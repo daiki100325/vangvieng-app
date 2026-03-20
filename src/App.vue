@@ -192,7 +192,7 @@
             <!-- Inventory Step 0: Setup -->
             <transition name="slide-up">
                 <div v-if="appMode === 'inventory' && currentStep === 0"
-                    class="flex flex-col items-center justify-center py-10">
+                    class="flex flex-col items-center pt-6 pb-20">
                     <div
                         class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 w-full max-w-md text-center">
                         <h2 class="text-xl font-bold text-slate-700 mb-8">棚卸しを開始</h2>
@@ -431,7 +431,7 @@
 
             <!-- Step 0: トップ画面 -->
             <transition name="slide-up">
-                <div v-if="transferStep === 0" class="flex flex-col items-center justify-center py-10">
+                <div v-if="transferStep === 0" class="flex flex-col items-center pt-6 pb-20">
                     <div
                         class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 w-full max-w-md">
                         <h2 class="text-xl font-bold text-slate-700 mb-8 text-center">移動記録</h2>
@@ -802,7 +802,7 @@
             class="container mx-auto px-4 py-6 max-w-lg md:max-w-7xl transition-all duration-300 flex-grow">
             <!-- Request Step 0: Setup -->
             <transition name="slide-up">
-                <div v-if="currentStep === 0" class="flex flex-col items-center justify-center py-10">
+                <div v-if="currentStep === 0" class="flex flex-col items-center pt-6 pb-20">
                     <div
                         class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 w-full max-w-md text-center">
                         <h2 class="text-xl font-bold text-slate-700 mb-8">補充依頼を開始</h2>
