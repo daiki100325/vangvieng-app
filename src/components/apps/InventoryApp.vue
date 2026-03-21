@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :style="inventoryFooterClearanceStyle">
         <!-- Inventory Step 0: Setup -->
         <transition name="slide-up">
             <div v-if="currentStep === 0" class="flex flex-col items-center pt-6 pb-20">
@@ -170,7 +170,6 @@
                     </div>
                 </div>
             </div>
-            <div class="h-20"></div>
         </div>
 
         <!-- Inventory Step 4: Confirmation -->
@@ -227,7 +226,6 @@
                     </table>
                 </div>
             </div>
-            <div class="h-20"></div>
         </div>
 
         <!-- Inventory Start Confirm Modal -->
@@ -308,6 +306,13 @@ export default {
         filteredItems() {
             if (!this.selectedBrand) return this.items
             return this.items.filter(i => i.brand === this.selectedBrand)
+        },
+        /** 固定フッター（戻る／次へ）と最下段カードの重なりを防ぐ */
+        inventoryFooterClearanceStyle() {
+            if (this.currentStep < 1 || this.currentStep > 4) return {}
+            return {
+                paddingBottom: 'calc(7.5rem + env(safe-area-inset-bottom, 0px))'
+            }
         }
     },
     beforeUnmount() {
