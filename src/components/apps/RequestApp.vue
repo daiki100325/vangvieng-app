@@ -82,7 +82,7 @@
 
             <!-- Item Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <div v-for="item in requestDisplayedItems" :key="item.id"
+                <div v-for="item in requestFilteredItems" :key="item.id"
                     class="bg-white p-5 rounded-2xl shadow-[0_2px_12px_rgb(0,0,0,0.03)] border border-slate-100 flex flex-col gap-4 transition-transform duration-200 hover:shadow-[0_4px_20px_rgb(0,0,0,0.06)] hover:-translate-y-0.5">
 
                     <!-- Header -->
@@ -110,21 +110,24 @@
 
                     <!-- Input & Checkboxes -->
                     <div class="pt-2 border-t border-slate-50 mt-1">
-                        <div class="flex items-end gap-3">
+                        <div class="flex flex-col sm:flex-row sm:items-end gap-3">
                             <div class="relative flex-1">
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 ml-1">移動量 (g)</label>
+                                <label class="block text-[10px] font-bold text-slate-400 tracking-wider mb-1.5 ml-1">移動量 (g)</label>
                                 <input type="number" min="0"
                                     class="w-full text-xl font-bold p-3 pl-4 rounded-xl border border-slate-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all shadow-sm text-center bg-white text-slate-800 placeholder-slate-200"
                                     placeholder="0" :value="getOrderAmount(item.id)" @input="updateOrderAmount(item.id, $event.target.value)">
                             </div>
-                            <div class="flex gap-2">
-                                <label v-for="reqStore in requestTargetStores" :key="reqStore" class="cursor-pointer group relative">
-                                    <input type="checkbox" class="peer sr-only" :checked="isOrderTargetChecked(item.id, reqStore)" @change="handleRequestSourceToggle(item.id, reqStore, $event.target.checked)">
-                                    <div class="w-12 h-12 rounded-xl border-2 border-slate-100 bg-white flex items-center justify-center text-xs font-bold text-slate-400 transition-all peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-checked:text-orange-600 group-hover:bg-slate-50 peer-checked:shadow-md">
-                                        {{ requestStoreLabel(reqStore) }}
-                                    </div>
-                                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-white opacity-0 peer-checked:opacity-100 transition-all"></div>
-                                </label>
+                            <div class="flex flex-col shrink-0 sm:min-w-[11rem]">
+                                <div class="block text-[10px] font-bold text-slate-400 tracking-wider mb-1.5 ml-1">依頼先</div>
+                                <div class="flex gap-2">
+                                    <label v-for="reqStore in requestTargetStores" :key="reqStore" class="cursor-pointer group relative">
+                                        <input type="checkbox" class="peer sr-only" :checked="isOrderTargetChecked(item.id, reqStore)" @change="handleRequestSourceToggle(item.id, reqStore, $event.target.checked)">
+                                        <div class="w-12 h-12 rounded-xl border-2 border-slate-100 bg-white flex items-center justify-center text-xs font-bold text-slate-400 transition-all peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-checked:text-orange-600 group-hover:bg-slate-50 peer-checked:shadow-md">
+                                            {{ requestStoreLabel(reqStore) }}
+                                        </div>
+                                        <div class="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-white opacity-0 peer-checked:opacity-100 transition-all"></div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -137,18 +140,6 @@
                         <span>在庫が不足しています</span>
                     </div>
                 </div>
-            </div>
-
-            <!-- Load More Button -->
-            <div v-if="requestFilteredItems.length > requestDisplayLimit" class="flex justify-center mt-8 mb-4">
-                <button @click="loadMoreRequestItems"
-                    class="bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 px-8 rounded-full shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95 flex items-center gap-2">
-                    <span>さらに表示する</span>
-                    <span class="bg-slate-100 text-xs py-0.5 px-2 rounded-full text-slate-500">{{ requestFilteredItems.length - requestDisplayLimit }}件</span>
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
             </div>
 
             <div class="h-24"></div>
@@ -240,7 +231,6 @@ export default {
             requestGeneratedSections: [],
             toastVisible: false,
             copiedSection: null,
-            requestDisplayLimit: 20,
             requestBrands: [],
             errorMessage: ''
         }
@@ -250,7 +240,7 @@ export default {
             return ['office', 'baba_main', 'nakano', 'baba_2nd'].filter(k => k !== this.requestStoreKey)
         },
         requestTargetStores() {
-            return ['office', 'baba_main', 'nakano', 'baba_2nd'].filter(k => k !== this.requestStoreKey && k !== 'office')
+            return ['office', 'baba_main', 'nakano', 'baba_2nd'].filter(k => k !== this.requestStoreKey)
         },
         requestCurrentStoreLabel() {
             return this.requestStoreLabel(this.requestStoreKey)
@@ -264,9 +254,6 @@ export default {
                 }
                 return true
             })
-        },
-        requestDisplayedItems() {
-            return this.requestFilteredItems.slice(0, this.requestDisplayLimit)
         },
         requestTotalQty() {
             return Object.values(this.requestOrderState).reduce((s, st) => s + (st.amount || 0), 0)
@@ -289,7 +276,11 @@ export default {
                 // requestMonth is the month value (1-12)
                 const data = await getInventoryData(this.requestMonth)
                 this.requestItems = data
-                data.forEach(item => { this.requestOrderState[item.id] = { amount: 0 } })
+                data.forEach(item => {
+                    const state = { amount: 0 }
+                    if (this.requestTargetStores.includes('office')) state.officeRequest = true
+                    this.requestOrderState[item.id] = state
+                })
                 
                 const seen = new Set()
                 this.requestBrands = this.requestItems.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))
@@ -321,14 +312,22 @@ export default {
         },
         updateOrderAmount(id, val) {
             const num = parseInt(val, 10)
-            if (!this.requestOrderState[id]) this.requestOrderState[id] = { amount: 0 }
+            if (!this.requestOrderState[id]) {
+                const s = { amount: 0 }
+                if (this.requestTargetStores.includes('office')) s.officeRequest = true
+                this.requestOrderState[id] = s
+            }
             this.requestOrderState[id].amount = isNaN(num) ? 0 : num
         },
         isOrderTargetChecked(id, key) {
             return this.requestOrderState[id] ? this.requestOrderState[id][`${key}Request`] || false : false
         },
         handleRequestSourceToggle(id, key, checked) {
-            if (!this.requestOrderState[id]) this.requestOrderState[id] = { amount: 0 }
+            if (!this.requestOrderState[id]) {
+                const s = { amount: 0 }
+                if (this.requestTargetStores.includes('office')) s.officeRequest = true
+                this.requestOrderState[id] = s
+            }
             const state = this.requestOrderState[id]
             state[`${key}Request`] = checked
             if (checked) {
@@ -405,11 +404,7 @@ export default {
             } catch { 
                 alert('コピーに失敗しました。') 
             }
-        },
-        loadMoreRequestItems() { 
-            this.requestDisplayLimit += 20 
-        },
-        // In App.vue the previous logic did not reset limits when unmounting, but we can reset if needed
+        }
     }
 }
 </script>

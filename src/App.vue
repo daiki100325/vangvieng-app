@@ -270,7 +270,18 @@ export default {
     
       },
   watch: {
-    stockMonth(val) { if (val) this.loadStockData() }
+    stockMonth(val) { if (val) this.loadStockData() },
+    currentStep(newVal, oldVal) {
+      if (this.appMode !== 'inventory') return
+      if (oldVal === 0 && (newVal === 1 || newVal === 3)) {
+        this.$nextTick(() => {
+          history.replaceState(
+            { appMode: 'inventory', currentStep: newVal, transferStep: 0 },
+            ''
+          )
+        })
+      }
+    }
   },
   created() {
     history.replaceState({ appMode: null, currentStep: 0, transferStep: 0 }, '')
@@ -356,6 +367,21 @@ export default {
       this.loading = false; this.saveLocally()
     },
     prevStep() {
+      if (this.appMode === 'inventory' && this.currentStep > 0) {
+        if (this.storeKey === 'office') {
+          if (this.currentStep === 4) this.currentStep = 3
+          else if (this.currentStep === 3) this.currentStep = 0
+        } else {
+          this.currentStep--
+        }
+        if (this.$refs.inventoryApp) this.$refs.inventoryApp.saveLocally()
+        history.replaceState(
+          { appMode: 'inventory', currentStep: this.currentStep, transferStep: 0 },
+          ''
+        )
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
       history.back()
     },
     nextStep() {
@@ -368,7 +394,7 @@ export default {
       this.showBrandFilter = false
       setTimeout(() => {
         if (this.appMode === 'transfer') { this.transferSelectedBrand = brand }
-        else { this.selectedBrand = brand; if (this.appMode === 'request') this.requestDisplayLimit = 20 }
+        else { this.selectedBrand = brand }
       }, 300)
     },
     hasValues(obj) { if (!obj) return false; return Object.values(obj).some(v => this.isValid(v)) },

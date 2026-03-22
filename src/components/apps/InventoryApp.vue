@@ -70,7 +70,8 @@
 
         <!-- Inventory Step 1: Tupper -->
         <div v-if="currentStep === 1" class="space-y-4">
-            <div class="flex items-center gap-2 mb-2 px-1">
+            <div
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
                 <h2 class="text-lg font-bold text-slate-800">タッパー</h2>
                 <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center">単位:
                     g</span>
@@ -107,7 +108,8 @@
 
         <!-- Inventory Step 2: Merch -->
         <div v-if="currentStep === 2" class="space-y-4">
-            <div class="flex items-center gap-2 mb-2 px-1">
+            <div
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
                 <h2 class="text-lg font-bold text-slate-800">物販</h2>
                 <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center">単位:
                     個</span>
@@ -137,7 +139,8 @@
 
         <!-- Inventory Step 3: Flavor -->
         <div v-if="currentStep === 3" class="space-y-4">
-            <div class="flex items-center gap-2 mb-2 px-1">
+            <div
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
                 <h2 class="text-lg font-bold text-slate-800">在庫</h2>
                 <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center">単位:
                     個</span>
