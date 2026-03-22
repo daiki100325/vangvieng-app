@@ -304,13 +304,21 @@ export default {
     pushHistoryState() {
       history.pushState({ appMode: this.appMode, currentStep: this.currentStep, transferStep: this.transferStep }, '')
     },
-    handlePopState(event) {
-      if (event.state) {
-        this.appMode = event.state.appMode || null
-        this.currentStep = event.state.currentStep || 0
-        this.transferStep = event.state.transferStep || 0
-      } else {
-        this.appMode = null; this.currentStep = 0; this.transferStep = 0
+    handlePopState() {
+      // ブラウザバックを「戻るボタン押下」と同じ挙動にするため、
+      // まず現在の状態を push し直して history 上の位置を元に戻し、
+      // その後に通常の戻るロジック（確認ダイアログ込み）を呼ぶ。
+      history.pushState(
+        { appMode: this.appMode, currentStep: this.currentStep, transferStep: this.transferStep },
+        ''
+      )
+      const footerBackVisible =
+        (this.appMode !== null && this.currentStep > 0) ||
+        (this.appMode === 'transfer' && this.transferStep !== 0)
+      if (footerBackVisible) {
+        this.prevStep()
+      } else if (this.appMode !== null) {
+        this.returnToPortal()
       }
     },
     openInventoryApp() { this.appMode = 'inventory'; this.currentStep = 0; this.pushHistoryState() },
@@ -331,7 +339,11 @@ export default {
         await this.handleTransferHeaderBack()
         return
       }
-      if (this.currentStep > 0) {
+      if (this.appMode === 'inventory' && this.currentStep > 0) {
+        if (this.$refs.inventoryApp) this.$refs.inventoryApp.saveLocally()
+        const ok = await this.appConfirm('未送信のデータがあります。ポータルに戻りますか？\n入力途中のデータはブラウザに保存されます。', 'ポータルへ', 'text-brand-600 hover:bg-brand-50')
+        if (!ok) return
+      } else if (this.currentStep > 0) {
         const ok = await this.appConfirm('入力途中のデータがある場合、破棄されます。\nポータルに戻りますか？', 'ポータルへ', 'text-red-600 hover:bg-red-50')
         if (!ok) return
       }
@@ -361,12 +373,15 @@ export default {
     // ─── Footer back / next ───────────────────────────────────────────────
     async prevStep() {
       if (this.appMode === 'inventory' && this.currentStep > 0) {
-        if (this.storeKey === 'office') {
-          if (this.currentStep === 4) this.currentStep = 3
-          else if (this.currentStep === 3) this.currentStep = 0
-        } else {
-          this.currentStep--
+        const nextStep = this.storeKey === 'office'
+          ? (this.currentStep === 4 ? 3 : 0)
+          : this.currentStep - 1
+        if (nextStep === 0) {
+          if (this.$refs.inventoryApp) this.$refs.inventoryApp.saveLocally()
+          const ok = await this.appConfirm('未送信のデータがあります。トップ画面に戻りますか？\n入力途中のデータはブラウザに保存されます。', 'トップに戻る', 'text-brand-600 hover:bg-brand-50')
+          if (!ok) return
         }
+        this.currentStep = nextStep
         if (this.$refs.inventoryApp) this.$refs.inventoryApp.saveLocally()
         history.replaceState({ appMode: 'inventory', currentStep: this.currentStep, transferStep: 0 }, '')
         window.scrollTo({ top: 0, behavior: 'smooth' })
