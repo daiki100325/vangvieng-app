@@ -177,9 +177,36 @@
 
         <!-- Inventory Step 4: Confirmation -->
         <div v-if="currentStep === 4" class="space-y-4">
-            <div class="flex items-center gap-2 mb-2 px-1">
+            <div
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
                 <h2 class="text-lg font-bold text-slate-800">入力内容確認</h2>
+                <template v-if="isCheckingConsumption">
+                    <div class="w-4 h-4 border-2 border-slate-300 border-t-brand-500 rounded-full animate-spin ml-1 flex-shrink-0"></div>
+                    <span class="text-[11px] text-slate-500 font-medium">消費量チェック中...</span>
+                </template>
             </div>
+
+            <!-- Negative consumption warning banner -->
+            <div v-if="previewNegativeItems.length > 0"
+                class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <div class="w-full">
+                        <h3 class="text-sm font-bold text-amber-800">前月消費量がマイナスになるフレーバーがあります</h3>
+                        <ul class="mt-2 space-y-1">
+                            <li v-for="item in previewNegativeItems" :key="item.name"
+                                class="flex justify-between text-xs font-bold">
+                                <span class="text-amber-700">・{{ item.name }}</span>
+                                <span class="ml-4 text-red-600 tabular-nums">{{ item.amount }} g</span>
+                            </li>
+                        </ul>
+                        <p class="text-xs text-amber-600 mt-2">送信前に数値を確認してください。このまま送信することも可能です。</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <div class="overflow-x-auto max-h-[70vh]">
                     <table class="w-full text-left border-collapse text-xs">
@@ -231,6 +258,37 @@
             </div>
         </div>
 
+        <!-- Submit Confirm Modal -->
+        <div v-if="showSubmitConfirmModal"
+            class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div
+                class="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col transform ring-1 ring-black/5 overflow-hidden">
+                <div class="px-6 pt-8 pb-6 text-center">
+                    <div
+                        class="w-16 h-16 bg-brand-50 text-brand-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">データを送信します</h2>
+                    <p class="text-slate-500 text-sm">よろしいですか？</p>
+                </div>
+                <div class="flex border-t border-slate-100">
+                    <button @click="showSubmitConfirmModal = false"
+                        class="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 transition-colors">
+                        キャンセル
+                    </button>
+                    <div class="w-px bg-slate-100"></div>
+                    <button @click="doSubmit"
+                        class="flex-1 py-4 text-brand-600 font-bold hover:bg-brand-50 transition-colors">
+                        送信する
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Inventory Start Confirm Modal -->
         <div v-if="showInventoryStartModal"
             class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -271,10 +329,11 @@
 </template>
 
 <script>
-import { getSheetData, submitData } from '../../api.js'
+import { getSheetData, submitData, checkNegativeConsumption } from '../../api.js'
 
 export default {
     name: 'InventoryApp',
+    inject: ['requestConfirm'],
     props: {
         currentStep: { type: Number, required: true },
         storeKey: { type: String, required: true },
@@ -292,13 +351,40 @@ export default {
         'update:loading',
         'update:loadingMessage',
         'update:brands',
-        'update:hasData'
+        'update:hasData',
+        'update:checkingConsumption'
     ],
     data() {
         return {
             showInventoryStartModal: false,
+            showSubmitConfirmModal: false,
             items: [],
-            errorMessage: ''
+            errorMessage: '',
+            previewNegativeItems: [],
+            isCheckingConsumption: false
+        }
+    },
+    watch: {
+        async currentStep(newVal) {
+            if (newVal !== 4) return
+            const payload = {
+                storeKey: this.storeKey,
+                sheetName: this.month,
+                date: this.date,
+                items: this.items
+            }
+            this.isCheckingConsumption = true
+            this.$emit('update:checkingConsumption', true)
+            this.previewNegativeItems = []
+            try {
+                const res = await checkNegativeConsumption(payload)
+                this.previewNegativeItems = res.negativeConsumptionItems || []
+            } catch {
+                this.previewNegativeItems = []
+            } finally {
+                this.isCheckingConsumption = false
+                this.$emit('update:checkingConsumption', false)
+            }
         }
     },
     computed: {
@@ -339,7 +425,8 @@ export default {
             if (saved) {
                 const parsed = JSON.parse(saved)
                 if (parsed.items && Array.isArray(parsed.items) && parsed.items.length > 0) {
-                    if (confirm('保存されたデータが見つかりました。復元しますか？')) {
+                    const ok = await this.requestConfirm('保存されたデータが見つかりました。\n復元しますか？', '復元する', 'text-brand-600 hover:bg-brand-50')
+                    if (ok) {
                         this.items = parsed.items
                         if (parsed.date) this.$emit('update:date', parsed.date)
                         const seen = new Set()
@@ -376,8 +463,12 @@ export default {
                 this.$emit('update:loading', false)
             }
         },
-        async submitInventory() {
-            if (!confirm('データを送信します。よろしいですか？')) return
+        submitInventory() {
+            if (this.isCheckingConsumption) return
+            this.showSubmitConfirmModal = true
+        },
+        async doSubmit() {
+            this.showSubmitConfirmModal = false
             this.$emit('update:loadingMessage', 'スプレッドシートに書き込み中...')
             this.$emit('update:loading', true)
             try {
@@ -396,6 +487,7 @@ export default {
                     }
                     localStorage.removeItem('inventory_draft_' + this.storeKey + '_' + this.month)
                     this.items = []
+                    this.previewNegativeItems = []
                     this.$emit('update:storeKey', '')
                     this.$emit('update:month', '')
                     this.$emit('update:date', '')

@@ -42,6 +42,10 @@ export const getSheetData = (storeKey, sheetName) =>
 export const submitData = (payload) =>
   gasPost('submitData', payload);
 
+/** 棚卸し: 消費量マイナスチェック（ドライラン・書き込みなし） */
+export const checkNegativeConsumption = (payload) =>
+  gasPost('checkNegativeConsumption', payload);
+
 /** 補充依頼: 在庫データ取得 */
 export const getInventoryData = (monthNum) =>
   gasGet('getInventoryData', { monthNum });

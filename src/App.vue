@@ -15,6 +15,9 @@
             :requestTotalQty="requestTotalQty"
             :currentMonth="currentMonth"
             :currentDate="currentDate"
+            :transferStep="transferStep"
+            :transferIssueFrom="transferIssueFromName"
+            :transferIssueTo="transferIssueToName"
             @return-to-portal="returnToPortal"
         />
 
@@ -52,6 +55,7 @@
                 @update:loadingMessage="loadingMessage = $event"
                 @update:brands="b => inventoryBrands = b"
                 @update:hasData="d => inventoryHasData = d"
+                @update:checkingConsumption="inventoryCheckingConsumption = $event"
             />
         </main>
 
@@ -69,6 +73,8 @@
                 @update:brands="transferBrands = $event"
                 @update:inspectAllChecked="inspectAllChecked = $event"
                 @update:issueConfirmItemsEmpty="issueConfirmItemsEmpty = $event"
+                @update:issueFromName="transferIssueFromName = $event"
+                @update:issueToName="transferIssueToName = $event"
             />
         </main>
 
@@ -110,6 +116,16 @@
             :theme="appMode || 'inventory'"
         />
 
+        <!-- Global Confirm Dialog -->
+        <ConfirmDialog
+            :visible="confirmDialog.visible"
+            :message="confirmDialog.message"
+            :okLabel="confirmDialog.okLabel"
+            :okClass="confirmDialog.okClass"
+            @ok="onConfirmDialogOk"
+            @cancel="onConfirmDialogCancel"
+        />
+
         <!-- Footer Navigation -->
         <AppFooter
             :appMode="appMode"
@@ -118,6 +134,7 @@
             :requestTotalQty="requestTotalQty"
             :issueConfirmItemsEmpty="issueConfirmItemsEmpty"
             :inspectAllChecked="inspectAllChecked"
+            :inventoryCheckingConsumption="inventoryCheckingConsumption"
             @prev-step="prevStep"
             @next-step="nextStep"
             @submit-inventory="submitInventory"
@@ -128,43 +145,6 @@
         />
 
         
-
-        <!-- Inventory Start Confirm Modal -->
-        <div v-if="appMode === 'inventory' && showInventoryStartModal"
-            class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div
-                class="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col transform ring-1 ring-black/5 overflow-hidden">
-                <div class="px-6 pt-8 pb-6 text-center">
-                    <div
-                        class="w-16 h-16 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                            </path>
-                        </svg>
-                    </div>
-                    <h2 class="text-xl font-bold text-slate-800 mb-2">店舗の確認</h2>
-                    <p class="text-slate-500 text-sm mb-6">以下の店舗の棚卸しを開始します。<br>よろしいですか？</p>
-
-                    <div class="bg-slate-50 rounded-2xl py-4 px-2 border border-slate-100 mb-2">
-                        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">選択中の店舗</div>
-                        <div class="text-3xl font-black text-brand-600 tracking-tight">{{ currentStoreName }}</div>
-                    </div>
-                </div>
-
-                <div class="flex border-t border-slate-100">
-                    <button @click="showInventoryStartModal = false"
-                        class="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 transition-colors">
-                        キャンセル
-                    </button>
-                    <div class="w-px bg-slate-100"></div>
-                    <button @click="confirmStartInventory"
-                        class="flex-1 py-4 text-brand-600 font-bold hover:bg-brand-50 transition-colors">
-                        開始する
-                    </button>
-                </div>
-            </div>
-        </div>
 
     </div>
 </template>
@@ -188,6 +168,7 @@ import InventoryApp from './components/apps/InventoryApp.vue'
 import RequestApp from './components/apps/RequestApp.vue'
 import TransferApp from './components/apps/TransferApp.vue'
 import BrandFilterSheet from './components/common/BrandFilterSheet.vue'
+import ConfirmDialog from './components/common/ConfirmDialog.vue'
 
 export default {
   components: {
@@ -200,9 +181,15 @@ export default {
     InventoryApp,
     RequestApp,
     TransferApp,
-    BrandFilterSheet
+    BrandFilterSheet,
+    ConfirmDialog
   },
   name: 'App',
+  provide() {
+    return {
+      requestConfirm: (msg, okLabel, okClass) => this.appConfirm(msg, okLabel, okClass)
+    }
+  },
   data() {
     return {
       authenticated: false,
@@ -223,6 +210,7 @@ export default {
       selectedBrand: null,
       months: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
       inventoryBrands: [],
+      inventoryCheckingConsumption: false,
       // Request
       requestBrands: [],
       requestTotalQty: 0,
@@ -232,9 +220,13 @@ export default {
       transferSelectedBrand: null,
       issueConfirmItemsEmpty: true,
       inspectAllChecked: false,
+      transferIssueFromName: '',
+      transferIssueToName: '',
       // Stock
       stockBrands: [],
       stockHasData: false,
+      // Global confirm dialog
+      confirmDialog: { visible: false, message: '', okLabel: 'OK', okClass: 'text-emerald-600 hover:bg-emerald-50', resolve: null }
     }
   },
   computed: {
@@ -266,9 +258,8 @@ export default {
       if (this.appMode === 'transfer') return this.transferBrands
       if (this.appMode === 'stock') return this.stockBrands
       return this.appMode === 'request' ? this.requestBrands : this.inventoryBrands
-    },
-    
-      },
+    }
+  },
   watch: {
     stockMonth(val) { if (val) this.loadStockData() },
     currentStep(newVal, oldVal) {
@@ -293,6 +284,23 @@ export default {
     window.removeEventListener('popstate', this.handlePopState)
   },
   methods: {
+    // ─── Global confirm dialog ────────────────────────────────────────────
+    appConfirm(message, okLabel = 'OK', okClass = 'text-emerald-600 hover:bg-emerald-50') {
+      return new Promise((resolve) => {
+        this.confirmDialog = { visible: true, message, okLabel, okClass, resolve }
+      })
+    },
+    onConfirmDialogOk() {
+      const { resolve } = this.confirmDialog
+      this.confirmDialog = { visible: false, message: '', okLabel: 'OK', okClass: 'text-emerald-600 hover:bg-emerald-50', resolve: null }
+      if (resolve) resolve(true)
+    },
+    onConfirmDialogCancel() {
+      const { resolve } = this.confirmDialog
+      this.confirmDialog = { visible: false, message: '', okLabel: 'OK', okClass: 'text-emerald-600 hover:bg-emerald-50', resolve: null }
+      if (resolve) resolve(false)
+    },
+    // ─── History / navigation ─────────────────────────────────────────────
     pushHistoryState() {
       history.pushState({ appMode: this.appMode, currentStep: this.currentStep, transferStep: this.transferStep }, '')
     },
@@ -302,71 +310,56 @@ export default {
         this.currentStep = event.state.currentStep || 0
         this.transferStep = event.state.transferStep || 0
       } else {
-        this.appMode = null
-        this.currentStep = 0
-        this.transferStep = 0
+        this.appMode = null; this.currentStep = 0; this.transferStep = 0
       }
     },
     openInventoryApp() { this.appMode = 'inventory'; this.currentStep = 0; this.pushHistoryState() },
     openRequestApp() { this.appMode = 'request'; this.currentStep = 0; this.selectedBrand = null; this.pushHistoryState() },
     openTransferApp() {
-      this.appMode = 'transfer'; this.transferStep = 0;
+      this.appMode = 'transfer'; this.transferStep = 0
       this.issueConfirmItemsEmpty = true; this.inspectAllChecked = false; this.errorMessage = ''
       this.pushHistoryState()
     },
     openStockApp() {
-      this.appMode = 'stock'
-      this.stockBrands = []
-      this.selectedBrand = null
-      this.errorMessage = ''
-      this.stockHasData = false
+      this.appMode = 'stock'; this.stockBrands = []; this.selectedBrand = null
+      this.errorMessage = ''; this.stockHasData = false
       this.pushHistoryState()
     },
-    goToIssueConfirm() { if (this.$refs.transferApp) this.$refs.transferApp.goToIssueConfirm() },
-    submitIssue() { if (this.$refs.transferApp) this.$refs.transferApp.submitIssue() },
-    submitInspection() { if (this.$refs.transferApp) this.$refs.transferApp.submitInspection() },
-    returnToPortal() {
+    // ─── Header back button ───────────────────────────────────────────────
+    async returnToPortal() {
+      if (this.appMode === 'transfer') {
+        await this.handleTransferHeaderBack()
+        return
+      }
       if (this.currentStep > 0) {
-        if (confirm('入力途中のデータがある場合、破棄されます。ポータルに戻りますか？')) {
-          this.appMode = null; this.currentStep = 0; this.transferStep = 0; this.pushHistoryState()
+        const ok = await this.appConfirm('入力途中のデータがある場合、破棄されます。\nポータルに戻りますか？', 'ポータルへ', 'text-red-600 hover:bg-red-50')
+        if (!ok) return
+      }
+      this.appMode = null; this.currentStep = 0; this.transferStep = 0; this.pushHistoryState()
+    },
+    transferHasSetupDraft(t) {
+      if (!t) return false
+      return !!(t.transferMonth || t.transferSubMode || t.issueFromStore || t.issueDestStore || t.issueDate || t.inspectDestStore)
+    },
+    async handleTransferHeaderBack() {
+      const t = this.$refs.transferApp
+      const atTop = this.transferStep === 0
+      if (atTop) {
+        if (this.transferHasSetupDraft(t)) {
+          const ok = await this.appConfirm('入力内容が破棄されます。よろしいですか？', 'はい', 'text-red-600 hover:bg-red-50')
+          if (!ok) return
         }
-      } else {
-        this.appMode = null; this.currentStep = 0; this.transferStep = 0; this.pushHistoryState()
+        this.appMode = null; this.currentStep = 0; this.transferStep = 0
+        this.transferSelectedBrand = null; this.pushHistoryState()
+        return
       }
+      const ok = await this.appConfirm('入力内容が破棄されます。よろしいですか？', 'はい', 'text-red-600 hover:bg-red-50')
+      if (!ok) return
+      if (t) t.resetTransferApp()
+      this.transferSelectedBrand = null; this.pushHistoryState()
     },
-    confirmStartInventory() { this.showInventoryStartModal = false; this.startInventory() },
-    async startInventory() {
-      this.errorMessage = ''; this.loading = true; this.loadingMessage = 'データを取得中...'
-      const saved = localStorage.getItem('inventory_draft_' + this.storeKey + '_' + this.month)
-      if (saved) {
-        if (confirm('保存されたデータが見つかりました。復元しますか？')) {
-          const parsed = JSON.parse(saved)
-          this.items = parsed.items; this.date = parsed.date
-          this.currentStep = (this.storeKey === 'office') ? 3 : 1
-          this.loading = false; return
-        }
-      }
-      try {
-        const response = await getSheetData(this.storeKey, this.month)
-        this.onDataLoaded(response)
-      } catch (e) {
-        this.onError(e)
-      }
-    },
-    onDataLoaded(response) {
-      this.items = response.items
-      const seen = new Set()
-      this.inventoryBrands = this.items.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))
-      if (!this.date && response.date) {
-        this.date = response.date
-      } else if (!this.date) {
-        const now = new Date()
-        this.date = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`
-      }
-      this.currentStep = (this.storeKey === 'office') ? 3 : 1
-      this.loading = false; this.saveLocally()
-    },
-    prevStep() {
+    // ─── Footer back / next ───────────────────────────────────────────────
+    async prevStep() {
       if (this.appMode === 'inventory' && this.currentStep > 0) {
         if (this.storeKey === 'office') {
           if (this.currentStep === 4) this.currentStep = 3
@@ -375,14 +368,36 @@ export default {
           this.currentStep--
         }
         if (this.$refs.inventoryApp) this.$refs.inventoryApp.saveLocally()
-        history.replaceState(
-          { appMode: 'inventory', currentStep: this.currentStep, transferStep: 0 },
-          ''
-        )
+        history.replaceState({ appMode: 'inventory', currentStep: this.currentStep, transferStep: 0 }, '')
         window.scrollTo({ top: 0, behavior: 'smooth' })
         return
       }
-      history.back()
+      if (this.appMode === 'transfer') {
+        if (this.transferStep === '2a') {
+          this.transferStep = '1a'
+          history.replaceState({ appMode: 'transfer', currentStep: 0, transferStep: '1a' }, '')
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+          return
+        }
+        if (this.transferStep === '1a' || this.transferStep === '1b') {
+          const ok = await this.appConfirm('入力内容が破棄されます。よろしいですか？', 'はい', 'text-red-600 hover:bg-red-50')
+          if (!ok) return
+          if (this.$refs.transferApp) this.$refs.transferApp.resetTransferApp()
+          this.transferSelectedBrand = null
+          history.replaceState({ appMode: 'transfer', currentStep: 0, transferStep: 0 }, '')
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+          return
+        }
+        return
+      }
+      if (this.appMode === 'request' && this.currentStep > 0) {
+        const ok = await this.appConfirm('入力途中のデータがある場合、破棄されます。\n補充依頼のトップに戻りますか？', 'はい', 'text-red-600 hover:bg-red-50')
+        if (!ok) return
+        this.currentStep = 0
+        history.replaceState({ appMode: 'request', currentStep: 0, transferStep: 0 }, '')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
     },
     nextStep() {
       if (this.storeKey === 'office') { if (this.currentStep === 3) this.currentStep = 4 }
@@ -390,35 +405,12 @@ export default {
       if (this.appMode === 'inventory' && this.$refs.inventoryApp) this.$refs.inventoryApp.saveLocally()
       this.pushHistoryState(); window.scrollTo({ top: 0, behavior: 'smooth' })
     },
-    selectBrand(brand) {
-      this.showBrandFilter = false
-      setTimeout(() => {
-        if (this.appMode === 'transfer') { this.transferSelectedBrand = brand }
-        else { this.selectedBrand = brand }
-      }, 300)
-    },
-    hasValues(obj) { if (!obj) return false; return Object.values(obj).some(v => this.isValid(v)) },
-    isValid(val) { return val !== '' && val !== null && val !== undefined },
-    formatValues(obj) {
-      if (!obj) return ''
-      return Object.entries(obj).filter(([, v]) => this.isValid(v))
-        .map(([k, v]) => { const l = k.replace('val',''); return l === 'Other' ? `他:${v}` : `${l}:${v}` }).join(', ')
-    },
-    submitInventory() {
-      if (this.$refs.inventoryApp) {
-        this.$refs.inventoryApp.submitInventory()
-      }
-    },
-                
-    
-    
-    
-    
-    
-    
-    
+    // ─── App-level delegates ──────────────────────────────────────────────
+    goToIssueConfirm() { if (this.$refs.transferApp) this.$refs.transferApp.goToIssueConfirm() },
+    submitIssue() { if (this.$refs.transferApp) this.$refs.transferApp.submitIssue() },
+    submitInspection() { if (this.$refs.transferApp) this.$refs.transferApp.submitInspection() },
+    submitInventory() { if (this.$refs.inventoryApp) this.$refs.inventoryApp.submitInventory() },
     openRequestReviewModal() { if (this.$refs.requestApp) this.$refs.requestApp.openRequestReviewModal() }
-    
   }
 }
 </script>

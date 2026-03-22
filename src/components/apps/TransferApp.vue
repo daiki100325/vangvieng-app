@@ -85,12 +85,19 @@
                     <!-- Arrival Setup -->
                     <transition name="slide-up">
                         <div v-if="transferSubMode === 'arrival'" class="border-t border-slate-100 pt-6 space-y-4">
-                            <h3 class="text-sm font-bold text-slate-600 mb-3">入荷の詳細 (事務所のみ対象)</h3>
+                            <h3 class="text-sm font-bold text-slate-600 mb-3">入荷の詳細</h3>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">実施店舗（あなたの店舗）</label>
+                                <select v-model="issueFromStore" :class="issueFromStore ? 'text-slate-800' : 'text-slate-500'" class="appearance-none w-full bg-slate-50 border border-slate-200 text-base font-bold rounded-xl focus:ring-2 focus:ring-emerald-500 block p-4 text-center">
+                                    <option value="" disabled>選択してください</option>
+                                    <option v-for="s in stores" :value="s.key" :key="s.key" class="text-slate-800">{{ s.name }}</option>
+                                </select>
+                            </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">実施日</label>
                                 <input type="date" v-model="issueDate" :class="issueDate ? 'text-slate-800' : 'text-slate-500'" class="w-full bg-slate-50 border border-slate-200 text-base font-bold rounded-xl focus:ring-2 focus:ring-emerald-500 block p-4 text-center">
                             </div>
-                            <button @click="startIssue" :disabled="!transferMonth || !issueDate" class="mt-4 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-4 rounded-full shadow-lg shadow-emerald-500/30 transition-all active:scale-95 disabled:opacity-50">
+                            <button @click="startIssue" :disabled="!transferMonth || !issueFromStore || !issueDate" class="mt-4 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-4 rounded-full shadow-lg shadow-emerald-500/30 transition-all active:scale-95 disabled:opacity-50">
                                 入荷記録を開始する
                             </button>
                         </div>
@@ -161,16 +168,41 @@
 
         <!-- Step 1A: Issue Entry -->
         <div v-if="transferStep === '1a'" class="space-y-4">
-            <div class="flex items-center gap-2 mb-4 px-1">
+            <div class="flex items-center gap-2 mb-1 px-1">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <h2 class="text-lg font-bold text-slate-800">{{ transferStep1aTitle }}</h2>
-                <span class="text-xs text-slate-400 font-medium ml-auto">{{ transferStep1aDesc }}</span>
+                <span v-if="transferSubMode !== 'issue'" class="text-xs text-slate-500 font-semibold ml-auto max-w-[55%] text-right leading-snug">{{ transferStep1aDesc }}</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div v-for="item in transferFilteredItems" :key="item.rowIndex" class="p-4 rounded-2xl shadow-sm border border-slate-100 bg-white">
-                    <div class="mb-3">
-                        <span class="inline-block bg-emerald-50 text-emerald-700 border border-emerald-100/50 text-[9px] font-bold px-2 py-0.5 rounded-full mb-1">{{ item.brand }}</span>
-                        <div class="font-bold text-slate-800 leading-tight">{{ item.flavorName }}</div>
+                <div v-for="item in transferFilteredItems" :key="item.rowIndex" class="p-4 rounded-2xl shadow-sm border border-slate-100 bg-white flex flex-col gap-3">
+                    <div class="flex flex-col gap-3">
+                        <template v-if="showTransferStep1aStock">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="pr-2 min-w-0">
+                                    <span class="inline-block bg-emerald-50 text-emerald-700 border border-emerald-100/50 text-[9px] font-bold px-2 py-0.5 rounded-full mb-1">{{ item.brand }}</span>
+                                    <div class="font-bold text-slate-800 leading-tight">{{ item.flavorName }}</div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{{ transferCurrentStoreStockLabel }}在庫</div>
+                                    <div class="text-2xl font-bold bg-slate-50 px-3 py-1 rounded-lg border border-slate-100 inline-flex items-center" :class="getTransferStockColorClass(transferItemStockAtCurrentStore(item))">
+                                        <span v-if="(Number(transferItemStockAtCurrentStore(item)) || 0) < 500" class="inline-flex items-center justify-center w-5 h-5 bg-red-100 text-red-600 rounded-full text-[10px] mr-1">!</span>
+                                        {{ Number(transferItemStockAtCurrentStore(item)) || 0 }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div v-for="storeCode in transferOtherInventoryKeys" :key="storeCode" class="text-center rounded-xl py-2 px-1 border" :class="getTransferOtherStockStyle(item, storeCode)">
+                                    <div class="text-[10px] text-slate-400 font-bold mb-0.5">{{ transferInventoryStoreLabel(storeCode) }}</div>
+                                    <div class="text-sm">{{ Number(item.stock && item.stock[storeCode]) || 0 }}</div>
+                                </div>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div>
+                                <span class="inline-block bg-emerald-50 text-emerald-700 border border-emerald-100/50 text-[9px] font-bold px-2 py-0.5 rounded-full mb-1">{{ item.brand }}</span>
+                                <div class="font-bold text-slate-800 leading-tight">{{ item.flavorName }}</div>
+                            </div>
+                        </template>
                     </div>
                     <input type="number" min="0" class="w-full text-xl font-bold p-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:outline-none transition-all text-center bg-white text-slate-800 placeholder-slate-200" placeholder="0" :value="issueOrderState[item.rowIndex] || ''" @input="updateIssueQty(item.rowIndex, $event.target.value)">
                 </div>
@@ -186,7 +218,11 @@
             </div>
             <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 <div class="px-5 py-4 bg-emerald-50 border-b border-emerald-100">
-                    <p class="text-sm font-bold text-emerald-700">{{ transferStep1aDesc }}</p>
+                    <div v-if="transferSubMode === 'issue' && issueFromStore && issueDestStore" class="mb-3 rounded-xl border border-emerald-200 bg-white/90 px-3 py-2.5">
+                        <p class="text-[10px] font-bold text-emerald-700 uppercase tracking-wide mb-1">移動ルート</p>
+                        <p class="text-base font-black text-slate-900">{{ issueStoreName(issueFromStore) }} <span class="text-emerald-600 mx-1">→</span> {{ issueStoreName(issueDestStore) }}</p>
+                    </div>
+                    <p v-else class="text-sm font-bold text-emerald-700">{{ transferStep1aDesc }}</p>
                     <p class="text-xs text-slate-500 mt-0.5">{{ issueDate }}</p>
                 </div>
                 <div v-if="issueConfirmItems.length === 0" class="p-8 text-center text-slate-400 text-sm">
@@ -280,6 +316,7 @@ import { getFlavorListForTransfer, getPendingTransferRecords, getTransferRecordD
 
 export default {
   name: 'TransferApp',
+  inject: ['requestConfirm'],
   props: {
     transferStep: { type: [Number, String], default: 0 },
     selectedBrand: String
@@ -335,7 +372,7 @@ export default {
       return '起票 — 移動数量の入力'
     },
     transferStep1aDesc() {
-      if (this.transferSubMode === 'arrival') return '事務所（入荷）'
+      if (this.transferSubMode === 'arrival') return this.issueStoreName(this.issueFromStore) + '（入荷）'
       if (this.transferSubMode === 'dispose') return this.issueStoreName(this.issueFromStore) + '（廃棄）'
       return this.issueStoreName(this.issueFromStore) + ' → ' + this.issueStoreName(this.issueDestStore)
     },
@@ -343,6 +380,20 @@ export default {
       if (this.transferSubMode === 'arrival') return '入荷 — 内容確認'
       if (this.transferSubMode === 'dispose') return '廃棄 — 内容確認'
       return '起票 — 内容確認'
+    },
+    /** 起票・廃棄の入力画面で、補充依頼と同じ在庫（移動元／実施店舗＋他拠点）を表示 */
+    showTransferStep1aStock() {
+      return this.transferStep === '1a' && (this.transferSubMode === 'issue' || this.transferSubMode === 'dispose' || this.transferSubMode === 'arrival')
+    },
+    transferIssueInventoryKey() {
+      const m = { office: 'office', baba: 'baba_main', nakano: 'nakano', baba_2nd: 'baba_2nd' }
+      return m[this.issueFromStore] || 'office'
+    },
+    transferCurrentStoreStockLabel() {
+      return this.transferInventoryStoreLabel(this.transferIssueInventoryKey)
+    },
+    transferOtherInventoryKeys() {
+      return ['office', 'baba_main', 'nakano', 'baba_2nd'].filter(k => k !== this.transferIssueInventoryKey)
     }
   },
   watch: {
@@ -355,6 +406,21 @@ export default {
             this.$emit('update:issueConfirmItemsEmpty', newVal.length === 0);
         },
         deep: true
+    },
+    issueFromStore(v) {
+      this.$emit('update:issueFromName', this.transferSubMode === 'issue' && v ? this.transferStoreName(v) : '')
+    },
+    issueDestStore(v) {
+      this.$emit('update:issueToName', this.transferSubMode === 'issue' && v ? this.transferStoreName(v) : '')
+    },
+    transferSubMode(v) {
+      if (v !== 'issue') {
+        this.$emit('update:issueFromName', '')
+        this.$emit('update:issueToName', '')
+      } else {
+        this.$emit('update:issueFromName', this.issueFromStore ? this.transferStoreName(this.issueFromStore) : '')
+        this.$emit('update:issueToName', this.issueDestStore ? this.transferStoreName(this.issueDestStore) : '')
+      }
     }
   },
   methods: {
@@ -363,6 +429,30 @@ export default {
       return s ? s.name : key
     },
     issueStoreName(key) { return this.transferStoreName(key) },
+    transferInventoryStoreLabel(key) {
+      return { office: '事務所', baba_main: '本店', nakano: '中野', baba_2nd: '2号店' }[key] || key
+    },
+    transferItemStockAtCurrentStore(item) {
+      if (!item || !item.stock) return 0
+      return item.stock[this.transferIssueInventoryKey]
+    },
+    getTransferStockColorClass(val) {
+      const n = Number(val) || 0
+      if (n < 500) return 'text-red-600 font-black'
+      if (n < 1000) return 'text-red-500 font-bold'
+      return 'text-slate-700'
+    },
+    getTransferOtherStockStyle(item, storeCode) {
+      const val = Number(item.stock && item.stock[storeCode]) || 0
+      const max = Math.max(
+        Number(item.stock && item.stock.office) || 0,
+        Number(item.stock && item.stock.baba_main) || 0,
+        Number(item.stock && item.stock.nakano) || 0,
+        Number(item.stock && item.stock.baba_2nd) || 0
+      )
+      if (max > 0 && val === max) return 'bg-emerald-50 text-emerald-700 font-bold border-emerald-100 ring-1 ring-emerald-100/50'
+      return 'bg-slate-50 text-slate-600 font-medium border-slate-100'
+    },
     async startIssue() {
       this.$emit('update:loading', true);
       this.$emit('update:loadingMessage', 'フレーバー一覧を取得中...');
@@ -393,13 +483,13 @@ export default {
     },
     async submitIssue() {
       const modeLabel = this.transferSubMode === 'arrival' ? '入荷記録' : (this.transferSubMode === 'dispose' ? '廃棄記録' : '移動記録')
-      if (!confirm('データを記録してよろしいですか？')) return
+      if (!await this.requestConfirm('データを記録してよろしいですか？')) return
       this.$emit('update:loading', true);
       this.$emit('update:loadingMessage', 'スプレッドシートに書き込み中...');
       const monthNum = parseInt(this.transferMonth, 10)
       const items = this.issueConfirmItems.map(i => ({ rowIndex: i.rowIndex, qty: i.qty }))
       let fromStore = this.issueFromStore, destStore = this.issueDestStore, autoInspect = false
-      if (this.transferSubMode === 'arrival') { fromStore = null; destStore = 'office'; autoInspect = true }
+      if (this.transferSubMode === 'arrival') { fromStore = null; destStore = this.issueFromStore; autoInspect = true }
       else if (this.transferSubMode === 'dispose') { destStore = null; autoInspect = true }
       try {
         await submitTransferRecord({ monthNum, fromStoreKey: fromStore, destStoreKey: destStore, date: this.issueDate, items, autoInspect })
@@ -457,13 +547,13 @@ export default {
       }
       this.inspectAddSelectedFlavor = ''
     },
-    confirmQtyChange(item) {
+    async confirmQtyChange(item) {
       const newQty = parseInt(item.qty, 10)
       if (isNaN(newQty) || newQty < 0) { item.qty = item.originalQty; return }
       if (newQty !== item.originalQty) {
-        if (confirm('移動されたフレーバーの数量を変更してスプレッドシートに上書きします。よろしいですか？')) {
-          item.originalQty = newQty; item.qty = newQty
-        } else { item.qty = item.originalQty }
+        const ok = await this.requestConfirm('移動されたフレーバーの数量を変更して\nスプレッドシートに上書きします。よろしいですか？')
+        if (ok) { item.originalQty = newQty; item.qty = newQty }
+        else { item.qty = item.originalQty }
       }
     },
     toggleInspectCheck(rowIndex) {
@@ -472,7 +562,7 @@ export default {
     },
     async submitInspection() {
       if (!this.inspectAllChecked) return
-      if (!confirm('検品を完了してよろしいですか？\n※数量を修正した場合はスプレッドシートが上書きされます。')) return
+      if (!await this.requestConfirm('検品を完了してよろしいですか？\n※数量を修正した場合はスプレッドシートが上書きされます。')) return
       this.$emit('update:loading', true);
       this.$emit('update:loadingMessage', '送信中...');
       try {
@@ -492,6 +582,8 @@ export default {
       this.issueDate = ''; this.issueItems = []; this.issueOrderState = {}
       this.inspectDestStore = ''; this.inspectPendingList = []; this.inspectSelectedBlock = null
       this.inspectDetail = []; this.inspectChecked = {}; this.transferSubMode = null
+      this.$emit('update:issueFromName', '')
+      this.$emit('update:issueToName', '')
       this.$emit('update:transferStep', 0);
     }
   }

@@ -44,6 +44,16 @@
                     <span class="text-xs font-bold text-slate-500">g</span>
                 </div>
             </div>
+
+            <!-- Transfer Issue Route -->
+            <div v-if="appMode === 'transfer' && transferStep === '1a' && transferIssueFrom && transferIssueTo"
+                class="flex items-center gap-1.5">
+                <span class="text-sm font-black text-slate-800 bg-emerald-50 border border-emerald-300 px-2.5 py-1 rounded-lg leading-none max-w-[90px] truncate" :title="transferIssueFrom">{{ transferIssueFrom }}</span>
+                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12h14M13 6l6 6-6 6"/>
+                </svg>
+                <span class="text-sm font-black text-slate-800 bg-emerald-50 border border-emerald-300 px-2.5 py-1 rounded-lg leading-none max-w-[90px] truncate" :title="transferIssueTo">{{ transferIssueTo }}</span>
+            </div>
         </div>
     </header>
 </template>
@@ -85,6 +95,18 @@ export default {
             default: ''
         },
         currentDate: {
+            type: String,
+            default: ''
+        },
+        transferStep: {
+            type: [Number, String],
+            default: 0
+        },
+        transferIssueFrom: {
+            type: String,
+            default: ''
+        },
+        transferIssueTo: {
             type: String,
             default: ''
         }

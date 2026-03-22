@@ -18,7 +18,8 @@
                         </svg>
                     </button>
                     <button v-if="currentStep === 4" @click="$emit('submit-inventory')"
-                        class="bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-brand-500/30 transition-transform transition-colors active:scale-95">
+                        :disabled="inventoryCheckingConsumption"
+                        class="bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-brand-500/30 transition-transform transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                         完了する
                     </button>
                 </template>
@@ -92,6 +93,10 @@ export default {
             default: true
         },
         inspectAllChecked: {
+            type: Boolean,
+            default: false
+        },
+        inventoryCheckingConsumption: {
             type: Boolean,
             default: false
         },
