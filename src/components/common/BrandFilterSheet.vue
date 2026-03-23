@@ -145,6 +145,9 @@ export default {
         selectBrand(brand) {
             this.$emit('update:selectedBrand', brand)
             this.isVisible = false
+            this.$nextTick(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+            })
         }
     }
 }
