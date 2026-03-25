@@ -458,7 +458,8 @@ export default {
       this.$emit('update:loadingMessage', 'フレーバー一覧を取得中...');
       try {
         const monthNum = parseInt(this.transferMonth, 10)
-        this.issueItems = await getFlavorListForTransfer(monthNum)
+        const rawIssueItems = await getFlavorListForTransfer(monthNum)
+        this.issueItems = rawIssueItems.filter(i => i.appDisplay !== false)
         this.issueOrderState = {}
         const seen = new Set()
         this.transferBrands = this.issueItems.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))

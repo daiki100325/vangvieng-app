@@ -275,7 +275,7 @@ export default {
             try {
                 // requestMonth is the month value (1-12)
                 const data = await getInventoryData(this.requestMonth)
-                this.requestItems = data
+                this.requestItems = data.filter(i => i.appDisplay !== false)
                 data.forEach(item => {
                     const state = { amount: 0 }
                     if (this.requestTargetStores.includes('office')) state.officeRequest = true

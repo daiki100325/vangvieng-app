@@ -123,7 +123,7 @@ export default {
             try {
                 const monthNum = parseInt(this.stockMonth, 10)
                 const data = await getStockOverview(monthNum)
-                this.stockItems = data || []
+                this.stockItems = (data || []).filter(i => i.appDisplay !== false)
                 
                 const seen = new Set()
                 const brands = this.stockItems.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))

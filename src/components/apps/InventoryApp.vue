@@ -447,7 +447,9 @@ export default {
 
             try {
                 const response = await getSheetData(this.storeKey, this.month)
-                this.items = response.items.map(i => ({
+                this.items = response.items
+                    .filter(i => i.appDisplay !== false)
+                    .map(i => ({
                     ...i,
                     flavorName: i.flavorName || i.flavor || i.name || '',
                     tupper: i.tupper || { basic: '', reserve: '' },
