@@ -163,6 +163,86 @@
                         </div>
                     </transition>
                 </div>
+
+                <!-- Transfer Record History -->
+                <div v-if="transferMonth" class="mt-4 w-full max-w-md">
+                    <button
+                        @click="allRecordsExpanded = !allRecordsExpanded"
+                        class="w-full flex items-center justify-between px-5 py-3 bg-white rounded-2xl border border-slate-100 shadow-sm text-slate-700 font-bold text-sm transition-all active:scale-95">
+                        <span v-if="allRecordsLoading" class="text-slate-400">{{ transferMonth }}の移動記録を取得中...</span>
+                        <span v-else>{{ transferMonth }}の移動記録一覧（{{ allTransferRecords.length }}件）</span>
+                        <svg v-if="!allRecordsLoading" :class="allRecordsExpanded ? 'rotate-180' : ''" class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <svg v-else class="w-4 h-4 text-slate-300 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </button>
+
+                    <transition name="slide-up">
+                        <div v-if="allRecordsExpanded && allTransferRecords.length > 0" class="mt-2 space-y-2">
+                            <div v-for="rec in allTransferRecords" :key="rec.blockIndex"
+                                class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                                <!-- Record Summary Row -->
+                                <button @click="toggleBlockDetail(rec)"
+                                    class="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 active:bg-slate-100">
+                                    <!-- Inspection Badge -->
+                                    <span v-if="rec.inspected"
+                                        class="flex-shrink-0 inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-2 py-0.5">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 111.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                        </svg>
+                                        検品済
+                                    </span>
+                                    <span v-else
+                                        class="flex-shrink-0 inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        未検品
+                                    </span>
+                                    <!-- Route & Date -->
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-bold text-slate-800 text-sm truncate">{{ recordRouteLabel(rec) }}</div>
+                                        <div class="text-xs text-slate-400 mt-0.5">{{ rec.date }}</div>
+                                    </div>
+                                    <!-- Expand Arrow -->
+                                    <svg :class="expandedBlocks[rec.blockIndex] ? 'rotate-180' : ''"
+                                        class="flex-shrink-0 w-4 h-4 text-slate-300 transition-transform duration-200"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                <!-- Record Detail (expanded) -->
+                                <transition name="slide-up">
+                                    <div v-if="expandedBlocks[rec.blockIndex]" class="border-t border-slate-100 px-4 py-3">
+                                        <div v-if="blockDetailsLoading[rec.blockIndex]" class="text-xs text-slate-400 text-center py-2">
+                                            読み込み中...
+                                        </div>
+                                        <div v-else-if="blockDetails[rec.blockIndex] && blockDetails[rec.blockIndex].length > 0"
+                                            class="space-y-1">
+                                            <div v-for="item in blockDetails[rec.blockIndex]" :key="item.rowIndex"
+                                                class="flex items-center justify-between text-sm py-0.5">
+                                                <span class="text-slate-600 truncate flex-1">
+                                                    <span class="text-xs text-slate-400 mr-1">{{ item.brand }}</span>{{ item.flavorName }}
+                                                </span>
+                                                <span class="font-bold text-slate-800 ml-3 flex-shrink-0">{{ item.qty.toLocaleString() }}g</span>
+                                            </div>
+                                        </div>
+                                        <div v-else class="text-xs text-slate-400 text-center py-1">
+                                            明細データなし
+                                        </div>
+                                    </div>
+                                </transition>
+                            </div>
+                        </div>
+                        <div v-else-if="allRecordsExpanded && !allRecordsLoading" class="mt-2 text-center py-4 text-slate-400 text-sm">
+                            この月の移動記録はありません
+                        </div>
+                    </transition>
+                </div>
             </div>
         </transition>
 
@@ -312,7 +392,7 @@
 </template>
 
 <script>
-import { getFlavorListForTransfer, getPendingTransferRecords, getTransferRecordDetail, submitTransferRecord, completeInspection } from '../../api.js'
+import { getFlavorListForTransfer, getPendingTransferRecords, getTransferRecordDetail, submitTransferRecord, completeInspection, getAllTransferRecords, getDisposeRecordDetail } from '../../api.js'
 
 export default {
   name: 'TransferApp',
@@ -345,7 +425,13 @@ export default {
       inspectDetail: [],
       inspectChecked: {},
       inspectAvailableItems: [],
-      inspectAddSelectedFlavor: ''
+      inspectAddSelectedFlavor: '',
+      allTransferRecords: [],
+      allRecordsLoading: false,
+      allRecordsExpanded: false,
+      expandedBlocks: {},
+      blockDetails: {},
+      blockDetailsLoading: {}
     }
   },
   computed: {
@@ -421,6 +507,14 @@ export default {
         this.$emit('update:issueFromName', this.issueFromStore ? this.transferStoreName(this.issueFromStore) : '')
         this.$emit('update:issueToName', this.issueDestStore ? this.transferStoreName(this.issueDestStore) : '')
       }
+    },
+    transferMonth(val) {
+      this.allTransferRecords = []
+      this.allRecordsExpanded = false
+      this.expandedBlocks = {}
+      this.blockDetails = {}
+      this.blockDetailsLoading = {}
+      if (val) this.loadAllTransferRecords()
     }
   },
   methods: {
@@ -583,9 +677,54 @@ export default {
       this.issueDate = ''; this.issueItems = []; this.issueOrderState = {}
       this.inspectDestStore = ''; this.inspectPendingList = []; this.inspectSelectedBlock = null
       this.inspectDetail = []; this.inspectChecked = {}; this.transferSubMode = null
+      this.allTransferRecords = []; this.allRecordsLoading = false; this.allRecordsExpanded = false
+      this.expandedBlocks = {}; this.blockDetails = {}; this.blockDetailsLoading = {}
       this.$emit('update:issueFromName', '')
       this.$emit('update:issueToName', '')
       this.$emit('update:transferStep', 0);
+    },
+    async loadAllTransferRecords() {
+      this.allRecordsLoading = true
+      try {
+        const monthNum = parseInt(this.transferMonth, 10)
+        this.allTransferRecords = await getAllTransferRecords(monthNum)
+      } catch (e) {
+        this.allTransferRecords = []
+      } finally {
+        this.allRecordsLoading = false
+      }
+    },
+    recordRouteLabel(rec) {
+      const from = rec.fromStoreKey ? this.transferStoreName(rec.fromStoreKey) : ''
+      const dest = rec.destStoreKey ? this.transferStoreName(rec.destStoreKey) : ''
+      if (rec.recordType === 'arrival') return dest + '（入荷）'
+      if (rec.recordType === 'dispose') return from + '（廃棄）'
+      return from + ' → ' + dest
+    },
+    async toggleBlockDetail(rec) {
+      const key = rec.blockIndex
+      if (this.expandedBlocks[key]) {
+        this.expandedBlocks = { ...this.expandedBlocks, [key]: false }
+        return
+      }
+      this.expandedBlocks = { ...this.expandedBlocks, [key]: true }
+      if (this.blockDetails[key] !== undefined) return
+      this.blockDetailsLoading = { ...this.blockDetailsLoading, [key]: true }
+      try {
+        const monthNum = parseInt(this.transferMonth, 10)
+        let detail = []
+        if (rec.recordType === 'dispose') {
+          detail = await getDisposeRecordDetail(monthNum, key, rec.fromStoreKey)
+        } else {
+          const detailStoreKey = rec.destStoreKey || rec.fromStoreKey
+          if (detailStoreKey) detail = await getTransferRecordDetail(monthNum, key, detailStoreKey)
+        }
+        this.blockDetails = { ...this.blockDetails, [key]: detail }
+      } catch (e) {
+        this.blockDetails = { ...this.blockDetails, [key]: [] }
+      } finally {
+        this.blockDetailsLoading = { ...this.blockDetailsLoading, [key]: false }
+      }
     }
   }
 }

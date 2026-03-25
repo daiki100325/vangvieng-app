@@ -54,6 +54,10 @@ export const getInventoryData = (monthNum) =>
 export const getFlavorListForTransfer = (monthNum) =>
   gasGet('getFlavorListForTransfer', { monthNum });
 
+/** 移動記録: 全記録一覧取得（検品済み含む） */
+export const getAllTransferRecords = (monthNum) =>
+  gasGet('getAllTransferRecords', { monthNum });
+
 /** 移動記録: 未検品一覧取得 */
 export const getPendingTransferRecords = (monthNum, destStoreKey) =>
   gasGet('getPendingTransferRecords', { monthNum, destStoreKey });
@@ -61,6 +65,10 @@ export const getPendingTransferRecords = (monthNum, destStoreKey) =>
 /** 移動記録: 詳細取得 */
 export const getTransferRecordDetail = (monthNum, blockIndex, destStoreKey) =>
   gasGet('getTransferRecordDetail', { monthNum, blockIndex, destStoreKey });
+
+/** 移動記録: 廃棄詳細取得 */
+export const getDisposeRecordDetail = (monthNum, blockIndex, fromStoreKey) =>
+  gasGet('getDisposeRecordDetail', { monthNum, blockIndex, fromStoreKey });
 
 /** 移動記録: 起票送信 */
 export const submitTransferRecord = (payload) =>
