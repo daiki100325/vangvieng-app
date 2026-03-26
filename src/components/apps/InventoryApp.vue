@@ -472,6 +472,33 @@ export default {
             if (this.isCheckingConsumption) return
             this.showSubmitConfirmModal = true
         },
+        async saveDraftToSheet() {
+            if (!this.storeKey || !this.month || !this.date) {
+                throw new Error('店舗・対象月・実施日を設定してから保存してください。')
+            }
+            if (!Array.isArray(this.items) || this.items.length === 0) {
+                throw new Error('保存対象の入力データがありません。')
+            }
+
+            this.$emit('update:loadingMessage', '途中データを保存中...')
+            this.$emit('update:loading', true)
+            try {
+                const payload = {
+                    storeKey: this.storeKey,
+                    sheetName: this.month,
+                    date: this.date,
+                    items: this.items
+                }
+                const result = await submitData(payload)
+                if (!result || result.success !== true) {
+                    throw new Error((result && result.error) || '途中保存に失敗しました。')
+                }
+                this.saveLocally()
+                return { success: true, savedAt: Date.now() }
+            } finally {
+                this.$emit('update:loading', false)
+            }
+        },
         async doSubmit() {
             this.showSubmitConfirmModal = false
             this.$emit('update:loadingMessage', 'スプレッドシートに書き込み中...')
