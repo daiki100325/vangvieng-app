@@ -91,11 +91,21 @@
                             <span class="inline-block bg-orange-50 text-orange-600 border border-orange-100/50 text-[10px] font-bold px-2.5 py-1 rounded-full mb-1.5 shadow-sm">{{ item.brand }}</span>
                             <h3 class="text-lg font-bold text-slate-800 leading-snug">{{ item.flavor }}</h3>
                         </div>
-                        <div class="text-right flex-shrink-0">
-                            <div class="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{{ requestCurrentStoreLabel }}在庫</div>
-                            <div class="text-2xl font-bold bg-slate-50 px-3 py-1 rounded-lg border border-slate-100 inline-flex items-center" :class="getStockColorClass(item.stock[requestStoreKey])">
-                                <span v-if="item.stock[requestStoreKey] < 500" class="inline-flex items-center justify-center w-5 h-5 bg-red-100 text-red-600 rounded-full text-[10px] mr-1">!</span>
-                                {{ Number(item.stock[requestStoreKey]) || 0 }}
+                        <div class="flex-shrink-0">
+                            <div class="grid grid-cols-[auto_auto] items-end gap-x-2">
+                                <div class="min-w-[3.5rem] flex flex-col items-center text-center">
+                                    <div class="text-[10px] font-bold text-slate-400 tracking-wide mb-0.5">前月消費</div>
+                                    <div class="text-sm font-semibold text-slate-500 tabular-nums leading-tight">
+                                        {{ formatRequestPrevMonthCons(item) }}
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center text-center">
+                                    <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wide mb-0.5">{{ requestCurrentStoreLabel }}在庫</div>
+                                    <div class="text-2xl font-bold bg-slate-50 px-3 py-1 rounded-lg border border-slate-100 inline-flex items-center justify-center" :class="getStockColorClass(item.stock[requestStoreKey])">
+                                        <span v-if="item.stock[requestStoreKey] < 500" class="inline-flex items-center justify-center w-5 h-5 bg-red-100 text-red-600 rounded-full text-[10px] mr-1">!</span>
+                                        {{ Number(item.stock[requestStoreKey]) || 0 }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -294,6 +304,13 @@ export default {
         },
         requestStoreLabel(key) {
             return { office: '事務所', baba_main: '本店', nakano: '中野', baba_2nd: '2号店' }[key] || key
+        },
+        formatRequestPrevMonthCons(item) {
+            const pmc = item.prevMonthConsumption
+            if (!pmc || !this.requestStoreKey) return '—'
+            const n = Number(pmc[this.requestStoreKey])
+            if (!Number.isFinite(n)) return '—'
+            return String(Math.round(n))
         },
         getStockColorClass(val) {
             const n = Number(val) || 0

@@ -234,6 +234,10 @@
                                         <div v-else class="text-xs text-slate-400 text-center py-1">
                                             明細データなし
                                         </div>
+                                        <div v-if="!blockDetailsLoading[rec.blockIndex] && transferRecordCommentText(rec)" class="mt-3 pt-3 border-t border-slate-100">
+                                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">コメント</div>
+                                            <p class="text-xs text-slate-600 whitespace-pre-wrap break-words leading-relaxed">{{ transferRecordCommentText(rec) }}</p>
+                                        </div>
                                     </div>
                                 </transition>
                             </div>
@@ -325,6 +329,13 @@
                         </tr>
                     </tbody>
                 </table>
+                <div v-if="issueConfirmItems.length > 0" class="border-t border-slate-100 px-4 py-4 bg-slate-50/60">
+                    <label for="transfer-submit-comment" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">コメント（任意）</label>
+                    <textarea id="transfer-submit-comment" v-model="issueSubmitComment" rows="3" maxlength="500"
+                        placeholder="担当者・理由など、必要に応じて入力してください"
+                        class="w-full text-sm text-slate-800 bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 focus:outline-none resize-y min-h-[4.5rem] placeholder:text-slate-300"></textarea>
+                    <p class="text-[10px] text-slate-400 mt-1.5">{{ issueSubmitComment.length }}/500</p>
+                </div>
             </div>
             <div class="h-24"></div>
         </div>
@@ -417,6 +428,7 @@ export default {
       issueDate: '',
       issueItems: [],
       issueOrderState: {},
+      issueSubmitComment: '',
       transferBrands: [],
       inspectDestStore: '',
       inspectPendingList: [],
@@ -555,6 +567,7 @@ export default {
         const rawIssueItems = await getFlavorListForTransfer(monthNum)
         this.issueItems = rawIssueItems.filter(i => i.appDisplay !== false)
         this.issueOrderState = {}
+        this.issueSubmitComment = ''
         const seen = new Set()
         this.transferBrands = this.issueItems.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))
         this.$emit('update:brands', this.transferBrands);
@@ -587,7 +600,15 @@ export default {
       if (this.transferSubMode === 'arrival') { fromStore = null; destStore = this.issueFromStore; autoInspect = true }
       else if (this.transferSubMode === 'dispose') { destStore = null; autoInspect = true }
       try {
-        await submitTransferRecord({ monthNum, fromStoreKey: fromStore, destStoreKey: destStore, date: this.issueDate, items, autoInspect })
+        await submitTransferRecord({
+          monthNum,
+          fromStoreKey: fromStore,
+          destStoreKey: destStore,
+          date: this.issueDate,
+          items,
+          autoInspect,
+          comment: this.issueSubmitComment
+        })
         alert(`${modeLabel}を保存しました。`)
         this.resetTransferApp()
       } catch (e) {
@@ -674,7 +695,7 @@ export default {
     },
     resetTransferApp() {
       this.transferMonth = ''; this.issueFromStore = ''; this.issueDestStore = ''
-      this.issueDate = ''; this.issueItems = []; this.issueOrderState = {}
+      this.issueDate = ''; this.issueItems = []; this.issueOrderState = {}; this.issueSubmitComment = ''
       this.inspectDestStore = ''; this.inspectPendingList = []; this.inspectSelectedBlock = null
       this.inspectDetail = []; this.inspectChecked = {}; this.transferSubMode = null
       this.allTransferRecords = []; this.allRecordsLoading = false; this.allRecordsExpanded = false
@@ -700,6 +721,11 @@ export default {
       if (rec.recordType === 'arrival') return dest + '（入荷）'
       if (rec.recordType === 'dispose') return from + '（廃棄）'
       return from + ' → ' + dest
+    },
+    transferRecordCommentText(rec) {
+      if (!rec || rec.comment == null) return ''
+      const s = String(rec.comment).trim()
+      return s
     },
     async toggleBlockDetail(rec) {
       const key = rec.blockIndex
