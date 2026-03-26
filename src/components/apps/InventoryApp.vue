@@ -71,10 +71,22 @@
         <!-- Inventory Step 1: Tupper -->
         <div v-if="currentStep === 1" class="space-y-4">
             <div
-                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-800">タッパー</h2>
-                <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center">単位:
-                    g</span>
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center justify-between gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                    <h2 class="text-lg font-bold text-slate-800">タッパー</h2>
+                    <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center shrink-0">単位:
+                        g</span>
+                </div>
+                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                    <button type="button" @click="onSaveDraftClick" :disabled="draftSaving"
+                        class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap"
+                        :class="draftSaving
+                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 active:bg-emerald-100'">
+                        {{ draftSaving ? '保存中...' : '途中保存' }}
+                    </button>
+                    <span v-if="draftSavedAtLabel" class="text-[9px] text-emerald-700 font-bold leading-tight">保存済 {{ draftSavedAtLabel }}</span>
+                </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div v-for="item in filteredItems" :key="item.rowIndex"
@@ -109,10 +121,22 @@
         <!-- Inventory Step 2: Merch -->
         <div v-if="currentStep === 2" class="space-y-4">
             <div
-                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-800">物販</h2>
-                <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center">単位:
-                    個</span>
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center justify-between gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                    <h2 class="text-lg font-bold text-slate-800">物販</h2>
+                    <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center shrink-0">単位:
+                        個</span>
+                </div>
+                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                    <button type="button" @click="onSaveDraftClick" :disabled="draftSaving"
+                        class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap"
+                        :class="draftSaving
+                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 active:bg-emerald-100'">
+                        {{ draftSaving ? '保存中...' : '途中保存' }}
+                    </button>
+                    <span v-if="draftSavedAtLabel" class="text-[9px] text-emerald-700 font-bold leading-tight">保存済 {{ draftSavedAtLabel }}</span>
+                </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div v-for="item in filteredItems" :key="item.rowIndex"
@@ -140,10 +164,22 @@
         <!-- Inventory Step 3: Flavor -->
         <div v-if="currentStep === 3" class="space-y-4">
             <div
-                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-800">在庫</h2>
-                <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center">単位:
-                    個</span>
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center justify-between gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                    <h2 class="text-lg font-bold text-slate-800">在庫</h2>
+                    <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center shrink-0">単位:
+                        個</span>
+                </div>
+                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                    <button type="button" @click="onSaveDraftClick" :disabled="draftSaving"
+                        class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap"
+                        :class="draftSaving
+                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 active:bg-emerald-100'">
+                        {{ draftSaving ? '保存中...' : '途中保存' }}
+                    </button>
+                    <span v-if="draftSavedAtLabel" class="text-[9px] text-emerald-700 font-bold leading-tight">保存済 {{ draftSavedAtLabel }}</span>
+                </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div v-for="item in filteredItems" :key="item.rowIndex"
@@ -178,12 +214,24 @@
         <!-- Inventory Step 4: Confirmation -->
         <div v-if="currentStep === 4" class="space-y-4">
             <div
-                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-800">入力内容確認</h2>
-                <template v-if="isCheckingConsumption">
-                    <div class="w-4 h-4 border-2 border-slate-300 border-t-brand-500 rounded-full animate-spin ml-1 flex-shrink-0"></div>
-                    <span class="text-[11px] text-slate-500 font-medium">消費量チェック中...</span>
-                </template>
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center justify-between gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+                    <h2 class="text-lg font-bold text-slate-800 shrink-0">入力内容確認</h2>
+                    <template v-if="isCheckingConsumption">
+                        <div class="w-4 h-4 border-2 border-slate-300 border-t-brand-500 rounded-full animate-spin flex-shrink-0"></div>
+                        <span class="text-[11px] text-slate-500 font-medium">消費量チェック中...</span>
+                    </template>
+                </div>
+                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                    <button type="button" @click="onSaveDraftClick" :disabled="draftSaving"
+                        class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap"
+                        :class="draftSaving
+                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 active:bg-emerald-100'">
+                        {{ draftSaving ? '保存中...' : '途中保存' }}
+                    </button>
+                    <span v-if="draftSavedAtLabel" class="text-[9px] text-emerald-700 font-bold leading-tight">保存済 {{ draftSavedAtLabel }}</span>
+                </div>
             </div>
 
             <!-- Negative consumption warning banner -->
@@ -364,7 +412,9 @@ export default {
             items: [],
             errorMessage: '',
             previewNegativeItems: [],
-            isCheckingConsumption: false
+            isCheckingConsumption: false,
+            draftSaving: false,
+            draftSavedAt: 0
         }
     },
     watch: {
@@ -405,6 +455,14 @@ export default {
             return {
                 paddingBottom: 'calc(7.5rem + env(safe-area-inset-bottom, 0px))'
             }
+        },
+        draftSavedAtLabel() {
+            if (!this.draftSavedAt) return ''
+            const d = new Date(this.draftSavedAt)
+            if (Number.isNaN(d.getTime())) return ''
+            const hh = String(d.getHours()).padStart(2, '0')
+            const mm = String(d.getMinutes()).padStart(2, '0')
+            return `${hh}:${mm}`
         }
     },
     beforeUnmount() {
@@ -415,6 +473,8 @@ export default {
     methods: {
         async confirmStartInventory() {
             this.showInventoryStartModal = false
+            this.draftSaving = false
+            this.draftSavedAt = 0
             await this.loadInventoryData()
         },
         async loadInventoryData() {
@@ -499,6 +559,18 @@ export default {
                 this.$emit('update:loading', false)
             }
         },
+        async onSaveDraftClick() {
+            if (this.draftSaving) return
+            this.draftSaving = true
+            try {
+                const result = await this.saveDraftToSheet()
+                this.draftSavedAt = (result && result.savedAt) ? result.savedAt : Date.now()
+            } catch (e) {
+                alert((e && e.message) ? e.message : '途中データの保存に失敗しました。')
+            } finally {
+                this.draftSaving = false
+            }
+        },
         async doSubmit() {
             this.showSubmitConfirmModal = false
             this.$emit('update:loadingMessage', 'スプレッドシートに書き込み中...')
@@ -520,6 +592,8 @@ export default {
                     localStorage.removeItem('inventory_draft_' + this.storeKey + '_' + this.month)
                     this.items = []
                     this.previewNegativeItems = []
+                    this.draftSavedAt = 0
+                    this.draftSaving = false
                     this.$emit('update:storeKey', '')
                     this.$emit('update:month', '')
                     this.$emit('update:date', '')

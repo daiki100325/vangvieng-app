@@ -29,24 +29,10 @@
             </div>
 
             <!-- Inventory Indicators -->
-            <div v-if="appMode === 'inventory' && currentStep > 0" class="text-right flex flex-col items-end gap-1">
+            <div v-if="appMode === 'inventory' && currentStep > 0" class="text-right flex flex-col items-end">
                 <span class="text-[10px] text-slate-400 font-bold block mb-0.5">{{ currentMonth }} / {{ currentDate }}</span>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-brand-700 px-2.5 py-0.5 bg-brand-50 border border-brand-100 rounded-full">
-                        Step {{ displayStep }}/{{ totalSteps }}
-                    </span>
-                    <button
-                        @click="$emit('save-inventory-draft')"
-                        :disabled="inventoryDraftSaving"
-                        class="text-xs font-bold px-2.5 py-1 rounded-full border transition-colors"
-                        :class="inventoryDraftSaving
-                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'">
-                        {{ inventoryDraftSaving ? '保存中...' : '途中保存' }}
-                    </button>
-                </div>
-                <span v-if="inventoryDraftSavedAtLabel" class="text-[10px] text-emerald-700 font-bold">
-                    保存済み {{ inventoryDraftSavedAtLabel }}
+                <span class="text-xs font-bold text-brand-700 px-2.5 py-0.5 bg-brand-50 border border-brand-100 rounded-full">
+                    Step {{ displayStep }}/{{ totalSteps }}
                 </span>
             </div>
 
@@ -123,16 +109,8 @@ export default {
         transferIssueTo: {
             type: String,
             default: ''
-        },
-        inventoryDraftSaving: {
-            type: Boolean,
-            default: false
-        },
-        inventoryDraftSavedAtLabel: {
-            type: String,
-            default: ''
         }
     },
-    emits: ['return-to-portal', 'save-inventory-draft']
+    emits: ['return-to-portal']
 }
 </script>

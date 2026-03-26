@@ -18,10 +18,7 @@
             :transferStep="transferStep"
             :transferIssueFrom="transferIssueFromName"
             :transferIssueTo="transferIssueToName"
-            :inventoryDraftSaving="inventoryDraftSaving"
-            :inventoryDraftSavedAtLabel="inventoryDraftSavedAtLabel"
             @return-to-portal="returnToPortal"
-            @save-inventory-draft="saveInventoryDraftFromHeader"
         />
 
         <!-- Loading Overlay -->
@@ -214,8 +211,6 @@ export default {
       months: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
       inventoryBrands: [],
       inventoryCheckingConsumption: false,
-      inventoryDraftSaving: false,
-      inventoryDraftSavedAt: 0,
       // Request
       requestBrands: [],
       requestTotalQty: 0,
@@ -259,14 +254,6 @@ export default {
     },
     currentMonth() { return this.month },
     currentDate() { return this.date },
-    inventoryDraftSavedAtLabel() {
-      if (!this.inventoryDraftSavedAt) return ''
-      const d = new Date(this.inventoryDraftSavedAt)
-      if (Number.isNaN(d.getTime())) return ''
-      const hh = String(d.getHours()).padStart(2, '0')
-      const mm = String(d.getMinutes()).padStart(2, '0')
-      return `${hh}:${mm}`
-    },
     brands() {
       if (this.appMode === 'transfer') return this.transferBrands
       if (this.appMode === 'stock') return this.stockBrands
@@ -327,20 +314,15 @@ export default {
       )
       const footerBackVisible =
         (this.appMode !== null && this.currentStep > 0) ||
-        (this.appMode === 'transfer' && this.transferStep !== 0)
+        (this.appMode === 'transfer' && this.transferStep !== 0) ||
+        (this.appMode === 'stock')
       if (footerBackVisible) {
         this.prevStep()
       } else if (this.appMode !== null) {
         this.returnToPortal()
       }
     },
-    openInventoryApp() {
-      this.appMode = 'inventory'
-      this.currentStep = 0
-      this.inventoryDraftSaving = false
-      this.inventoryDraftSavedAt = 0
-      this.pushHistoryState()
-    },
+    openInventoryApp() { this.appMode = 'inventory'; this.currentStep = 0; this.pushHistoryState() },
     openRequestApp() { this.appMode = 'request'; this.currentStep = 0; this.selectedBrand = null; this.pushHistoryState() },
     openTransferApp() {
       this.appMode = 'transfer'; this.transferStep = 0
@@ -432,27 +414,23 @@ export default {
         window.scrollTo({ top: 0, behavior: 'smooth' })
         return
       }
+      if (this.appMode === 'stock') {
+        this.appMode = null
+        this.currentStep = 0
+        this.transferStep = 0
+        this.selectedBrand = null
+        this.stockBrands = []
+        this.stockHasData = false
+        this.pushHistoryState()
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
     },
     nextStep() {
       if (this.storeKey === 'office') { if (this.currentStep === 3) this.currentStep = 4 }
       else { if (this.currentStep < 4) this.currentStep++ }
       if (this.appMode === 'inventory' && this.$refs.inventoryApp) this.$refs.inventoryApp.saveLocally()
       this.pushHistoryState(); window.scrollTo({ top: 0, behavior: 'smooth' })
-    },
-    async saveInventoryDraftFromHeader() {
-      if (!(this.appMode === 'inventory' && this.currentStep > 0)) return
-      const inventoryApp = this.$refs.inventoryApp
-      if (!inventoryApp || this.inventoryDraftSaving) return
-
-      this.inventoryDraftSaving = true
-      try {
-        const result = await inventoryApp.saveDraftToSheet()
-        this.inventoryDraftSavedAt = (result && result.savedAt) ? result.savedAt : Date.now()
-      } catch (e) {
-        alert((e && e.message) ? e.message : '途中データの保存に失敗しました。')
-      } finally {
-        this.inventoryDraftSaving = false
-      }
     },
     // ─── App-level delegates ──────────────────────────────────────────────
     goToIssueConfirm() { if (this.$refs.transferApp) this.$refs.transferApp.goToIssueConfirm() },
