@@ -11,8 +11,9 @@
                             </path>
                         </svg>
                     </div>
-                    <h1 class="text-2xl font-bold text-white">店舗業務ポータル</h1>
-                    <p class="text-slate-400 text-sm mt-1">暗証番号を入力してください</p>
+                    <h1 class="text-2xl font-bold text-white">V-MINT</h1>
+                    <p class="text-slate-400 text-xs mt-0.5">店舗業務ポータル</p>
+                    <p class="text-slate-400 text-sm mt-2">暗証番号を入力してください</p>
                 </div>
 
                 <!-- テンキー入力エリア -->
