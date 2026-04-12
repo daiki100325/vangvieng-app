@@ -1,5 +1,11 @@
 # CHANGELOG_DEV
 
+## 2026-04-14
+- What: `src/constants/inventoryPackageRules.js` を Git に追加（2026-04-12 変更で `InventoryApp.vue` から import 済みだがファイルが未コミットで、Cloudflare Pages の `vite build` がモジュール解決に失敗していた）
+- Why: CI/本番ビルドで依存ファイルを解決できるようにするため
+- Files: `src/constants/inventoryPackageRules.js`, `CHANGELOG_DEV.md`
+- Related: [[V-MINT/CHANGELOG_DEV]]
+
 ## 2026-04-13
 - What: 棚卸し Step1 タッパー1・2 に行末トグル（既定オン）を追加。オフ時は入力無効・スプレッドシートには半角 `-` を書き込み、読み取り時は `-` のセルでトグルオフを復元。Step4 確認表は `基:-` / `予:-` で表示
 - Why: 該当タッパーがない行を数式・運用と整合する形で明示するため
