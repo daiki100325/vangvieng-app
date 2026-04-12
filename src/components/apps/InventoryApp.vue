@@ -100,17 +100,43 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label
-                                class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">タッパー1</label>
+                            <div class="flex items-center justify-between gap-1 mb-1 min-h-[1.25rem]">
+                                <span
+                                    class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">タッパー1</span>
+                                <button type="button" role="switch"
+                                    :aria-checked="item.tupper.basicEnabled !== false"
+                                    :aria-label="'タッパー1の入力'"
+                                    @click="setTupperBasicEnabled(item, item.tupper.basicEnabled === false)"
+                                    class="relative shrink-0 w-9 h-5 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50"
+                                    :class="item.tupper.basicEnabled !== false ? 'bg-brand-500' : 'bg-slate-300'">
+                                    <span
+                                        class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform pointer-events-none"
+                                        :class="item.tupper.basicEnabled !== false ? 'translate-x-4' : 'translate-x-0'"></span>
+                                </button>
+                            </div>
                             <input type="number" v-model.number="item.tupper.basic"
-                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-lg font-bold rounded-lg p-2 text-center focus:ring-2 focus:ring-brand-500 focus:outline-none placeholder-slate-300"
+                                :disabled="item.tupper.basicEnabled === false"
+                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-lg font-bold rounded-lg p-2 text-center focus:ring-2 focus:ring-brand-500 focus:outline-none placeholder-slate-300 disabled:opacity-45 disabled:cursor-not-allowed"
                                 placeholder="0">
                         </div>
                         <div>
-                            <label
-                                class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">タッパー2</label>
+                            <div class="flex items-center justify-between gap-1 mb-1 min-h-[1.25rem]">
+                                <span
+                                    class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">タッパー2</span>
+                                <button type="button" role="switch"
+                                    :aria-checked="item.tupper.reserveEnabled !== false"
+                                    :aria-label="'タッパー2の入力'"
+                                    @click="setTupperReserveEnabled(item, item.tupper.reserveEnabled === false)"
+                                    class="relative shrink-0 w-9 h-5 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50"
+                                    :class="item.tupper.reserveEnabled !== false ? 'bg-brand-500' : 'bg-slate-300'">
+                                    <span
+                                        class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform pointer-events-none"
+                                        :class="item.tupper.reserveEnabled !== false ? 'translate-x-4' : 'translate-x-0'"></span>
+                                </button>
+                            </div>
                             <input type="number" v-model.number="item.tupper.reserve"
-                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-lg font-bold rounded-lg p-2 text-center focus:ring-2 focus:ring-brand-500 focus:outline-none placeholder-slate-300"
+                                :disabled="item.tupper.reserveEnabled === false"
+                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-lg font-bold rounded-lg p-2 text-center focus:ring-2 focus:ring-brand-500 focus:outline-none placeholder-slate-300 disabled:opacity-45 disabled:cursor-not-allowed"
                                 placeholder="0">
                         </div>
                     </div>
@@ -148,10 +174,10 @@
                             item.brand }}</span>
                         <div class="font-bold text-base leading-tight">{{ item.flavorName || item.flavor || item.name }}</div>
                     </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div v-for="size in ['50','100','125','200','250','1kg']" :key="size">
+                    <div v-if="visibleMerchSizes(item).length > 0" class="flex flex-wrap gap-2">
+                        <div v-for="size in visibleMerchSizes(item)" :key="size" class="min-w-[4.5rem] flex-1">
                             <label
-                                class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block text-center">{{size}}</label>
+                                class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block text-center">{{ size }}</label>
                             <input type="number" v-model.number="item.merch['val'+size]"
                                 class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-base font-bold rounded-lg p-1.5 text-center focus:ring-2 focus:ring-pink-500 focus:outline-none placeholder-slate-300"
                                 placeholder="0">
@@ -191,21 +217,21 @@
                             item.brand }}</span>
                         <div class="font-bold text-base leading-tight">{{ item.flavorName || item.flavor || item.name }}</div>
                     </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div v-for="size in ['50','100','125','200','250','1kg']" :key="size">
+                    <div v-if="visibleStockGramSizes(item).length > 0" class="flex flex-wrap gap-2 mb-2">
+                        <div v-for="size in visibleStockGramSizes(item)" :key="size" class="min-w-[4.5rem] flex-1">
                             <label
-                                class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block text-center">{{size}}</label>
+                                class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block text-center">{{ size }}</label>
                             <input type="number" v-model.number="item.flavor['val'+size]"
                                 class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-base font-bold rounded-lg p-1.5 text-center focus:ring-2 focus:ring-yellow-500 focus:outline-none placeholder-slate-300"
                                 placeholder="0">
                         </div>
-                        <div class="col-span-3">
-                            <label
-                                class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block">その他</label>
-                            <input type="number" v-model.number="item.flavor.valOther"
-                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-base font-bold rounded-lg p-1.5 text-center focus:ring-2 focus:ring-yellow-500 focus:outline-none placeholder-slate-300"
-                                placeholder="0">
-                        </div>
+                    </div>
+                    <div class="w-full">
+                        <label
+                            class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block">その他</label>
+                        <input type="number" v-model.number="item.flavor.valOther"
+                            class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-base font-bold rounded-lg p-1.5 text-center focus:ring-2 focus:ring-yellow-500 focus:outline-none placeholder-slate-300"
+                            placeholder="0">
                     </div>
                 </div>
             </div>
@@ -279,26 +305,26 @@
                                         }}</div>
                                 </td>
                                 <td v-if="storeKey !== 'office'" class="p-2 align-middle text-center">
-                                    <div v-if="isValid(item.tupper.basic) || isValid(item.tupper.reserve)"
+                                    <div v-if="hasTupperPreview(item)"
                                         class="inline-flex flex-col text-[10px] leading-tight">
-                                        <span v-if="isValid(item.tupper.basic)"
-                                            class="bg-slate-100 px-1 rounded mb-0.5">基:{{item.tupper.basic}}</span>
-                                        <span v-if="isValid(item.tupper.reserve)"
-                                            class="bg-slate-100 px-1 rounded">予:{{item.tupper.reserve}}</span>
+                                        <span v-if="tupperPreviewBasicLine(item)"
+                                            class="bg-slate-100 px-1 rounded mb-0.5">{{ tupperPreviewBasicLine(item) }}</span>
+                                        <span v-if="tupperPreviewReserveLine(item)"
+                                            class="bg-slate-100 px-1 rounded">{{ tupperPreviewReserveLine(item) }}</span>
                                     </div>
                                     <span v-else class="text-slate-300">-</span>
                                 </td>
                                 <td v-if="storeKey !== 'office'" class="p-2 align-middle text-center max-w-[120px]">
-                                    <div v-if="hasValues(item.merch)"
+                                    <div v-if="hasMerchPreview(item)"
                                         class="text-[10px] leading-tight bg-pink-50 text-pink-700 px-1.5 py-1 rounded break-words">
-                                        {{ formatValues(item.merch) }}
+                                        {{ formatMerchPreview(item) }}
                                     </div>
                                     <span v-else class="text-slate-300">-</span>
                                 </td>
                                 <td class="p-2 align-middle text-center max-w-[120px]">
-                                    <div v-if="hasValues(item.flavor)"
+                                    <div v-if="hasFlavorPreview(item)"
                                         class="text-[10px] leading-tight bg-yellow-50 text-yellow-700 px-1.5 py-1 rounded break-words">
-                                        {{ formatValues(item.flavor) }}
+                                        {{ formatFlavorPreview(item) }}
                                     </div>
                                     <span v-else class="text-slate-300">-</span>
                                 </td>
@@ -381,6 +407,7 @@
 
 <script>
 import { getSheetData, submitData, checkNegativeConsumption } from '../../api.js'
+import { getVisibleMerchSizes, getVisibleStockGramSizes } from '../../constants/inventoryPackageRules.js'
 
 export default {
     name: 'InventoryApp',
@@ -490,7 +517,7 @@ export default {
                 if (parsed.items && Array.isArray(parsed.items) && parsed.items.length > 0) {
                     const ok = await this.requestConfirm('保存されたデータが見つかりました。\n復元しますか？', '復元する', 'text-brand-600 hover:bg-brand-50')
                     if (ok) {
-                        this.items = parsed.items
+                        this.items = parsed.items.map(i => ({ ...i, tupper: this.mergeTupper(i.tupper) }))
                         if (parsed.date) this.$emit('update:date', parsed.date)
                         const seen = new Set()
                         const brands = this.items.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))
@@ -512,7 +539,7 @@ export default {
                     .map(i => ({
                     ...i,
                     flavorName: i.flavorName || i.flavor || i.name || '',
-                    tupper: i.tupper || { basic: '', reserve: '' },
+                    tupper: this.mergeTupper(i.tupper),
                     merch: i.merch || { val50: '', val100: '', val125: '', val200: '', val250: '', val1kg: '' },
                     flavor: (i.flavor && typeof i.flavor === 'object') ? i.flavor : { val50: '', val100: '', val125: '', val200: '', val250: '', val1kg: '', valOther: '' }
                 }))
@@ -613,12 +640,79 @@ export default {
             localStorage.setItem('inventory_draft_' + this.storeKey + '_' + this.month, JSON.stringify({ items: this.items, date: this.date, timestamp: Date.now() }))
         },
         isValid(val) { return val !== null && val !== "" && !isNaN(val) },
+        mergeTupper(raw) {
+            const t = raw && typeof raw === 'object' ? raw : {}
+            return {
+                basic: t.basic !== undefined && t.basic !== null ? t.basic : '',
+                reserve: t.reserve !== undefined && t.reserve !== null ? t.reserve : '',
+                basicEnabled: t.basicEnabled !== false,
+                reserveEnabled: t.reserveEnabled !== false
+            }
+        },
+        setTupperBasicEnabled(item, enabled) {
+            if (!item.tupper) item.tupper = this.mergeTupper(null)
+            item.tupper.basicEnabled = enabled
+            if (!enabled) item.tupper.basic = ''
+        },
+        setTupperReserveEnabled(item, enabled) {
+            if (!item.tupper) item.tupper = this.mergeTupper(null)
+            item.tupper.reserveEnabled = enabled
+            if (!enabled) item.tupper.reserve = ''
+        },
+        tupperPreviewBasicLine(item) {
+            const t = item.tupper || {}
+            if (t.basicEnabled === false) return '基:-'
+            if (this.isValid(t.basic)) return '基:' + t.basic
+            return null
+        },
+        tupperPreviewReserveLine(item) {
+            const t = item.tupper || {}
+            if (t.reserveEnabled === false) return '予:-'
+            if (this.isValid(t.reserve)) return '予:' + t.reserve
+            return null
+        },
+        hasTupperPreview(item) {
+            return this.tupperPreviewBasicLine(item) !== null || this.tupperPreviewReserveLine(item) !== null
+        },
         hasValues(obj) { return Object.values(obj).some(val => this.isValid(val)) },
+        visibleMerchSizes(item) {
+            return getVisibleMerchSizes(item)
+        },
+        visibleStockGramSizes(item) {
+            return getVisibleStockGramSizes(item)
+        },
         formatValues(obj) {
             return Object.entries(obj)
                 .filter(([_, val]) => this.isValid(val))
                 .map(([key, val]) => `${key.replace('val', '')}:${val}`)
                 .join(' / ')
+        },
+        /** 確認テーブル用：制限ブランドでは非表示列を出さない */
+        formatMerchPreview(item) {
+            const keys = this.visibleMerchSizes(item).map(s => `val${s}`)
+            const o = item.merch || {}
+            return keys
+                .filter(k => this.isValid(o[k]))
+                .map(k => `${k.replace('val', '')}:${o[k]}`)
+                .join(' / ')
+        },
+        formatFlavorPreview(item) {
+            const keys = this.visibleStockGramSizes(item).map(s => `val${s}`)
+            const o = item.flavor || {}
+            const parts = keys
+                .filter(k => this.isValid(o[k]))
+                .map(k => `${k.replace('val', '')}:${o[k]}`)
+            if (this.isValid(o.valOther)) parts.push(`その他:${o.valOther}`)
+            return parts.join(' / ')
+        },
+        hasMerchPreview(item) {
+            const o = item.merch || {}
+            return this.visibleMerchSizes(item).some(s => this.isValid(o[`val${s}`]))
+        },
+        hasFlavorPreview(item) {
+            const o = item.flavor || {}
+            const grams = this.visibleStockGramSizes(item).some(s => this.isValid(o[`val${s}`]))
+            return grams || this.isValid(o.valOther)
         }
     }
 }

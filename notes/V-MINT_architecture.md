@@ -23,7 +23,9 @@ parent: [[V-MINT/notes/_index]]
   - `PortalMenu.vue`
   - `BrandFilterSheet.vue`
   - `StockApp.vue`
-  - `InventoryApp.vue`
+  - `InventoryApp.vue`（タッパー `tupper.basicEnabled` / `reserveEnabled` と GAS 書き込みの半角 `-` を同期）
+  - `Code.gs`（`normalizeTupperSheetCell_` / `buildWriteValues_` でタッパー列の `-` とフラグ）
+  - `src/constants/inventoryPackageRules.js`（棚卸し物販・在庫の表示グラム列マスタ）
   - `RequestApp.vue`
 - 未完了タスク:
   - `TransferApp.vue` の生成と接続確認（`src/refactor_transfer.cjs`）。

@@ -15,6 +15,8 @@ tags: [project/v-mint, type/hub]
 - Troubleshooting: [[V-MINT/TROUBLESHOOTING]]
 
 ## Notes
+- 棚卸しタッパー「なし」トグルとセル `-` の対応: [[V-MINT/docs/詳細仕様書]]（§6.1 表）
+- [[V-MINT/notes/inventory_package_visibility_plan]] — 棚卸しパッケージ表示（プラン・UTF-8 正本）
 - [[V-MINT/notes/V-MINT_architecture]]
 - [[V-MINT/notes/V-MINT_requirements]]
 - [[V-MINT/notes/V-MINT_release-plan]]
