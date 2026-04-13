@@ -12,7 +12,7 @@ parent: [[V-MINT/notes/_index]]
 ## Context
 - `handoff_report.md` で `App.vue` からの分割進行状況を引き継ぎ。
 - `migration_plan.md` で GAS 継続運用から段階移行するロードマップを定義。
-- 詳細仕様は `docs/詳細仕様書.md` に集約。
+- 詳細仕様は `docs/PRODUCT_SPEC.md` に集約。
 
 ## Details
 - 主要分割済みコンポーネント:
@@ -43,4 +43,4 @@ parent: [[V-MINT/notes/_index]]
 - [[V-MINT/CHANGELOG_DEV]]
 - Source: [[V-MINT/handoff_report]]
 - Source: [[V-MINT/migration_plan]]
-- Source: [[V-MINT/docs/詳細仕様書]]
+- Source: [[V-MINT/docs/PRODUCT_SPEC]]

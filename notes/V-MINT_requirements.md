@@ -10,7 +10,7 @@ parent: [[V-MINT/notes/_index]]
 - リリース後フィードバックを取り込みながら、段階的に機能拡張する。
 
 ## Context
-- 要件の一次情報は `docs/現場向け操作マニュアル.md` と `docs/詳細仕様書.md`。
+- 要件の一次情報は `docs/現場向け操作マニュアル.md` と `docs/PRODUCT_SPEC.md`。
 - 成果物・残課題は `docs/プロジェクト最終報告書.md` を参照。
 
 ## Details
@@ -36,5 +36,5 @@ parent: [[V-MINT/notes/_index]]
 - [[V-MINT/DECISIONS]]
 - [[V-MINT/CHANGELOG_DEV]]
 - Source: [[V-MINT/docs/現場向け操作マニュアル]]
-- Source: [[V-MINT/docs/詳細仕様書]]
+- Source: [[V-MINT/docs/PRODUCT_SPEC]]
 - Source: [[V-MINT/docs/プロジェクト最終報告書]]
