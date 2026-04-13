@@ -97,6 +97,25 @@
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">実施日</label>
                                 <input type="date" v-model="issueDate" :class="issueDate ? 'text-slate-800' : 'text-slate-500'" class="w-full bg-slate-50 border border-slate-200 text-base font-bold rounded-xl focus:ring-2 focus:ring-emerald-500 block p-4 text-center">
                             </div>
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 space-y-2">
+                                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">新規銘柄を追加</p>
+                                <select v-model="arrivalSelectedBrand"
+                                    class="w-full bg-white border border-slate-200 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none">
+                                    <option value="" disabled>ブランド名を選択</option>
+                                    <option v-for="brand in arrivalBrandOptions" :key="'brand-'+brand" :value="brand">{{ brand }}</option>
+                                    <option value="__other__">その他</option>
+                                </select>
+                                <input v-if="arrivalSelectedBrand === '__other__'" v-model.trim="arrivalNewBrand" type="text" maxlength="80" placeholder="ブランド名を入力"
+                                    class="w-full bg-white border border-slate-200 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none">
+                                <p v-if="arrivalBrandValidationMessage" class="text-xs text-rose-600 font-medium">{{ arrivalBrandValidationMessage }}</p>
+                                <input v-model.trim="arrivalNewFlavorName" type="text" maxlength="120" placeholder="フレーバー名を入力"
+                                    class="w-full bg-white border border-slate-200 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none">
+                                <p v-if="arrivalFlavorValidationMessage" class="text-xs text-rose-600 font-medium">{{ arrivalFlavorValidationMessage }}</p>
+                                <button @click="addArrivalFlavor" :disabled="arrivalAddDisabled"
+                                    class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                                    {{ arrivalAddingFlavor ? '追加中...' : 'この銘柄を追加' }}
+                                </button>
+                            </div>
                             <button @click="startIssue" :disabled="!transferMonth || !issueFromStore || !issueDate" class="mt-4 w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-4 rounded-full shadow-lg shadow-emerald-500/30 transition-all active:scale-95 disabled:opacity-50">
                                 入荷記録を開始する
                             </button>
@@ -403,7 +422,7 @@
 </template>
 
 <script>
-import { getFlavorListForTransfer, getPendingTransferRecords, getTransferRecordDetail, submitTransferRecord, completeInspection, getAllTransferRecords, getDisposeRecordDetail } from '../../api.js'
+import { getFlavorListForTransfer, getPendingTransferRecords, getTransferRecordDetail, submitTransferRecord, completeInspection, getAllTransferRecords, getDisposeRecordDetail, addFlavorForArrival } from '../../api.js'
 
 export default {
   name: 'TransferApp',
@@ -429,6 +448,10 @@ export default {
       issueItems: [],
       issueOrderState: {},
       issueSubmitComment: '',
+      arrivalSelectedBrand: '',
+      arrivalNewBrand: '',
+      arrivalNewFlavorName: '',
+      arrivalAddingFlavor: false,
       transferBrands: [],
       inspectDestStore: '',
       inspectPendingList: [],
@@ -492,6 +515,38 @@ export default {
     },
     transferOtherInventoryKeys() {
       return ['office', 'baba_main', 'nakano', 'baba_2nd'].filter(k => k !== this.transferIssueInventoryKey)
+    },
+    arrivalBrandOptions() {
+      return this.transferBrands || []
+    },
+    arrivalResolvedBrand() {
+      if (this.arrivalSelectedBrand === '__other__') return (this.arrivalNewBrand || '').trim()
+      return (this.arrivalSelectedBrand || '').trim()
+    },
+    arrivalBrandValidationMessage() {
+      if (!this.transferMonth) return '対象月を選択してください。'
+      if (!this.arrivalSelectedBrand) return 'ブランド名を選択してください。'
+      if (this.arrivalSelectedBrand !== '__other__') return ''
+      if (!this.arrivalResolvedBrand) return 'ブランド名を入力してください。'
+      // 例: AF (Al Fakher), AZR GOLD (Azure Gold Line)
+      const brandRule = /^[A-Z0-9]+(?: [A-Z0-9]+)* \([A-Z][a-z0-9]*(?: [A-Z][a-z0-9]*)*\)$/
+      if (!brandRule.test(this.arrivalResolvedBrand)) {
+        return 'ブランド名は「大文字略称 + 半角スペース + (正式名称: 各単語の頭文字のみ大文字)」で入力してください。'
+      }
+      return ''
+    },
+    arrivalFlavorValidationMessage() {
+      const v = (this.arrivalNewFlavorName || '').trim()
+      if (!v) return 'フレーバー名を入力してください。'
+      // 例: Mexi Cola
+      const flavorRule = /^[A-Z][a-z0-9]*(?: [A-Z][a-z0-9]*)*$/
+      if (!flavorRule.test(v)) {
+        return 'フレーバー名は各単語の頭文字のみ大文字、単語間は半角スペースで入力してください。'
+      }
+      return ''
+    },
+    arrivalAddDisabled() {
+      return this.arrivalAddingFlavor || !this.transferMonth || !!this.arrivalBrandValidationMessage || !!this.arrivalFlavorValidationMessage
     }
   },
   watch: {
@@ -519,6 +574,7 @@ export default {
         this.$emit('update:issueFromName', this.issueFromStore ? this.transferStoreName(this.issueFromStore) : '')
         this.$emit('update:issueToName', this.issueDestStore ? this.transferStoreName(this.issueDestStore) : '')
       }
+      if (v === 'arrival' && this.transferMonth) this.ensureArrivalBrandOptions()
     },
     transferMonth(val) {
       this.allTransferRecords = []
@@ -527,9 +583,27 @@ export default {
       this.blockDetails = {}
       this.blockDetailsLoading = {}
       if (val) this.loadAllTransferRecords()
+      if (val && this.transferSubMode === 'arrival') this.ensureArrivalBrandOptions()
     }
   },
   methods: {
+    async ensureArrivalBrandOptions() {
+      if (!this.transferMonth) return
+      if (this.transferBrands.length > 0) return
+      try {
+        const monthNum = parseInt(this.transferMonth, 10)
+        await this.reloadTransferItems(monthNum)
+      } catch (_) {
+        // ブランド選択肢の事前取得失敗は、開始ボタン/追加ボタン押下時に再度検知する
+      }
+    },
+    async reloadTransferItems(monthNum) {
+      const rawIssueItems = await getFlavorListForTransfer(monthNum)
+      this.issueItems = rawIssueItems.filter(i => i.appDisplay !== false)
+      const seen = new Set()
+      this.transferBrands = this.issueItems.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))
+      this.$emit('update:brands', this.transferBrands)
+    },
     transferStoreName(key) {
       const s = this.stores.find(x => x.key === key)
       return s ? s.name : key
@@ -564,18 +638,44 @@ export default {
       this.$emit('update:loadingMessage', 'フレーバー一覧を取得中...');
       try {
         const monthNum = parseInt(this.transferMonth, 10)
-        const rawIssueItems = await getFlavorListForTransfer(monthNum)
-        this.issueItems = rawIssueItems.filter(i => i.appDisplay !== false)
+        await this.reloadTransferItems(monthNum)
         this.issueOrderState = {}
         this.issueSubmitComment = ''
-        const seen = new Set()
-        this.transferBrands = this.issueItems.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))
-        this.$emit('update:brands', this.transferBrands);
         this.$emit('update:transferStep', '1a');
       } catch (e) {
         alert(e.message || 'データの取得に失敗しました。')
       } finally {
         this.$emit('update:loading', false);
+      }
+    },
+    async addArrivalFlavor() {
+      if (this.transferSubMode !== 'arrival') return
+      const brand = this.arrivalResolvedBrand
+      const flavorName = (this.arrivalNewFlavorName || '').trim()
+      if (this.arrivalBrandValidationMessage || this.arrivalFlavorValidationMessage) {
+        alert(this.arrivalBrandValidationMessage || this.arrivalFlavorValidationMessage)
+        return
+      }
+      const monthNum = parseInt(this.transferMonth, 10)
+      if (!monthNum) {
+        alert('対象月を選択してください。')
+        return
+      }
+      this.arrivalAddingFlavor = true
+      this.$emit('update:loading', true)
+      this.$emit('update:loadingMessage', '新規銘柄を追加中...')
+      try {
+        await addFlavorForArrival({ monthNum, brand, flavorName })
+        await this.reloadTransferItems(monthNum)
+        this.arrivalSelectedBrand = ''
+        this.arrivalNewBrand = ''
+        this.arrivalNewFlavorName = ''
+        alert('新規銘柄を追加しました。')
+      } catch (e) {
+        alert(e.message || '新規銘柄の追加に失敗しました。')
+      } finally {
+        this.arrivalAddingFlavor = false
+        this.$emit('update:loading', false)
       }
     },
     updateIssueQty(rowIndex, val) {
@@ -696,6 +796,7 @@ export default {
     resetTransferApp() {
       this.transferMonth = ''; this.issueFromStore = ''; this.issueDestStore = ''
       this.issueDate = ''; this.issueItems = []; this.issueOrderState = {}; this.issueSubmitComment = ''
+      this.arrivalSelectedBrand = ''; this.arrivalNewBrand = ''; this.arrivalNewFlavorName = ''; this.arrivalAddingFlavor = false
       this.inspectDestStore = ''; this.inspectPendingList = []; this.inspectSelectedBlock = null
       this.inspectDetail = []; this.inspectChecked = {}; this.transferSubMode = null
       this.allTransferRecords = []; this.allRecordsLoading = false; this.allRecordsExpanded = false

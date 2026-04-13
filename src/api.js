@@ -74,6 +74,10 @@ export const getDisposeRecordDetail = (monthNum, blockIndex, fromStoreKey) =>
 export const submitTransferRecord = (payload) =>
   gasPost('submitTransferRecord', payload);
 
+/** 移動記録: 入荷時の新規銘柄追加 */
+export const addFlavorForArrival = (payload) =>
+  gasPost('addFlavorForArrival', payload);
+
 /** 移動記録: 検品完了 */
 export const completeInspection = (payload) =>
   gasPost('completeInspection', payload);

@@ -25,7 +25,8 @@ parent: [[V-MINT/notes/_index]]
 - Phase 4（将来）:
   - DB を RDB へ移行し堅牢性・拡張性を強化
 - 直近チェック項目:
-  - `TransferApp.vue` 生成後のビルド確認
+  - 入荷画面の新規銘柄追加（重複・並び順・列初期化ルール）を実機で確認
+  - `addFlavorForArrival` の競合時リトライ運用（ロック取得失敗時）を周知
   - 主要業務フローの実機検証
 
 ## Related

@@ -1,5 +1,17 @@
 # CHANGELOG_DEV
 
+## 2026-04-13
+- What:
+  - 移動記録「入荷」トップ画面に、新規銘柄（A列ブランド / B列フレーバー）を追加する入力UIを実装
+  - 新規銘柄追加UIを改修し、ブランドは既存プルダウン + `その他` 時のみ自由入力、フレーバー名/ブランド名に命名規則バリデーション（違反時の警告表示と追加ボタン無効化）を実装
+  - GAS に `addFlavorForArrival` を追加し、A+B重複判定・アルファベット順挿入・列ごとの初期化制御（コピー禁止列保護、`IP` 列 `TRUE`、許可列は数式コピー）を実装
+  - コピー禁止列ルールを更新（`C~E, G~J, T~Y, CM~CN, IG~IL, IO` を追加）
+  - `CO~CV` 列はコピーではなく数値 `0` を初期化するルールに変更
+  - 行初期化失敗時のロールバック（挿入行削除）を追加
+- Why: 新規銘柄入荷時にスプレッドシート手編集を不要化し、既存実績列の汚染を防ぎつつ数式整合性を維持するため
+- Files: `Code.gs`, `src/api.js`, `src/components/apps/TransferApp.vue`, `docs/詳細仕様書.md`, `notes/V-MINT_requirements.md`, `notes/_index.md`, `DECISIONS.md`, `TROUBLESHOOTING.md`, `CHANGELOG_DEV.md`
+- Related: [[V-MINT/docs/詳細仕様書]]
+
 ## 2026-04-14
 - What: `src/constants/inventoryPackageRules.js` を Git に追加（2026-04-12 変更で `InventoryApp.vue` から import 済みだがファイルが未コミットで、Cloudflare Pages の `vite build` がモジュール解決に失敗していた）
 - Why: CI/本番ビルドで依存ファイルを解決できるようにするため

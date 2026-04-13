@@ -27,8 +27,11 @@ parent: [[V-MINT/notes/_index]]
   - `Code.gs`（`normalizeTupperSheetCell_` / `buildWriteValues_` でタッパー列の `-` とフラグ）
   - `src/constants/inventoryPackageRules.js`（棚卸し物販・在庫の表示グラム列マスタ）
   - `RequestApp.vue`
-- 未完了タスク:
-  - `TransferApp.vue` の生成と接続確認（`src/refactor_transfer.cjs`）。
+  - `TransferApp.vue`（入荷モードで `addFlavorForArrival` を呼び出し、新規銘柄をA/B列へ追加可能）
+- バックエンドの要点:
+  - `Code.gs` に `addFlavorForArrival(payload)` を追加
+  - 行挿入時は列別ポリシーで初期化（コピー禁止列をクリア、`IP` 列 `TRUE`、許可列は数式コピー）
+  - ロック競合は `LockService`、初期化失敗は挿入行ロールバック
 - アーキ移行フェーズ:
   - Phase 1: GAS 運用で検証
   - Phase 2: バックエンド統合 + 新機能
