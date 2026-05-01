@@ -1,0 +1,7 @@
+# Local secrets (Vite loads project-root `.env.local` as a file, not a folder)
+.env
+.env.local
+.env.*.local
+
+node_modules
+dist

@@ -1,0 +1,853 @@
+<template>
+    <div :style="inventoryFooterClearanceStyle">
+        <!-- Inventory Step 0: Setup -->
+        <transition name="slide-up">
+            <div v-if="currentStep === 0" class="flex flex-col items-center pt-6 pb-20">
+                <div
+                    class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 w-full max-w-md text-center">
+                    <h2 class="text-xl font-bold text-slate-700 mb-8">棚卸しを開始</h2>
+
+                    <div v-if="errorMessage"
+                        class="mb-6 bg-red-50 border border-red-200 p-4 rounded-xl text-left shadow-sm animate-pulse">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                </path>
+                            </svg>
+                            <div>
+                                <h3 class="text-sm font-bold text-red-800">アクセスエラー</h3>
+                                <p class="text-xs text-red-600 mt-1">{{ errorMessage }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6 text-left">
+                        <div>
+                            <label
+                                class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">対象店舗</label>
+                            <div class="relative">
+                                <select :value="storeKey" @input="$emit('update:storeKey', $event.target.value)"
+                                    :class="storeKey ? 'text-slate-800' : 'text-slate-500'"
+                                    class="appearance-none w-full bg-slate-50 border border-slate-200 text-lg font-bold rounded-xl focus:ring-2 focus:ring-brand-500 block p-4 text-center cursor-pointer">
+                                    <option value="" disabled>店舗を選択してください</option>
+                                    <option v-for="store in stores" :value="store.key" :key="store.key" class="text-slate-800">{{
+                                        store.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label
+                                class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">対象月</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <select :value="selectedYear" @input="onYearInput($event.target.value)"
+                                    :class="selectedYear ? 'text-slate-800' : 'text-slate-500'"
+                                    class="appearance-none w-full bg-slate-50 border border-slate-200 text-lg font-bold rounded-xl focus:ring-2 focus:ring-brand-500 block p-4 text-center">
+                                    <option value="" disabled>年を選択</option>
+                                    <option v-for="y in years" :value="y.value" :key="y.value" class="text-slate-800">{{ y.label }}</option>
+                                </select>
+                                <select :value="selectedMonth" @input="onMonthInput($event.target.value)"
+                                    :class="selectedMonth ? 'text-slate-800' : 'text-slate-500'"
+                                    class="appearance-none w-full bg-slate-50 border border-slate-200 text-lg font-bold rounded-xl focus:ring-2 focus:ring-brand-500 block p-4 text-center">
+                                    <option value="" disabled>月を選択</option>
+                                    <option v-for="m in months" :value="m.value" :key="m.value" class="text-slate-800">{{ m.label }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label
+                                class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">実施日</label>
+                            <input type="date" :value="date" @input="$emit('update:date', $event.target.value)"
+                                :class="date ? 'text-slate-800' : 'text-slate-500'"
+                                class="w-full bg-slate-50 border border-slate-200 text-lg font-bold rounded-xl focus:ring-2 focus:ring-brand-500 block p-4 text-center">
+                        </div>
+                    </div>
+
+                    <button @click="showInventoryStartModal = true" :disabled="!storeKey || !month || !date"
+                        class="mt-10 w-full bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold py-4 rounded-full shadow-lg shadow-brand-500/30 transition-all transform active:scale-95 disabled:opacity-50">
+                        入力を開始する
+                    </button>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Inventory Step 1: Tupper -->
+        <div v-if="currentStep === 1" class="space-y-4">
+            <div
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center justify-between gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                    <h2 class="text-lg font-bold text-slate-800">タッパー</h2>
+                    <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center shrink-0">単位:
+                        g</span>
+                </div>
+                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                    <button type="button" @click="onSaveDraftClick" :disabled="draftSaving"
+                        class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap"
+                        :class="draftSaving
+                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 active:bg-emerald-100'">
+                        {{ draftSaving ? '保存中...' : '途中保存' }}
+                    </button>
+                    <span v-if="draftSavedAtLabel" class="text-[9px] text-emerald-700 font-bold leading-tight">保存済 {{ draftSavedAtLabel }}</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div v-for="item in filteredItems" :key="item.rowIndex"
+                    class="p-3 rounded-xl shadow-sm border border-slate-100"
+                    :class="item.brandIndex % 2 === 0 ? 'bg-white' : 'bg-slate-100'">
+                    <div class="mb-2 text-slate-800 border-b border-slate-200/50 pb-1.5">
+                        <span
+                            class="inline-block bg-brand-50 text-brand-600 border border-brand-100/50 text-[9px] font-bold px-1.5 py-0.5 rounded-full mb-0.5 leading-none">{{
+                            item.brand }}</span>
+                        <div class="font-bold text-base leading-tight">{{ item.flavorName || item.flavor || item.name }}</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <div class="flex items-center justify-between gap-1 mb-1 min-h-[1.25rem]">
+                                <span
+                                    class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">タッパー1</span>
+                                <button type="button" role="switch"
+                                    :aria-checked="item.tupper.basicEnabled !== false"
+                                    :aria-label="'タッパー1の入力'"
+                                    @click="setTupperBasicEnabled(item, item.tupper.basicEnabled === false)"
+                                    class="relative shrink-0 w-9 h-5 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50"
+                                    :class="item.tupper.basicEnabled !== false ? 'bg-brand-500' : 'bg-slate-300'">
+                                    <span
+                                        class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform pointer-events-none"
+                                        :class="item.tupper.basicEnabled !== false ? 'translate-x-4' : 'translate-x-0'"></span>
+                                </button>
+                            </div>
+                            <input type="number" v-model.number="item.tupper.basic"
+                                :disabled="item.tupper.basicEnabled === false"
+                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-lg font-bold rounded-lg p-2 text-center focus:ring-2 focus:ring-brand-500 focus:outline-none placeholder-slate-300 disabled:opacity-45 disabled:cursor-not-allowed"
+                                placeholder="0">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between gap-1 mb-1 min-h-[1.25rem]">
+                                <span
+                                    class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">タッパー2</span>
+                                <button type="button" role="switch"
+                                    :aria-checked="item.tupper.reserveEnabled !== false"
+                                    :aria-label="'タッパー2の入力'"
+                                    @click="setTupperReserveEnabled(item, item.tupper.reserveEnabled === false)"
+                                    class="relative shrink-0 w-9 h-5 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50"
+                                    :class="item.tupper.reserveEnabled !== false ? 'bg-brand-500' : 'bg-slate-300'">
+                                    <span
+                                        class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform pointer-events-none"
+                                        :class="item.tupper.reserveEnabled !== false ? 'translate-x-4' : 'translate-x-0'"></span>
+                                </button>
+                            </div>
+                            <input type="number" v-model.number="item.tupper.reserve"
+                                :disabled="item.tupper.reserveEnabled === false"
+                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-lg font-bold rounded-lg p-2 text-center focus:ring-2 focus:ring-brand-500 focus:outline-none placeholder-slate-300 disabled:opacity-45 disabled:cursor-not-allowed"
+                                placeholder="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Step 2: Merch -->
+        <div v-if="currentStep === 2" class="space-y-4">
+            <div
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center justify-between gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                    <h2 class="text-lg font-bold text-slate-800">物販</h2>
+                    <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center shrink-0">単位:
+                        個</span>
+                </div>
+                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                    <button type="button" @click="onSaveDraftClick" :disabled="draftSaving"
+                        class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap"
+                        :class="draftSaving
+                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 active:bg-emerald-100'">
+                        {{ draftSaving ? '保存中...' : '途中保存' }}
+                    </button>
+                    <span v-if="draftSavedAtLabel" class="text-[9px] text-emerald-700 font-bold leading-tight">保存済 {{ draftSavedAtLabel }}</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div v-for="item in filteredItems" :key="item.rowIndex"
+                    class="p-3 rounded-xl shadow-sm border border-slate-100"
+                    :class="item.brandIndex % 2 === 0 ? 'bg-white' : 'bg-slate-100'">
+                    <div class="mb-2 text-slate-800 border-b border-slate-200/50 pb-1.5">
+                        <span
+                            class="inline-block bg-brand-50 text-brand-600 border border-brand-100/50 text-[9px] font-bold px-1.5 py-0.5 rounded-full mb-0.5 leading-none">{{
+                            item.brand }}</span>
+                        <div class="font-bold text-base leading-tight">{{ item.flavorName || item.flavor || item.name }}</div>
+                    </div>
+                    <div v-if="visibleMerchSizes(item).length > 0" class="flex flex-wrap gap-2">
+                        <div v-for="size in visibleMerchSizes(item)" :key="size" class="min-w-[4.5rem] flex-1">
+                            <label
+                                class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block text-center">{{ size }}</label>
+                            <input type="number" v-model.number="item.merch['val'+size]"
+                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-base font-bold rounded-lg p-1.5 text-center focus:ring-2 focus:ring-pink-500 focus:outline-none placeholder-slate-300"
+                                placeholder="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Step 3: Flavor -->
+        <div v-if="currentStep === 3" class="space-y-4">
+            <div
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center justify-between gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                    <h2 class="text-lg font-bold text-slate-800">在庫</h2>
+                    <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-center shrink-0">単位:
+                        個</span>
+                </div>
+                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                    <button type="button" @click="onSaveDraftClick" :disabled="draftSaving"
+                        class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap"
+                        :class="draftSaving
+                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 active:bg-emerald-100'">
+                        {{ draftSaving ? '保存中...' : '途中保存' }}
+                    </button>
+                    <span v-if="draftSavedAtLabel" class="text-[9px] text-emerald-700 font-bold leading-tight">保存済 {{ draftSavedAtLabel }}</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div v-for="item in filteredItems" :key="item.rowIndex"
+                    class="p-3 rounded-xl shadow-sm border border-slate-100"
+                    :class="item.brandIndex % 2 === 0 ? 'bg-white' : 'bg-slate-100'">
+                    <div class="mb-2 text-slate-800 border-b border-slate-200/50 pb-1.5">
+                        <span
+                            class="inline-block bg-brand-50 text-brand-600 border border-brand-100/50 text-[9px] font-bold px-1.5 py-0.5 rounded-full mb-0.5 leading-none">{{
+                            item.brand }}</span>
+                        <div class="font-bold text-base leading-tight">{{ item.flavorName || item.flavor || item.name }}</div>
+                    </div>
+                    <div v-if="visibleStockGramSizes(item).length > 0" class="flex flex-wrap gap-2 mb-2">
+                        <div v-for="size in visibleStockGramSizes(item)" :key="size" class="min-w-[4.5rem] flex-1">
+                            <label
+                                class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block text-center">{{ size }}</label>
+                            <input type="number" v-model.number="item.flavor['val'+size]"
+                                class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-base font-bold rounded-lg p-1.5 text-center focus:ring-2 focus:ring-yellow-500 focus:outline-none placeholder-slate-300"
+                                placeholder="0">
+                        </div>
+                    </div>
+                    <div class="w-full">
+                        <label
+                            class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block">その他</label>
+                        <input type="number" v-model.number="item.flavor.valOther"
+                            class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-base font-bold rounded-lg p-1.5 text-center focus:ring-2 focus:ring-yellow-500 focus:outline-none placeholder-slate-300"
+                            placeholder="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Step 4: Confirmation -->
+        <div v-if="currentStep === 4" class="space-y-4">
+            <div
+                class="sticky top-16 z-20 -mx-4 px-4 py-2.5 mb-2 flex items-center justify-between gap-2 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+                    <h2 class="text-lg font-bold text-slate-800 shrink-0">入力内容確認</h2>
+                    <template v-if="isCheckingConsumption">
+                        <div class="w-4 h-4 border-2 border-slate-300 border-t-brand-500 rounded-full animate-spin flex-shrink-0"></div>
+                        <span class="text-[11px] text-slate-500 font-medium">消費量チェック中...</span>
+                    </template>
+                </div>
+                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                    <button type="button" @click="onSaveDraftClick" :disabled="draftSaving"
+                        class="text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap"
+                        :class="draftSaving
+                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 active:bg-emerald-100'">
+                        {{ draftSaving ? '保存中...' : '途中保存' }}
+                    </button>
+                    <span v-if="draftSavedAtLabel" class="text-[9px] text-emerald-700 font-bold leading-tight">保存済 {{ draftSavedAtLabel }}</span>
+                </div>
+            </div>
+
+            <!-- Consumption warning banner -->
+            <div v-if="previewNegativeItems.length > 0"
+                class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <div class="w-full">
+                        <h3 class="text-sm font-bold text-amber-800">
+                            <template v-if="storeKey === 'office'">消費量が0でないフレーバーがあります</template>
+                            <template v-else>前月消費量がマイナスになるフレーバーがあります</template>
+                        </h3>
+                        <ul class="mt-2 space-y-1">
+                            <li v-for="item in previewNegativeItems" :key="item.name"
+                                class="flex justify-between text-xs font-bold">
+                                <span class="text-amber-700">・{{ item.name }}</span>
+                                <span class="ml-4 text-red-600 tabular-nums">{{ formatWarningAmount(item.amount) }} g</span>
+                            </li>
+                        </ul>
+                        <p class="text-xs text-amber-600 mt-2">送信前に数値を確認してください。このまま送信することも可能です。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="previewHighConsumptionItems.length > 0"
+                class="bg-sky-50 border border-sky-200 rounded-xl p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"></path>
+                    </svg>
+                    <div class="w-full">
+                        <h3 class="text-sm font-bold text-sky-800">消費量が 500g を超えるフレーバーがあります</h3>
+                        <ul class="mt-2 space-y-1">
+                            <li v-for="item in previewHighConsumptionItems" :key="item.name"
+                                class="flex justify-between text-xs font-bold">
+                                <span class="text-sky-700">・{{ item.name }}</span>
+                                <span class="ml-4 text-sky-900 tabular-nums">{{ formatWarningAmount(item.amount) }} g</span>
+                            </li>
+                        </ul>
+                        <p class="text-xs text-sky-700 mt-2">大量消費の可能性もあるため、念のため数値を確認してください。このまま送信することも可能です。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="overflow-x-auto max-h-[70vh]">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm font-bold text-slate-500">
+                            <tr>
+                                <th class="p-2 whitespace-nowrap">銘柄/フレーバー</th>
+                                <th v-if="storeKey !== 'office'" class="p-2 whitespace-nowrap text-center w-20">タッパー
+                                </th>
+                                <th v-if="storeKey !== 'office'" class="p-2 whitespace-nowrap text-center">物販</th>
+                                <th class="p-2 whitespace-nowrap text-center">在庫</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr v-for="item in items" :key="item.rowIndex" class="hover:bg-slate-50/50">
+                                <td class="p-2 align-middle">
+                                    <div class="text-[10px] text-brand-600 font-bold leading-none mb-0.5">{{
+                                        item.brand }}</div>
+                                    <div class="text-sm text-slate-800 font-bold leading-tight">{{ item.flavorName || item.flavor || item.name
+                                        }}</div>
+                                </td>
+                                <td v-if="storeKey !== 'office'" class="p-2 align-middle text-center">
+                                    <div v-if="hasTupperPreview(item)"
+                                        class="inline-flex flex-col text-[10px] leading-tight">
+                                        <span v-if="tupperPreviewBasicLine(item)"
+                                            class="bg-slate-100 px-1 rounded mb-0.5">{{ tupperPreviewBasicLine(item) }}</span>
+                                        <span v-if="tupperPreviewReserveLine(item)"
+                                            class="bg-slate-100 px-1 rounded">{{ tupperPreviewReserveLine(item) }}</span>
+                                    </div>
+                                    <span v-else class="text-slate-300">-</span>
+                                </td>
+                                <td v-if="storeKey !== 'office'" class="p-2 align-middle text-center max-w-[120px]">
+                                    <div v-if="hasMerchPreview(item)"
+                                        class="text-[10px] leading-tight bg-pink-50 text-pink-700 px-1.5 py-1 rounded break-words">
+                                        {{ formatMerchPreview(item) }}
+                                    </div>
+                                    <span v-else class="text-slate-300">-</span>
+                                </td>
+                                <td class="p-2 align-middle text-center max-w-[120px]">
+                                    <div v-if="hasFlavorPreview(item)"
+                                        class="text-[10px] leading-tight bg-yellow-50 text-yellow-700 px-1.5 py-1 rounded break-words">
+                                        {{ formatFlavorPreview(item) }}
+                                    </div>
+                                    <span v-else class="text-slate-300">-</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Confirm Modal -->
+        <div v-if="showSubmitConfirmModal"
+            class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div
+                class="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col transform ring-1 ring-black/5 overflow-hidden">
+                <div class="px-6 pt-8 pb-6 text-center">
+                    <div
+                        class="w-16 h-16 bg-brand-50 text-brand-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">データを送信します</h2>
+                    <p class="text-slate-500 text-sm">よろしいですか？</p>
+                </div>
+                <div class="flex border-t border-slate-100">
+                    <button @click="showSubmitConfirmModal = false"
+                        class="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 transition-colors">
+                        キャンセル
+                    </button>
+                    <div class="w-px bg-slate-100"></div>
+                    <button @click="doSubmit"
+                        class="flex-1 py-4 text-brand-600 font-bold hover:bg-brand-50 transition-colors">
+                        送信する
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Start Confirm Modal -->
+        <div v-if="showInventoryStartModal"
+            class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div
+                class="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col transform ring-1 ring-black/5 overflow-hidden">
+                <div class="px-6 pt-8 pb-6 text-center">
+                    <div
+                        class="w-16 h-16 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">店舗の確認</h2>
+                    <p class="text-slate-500 text-sm mb-6">以下の店舗の棚卸しを開始します。<br>よろしいですか？</p>
+
+                    <div class="bg-slate-50 rounded-2xl py-4 px-2 border border-slate-100 mb-2">
+                        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">選択中の店舗</div>
+                        <div class="text-3xl font-black text-brand-600 tracking-tight">{{ currentStoreName }}</div>
+                    </div>
+                </div>
+
+                <div class="flex border-t border-slate-100">
+                    <button @click="showInventoryStartModal = false"
+                        class="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-50 transition-colors">
+                        キャンセル
+                    </button>
+                    <div class="w-px bg-slate-100"></div>
+                    <button @click="confirmStartInventory"
+                        class="flex-1 py-4 text-brand-600 font-bold hover:bg-brand-50 transition-colors">
+                        開始する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import { getSheetData, submitData, checkNegativeConsumption } from '../../api.js'
+import { getVisibleMerchSizes, getVisibleStockGramSizes } from '../../constants/inventoryPackageRules.js'
+import { composePeriodKey, parsePeriodKey } from '../../utils/periods.js'
+
+export default {
+    name: 'InventoryApp',
+    inject: ['requestConfirm'],
+    props: {
+        currentStep: { type: Number, required: true },
+        storeKey: { type: String, required: true },
+        month: { type: String, required: true },
+        date: { type: String, required: true },
+        stores: { type: Array, required: true },
+        years: { type: Array, required: true },
+        months: { type: Array, required: true },
+        selectedBrand: { type: String, default: null }
+    },
+    emits: [
+        'update:currentStep',
+        'update:storeKey',
+        'update:month',
+        'update:date',
+        'update:loading',
+        'update:loadingMessage',
+        'update:brands',
+        'update:hasData',
+        'update:checkingConsumption'
+    ],
+    data() {
+        return {
+            showInventoryStartModal: false,
+            showSubmitConfirmModal: false,
+            selectedYear: '',
+            selectedMonth: '',
+            items: [],
+            errorMessage: '',
+            previewNegativeItems: [],
+            previewHighConsumptionItems: [],
+            isCheckingConsumption: false,
+            draftSaving: false,
+            draftSavedAt: 0,
+            autoSaveTimer: null,
+            autoSaveDelayMs: 30000,
+            autoSaveEnabled: false,
+            suppressAutoSave: false,
+            lastSavedSnapshot: ''
+        }
+    },
+    watch: {
+        month: {
+            immediate: true,
+            handler(newVal) {
+                const parsed = parsePeriodKey(newVal)
+                this.selectedYear = parsed ? String(parsed.year) : ''
+                this.selectedMonth = parsed ? String(parsed.month) : ''
+            }
+        },
+        date() {
+            this.scheduleAutoSave()
+        },
+        items: {
+            deep: true,
+            handler() {
+                this.scheduleAutoSave()
+            }
+        },
+        async currentStep(newVal) {
+            if (newVal !== 4) return
+            const payload = {
+                storeKey: this.storeKey,
+                sheetName: this.month,
+                date: this.date,
+                items: this.items
+            }
+            this.isCheckingConsumption = true
+            this.$emit('update:checkingConsumption', true)
+            this.previewNegativeItems = []
+            this.previewHighConsumptionItems = []
+            try {
+                const res = await checkNegativeConsumption(payload)
+                this.previewNegativeItems = res.negativeConsumptionItems || []
+                this.previewHighConsumptionItems = res.highConsumptionItems || []
+            } catch {
+                this.previewNegativeItems = []
+                this.previewHighConsumptionItems = []
+            } finally {
+                this.isCheckingConsumption = false
+                this.$emit('update:checkingConsumption', false)
+            }
+        }
+    },
+    computed: {
+        currentStoreName() {
+            const s = this.stores.find(x => x.key === this.storeKey)
+            return s ? s.name : ''
+        },
+        filteredItems() {
+            if (!this.selectedBrand) return this.items
+            return this.items.filter(i => i.brand === this.selectedBrand)
+        },
+        /** 固定フッター（戻る／次へ）と最下段カードの重なりを防ぐ */
+        inventoryFooterClearanceStyle() {
+            if (this.currentStep < 1 || this.currentStep > 4) return {}
+            return {
+                paddingBottom: 'calc(7.5rem + env(safe-area-inset-bottom, 0px))'
+            }
+        },
+        draftSavedAtLabel() {
+            if (!this.draftSavedAt) return ''
+            const d = new Date(this.draftSavedAt)
+            if (Number.isNaN(d.getTime())) return ''
+            const hh = String(d.getHours()).padStart(2, '0')
+            const mm = String(d.getMinutes()).padStart(2, '0')
+            return `${hh}:${mm}`
+        }
+    },
+    beforeUnmount() {
+        this.clearAutoSaveTimer()
+        if (this.storeKey && this.month && this.items.length > 0 && this.currentStep > 0) {
+            this.saveLocally()
+        }
+    },
+    methods: {
+        onYearInput(value) {
+            this.selectedYear = value
+            this.emitPeriodKey()
+        },
+        onMonthInput(value) {
+            this.selectedMonth = value
+            this.emitPeriodKey()
+        },
+        emitPeriodKey() {
+            this.$emit('update:month', composePeriodKey(this.selectedYear, this.selectedMonth))
+        },
+        async confirmStartInventory() {
+            this.showInventoryStartModal = false
+            this.draftSaving = false
+            this.draftSavedAt = 0
+            await this.loadInventoryData()
+        },
+        async loadInventoryData() {
+            this.errorMessage = ''
+            this.clearAutoSaveTimer()
+            this.autoSaveEnabled = false
+            this.suppressAutoSave = true
+            this.$emit('update:loadingMessage', 'データ読み込み中...')
+            this.$emit('update:loading', true)
+            this.$emit('update:hasData', false)
+
+            const savedKey = 'inventory_draft_' + this.storeKey + '_' + this.month
+            const saved = localStorage.getItem(savedKey)
+            if (saved) {
+                const parsed = JSON.parse(saved)
+                if (parsed.items && Array.isArray(parsed.items) && parsed.items.length > 0) {
+                    const ok = await this.requestConfirm('保存されたデータが見つかりました。\n復元しますか？', '復元する', 'text-brand-600 hover:bg-brand-50')
+                    if (ok) {
+                        this.items = parsed.items.map(i => ({ ...i, tupper: this.mergeTupper(i.tupper) }))
+                        if (parsed.date) this.$emit('update:date', parsed.date)
+                        const seen = new Set()
+                        const brands = this.items.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))
+                        this.$emit('update:brands', brands)
+                        this.$emit('update:hasData', true)
+                        this.lastSavedSnapshot = ''
+                        this.autoSaveEnabled = true
+                        this.suppressAutoSave = false
+                        this.scheduleAutoSave()
+                        this.$emit('update:currentStep', this.storeKey === 'office' ? 3 : 1)
+                        this.$emit('update:loading', false)
+                        return
+                    }
+                } else {
+                    localStorage.removeItem(savedKey)
+                }
+            }
+
+            try {
+                const response = await getSheetData(this.storeKey, this.month)
+                this.items = response.items
+                    .filter(i => i.appDisplay !== false)
+                    .map(i => ({
+                    ...i,
+                    flavorName: i.flavorName || i.flavor || i.name || '',
+                    tupper: this.mergeTupper(i.tupper),
+                    merch: i.merch || { val50: '', val100: '', val125: '', val200: '', val250: '', val1kg: '' },
+                    flavor: (i.flavor && typeof i.flavor === 'object') ? i.flavor : { val50: '', val100: '', val125: '', val200: '', val250: '', val1kg: '', valOther: '' }
+                }))
+                if (response.date && !this.date) this.$emit('update:date', response.date)
+                const seen = new Set()
+                const brands = this.items.map(i => i.brand).filter(b => b && !seen.has(b) && seen.add(b))
+                this.$emit('update:brands', brands)
+                this.$emit('update:hasData', this.items.length > 0)
+                this.lastSavedSnapshot = this.createAutoSaveSnapshot()
+                this.autoSaveEnabled = true
+                this.suppressAutoSave = false
+                this.$emit('update:currentStep', this.storeKey === 'office' ? 3 : 1)
+            } catch (e) {
+                this.errorMessage = e.message || 'データの取得に失敗しました。'
+            } finally {
+                this.suppressAutoSave = false
+                this.$emit('update:loading', false)
+            }
+        },
+        submitInventory() {
+            if (this.isCheckingConsumption) return
+            this.showSubmitConfirmModal = true
+        },
+        async saveDraftToSheet() {
+            if (!this.storeKey || !this.month || !this.date) {
+                throw new Error('店舗・対象月・実施日を設定してから保存してください。')
+            }
+            if (!Array.isArray(this.items) || this.items.length === 0) {
+                throw new Error('保存対象の入力データがありません。')
+            }
+            this.$emit('update:loadingMessage', '途中データを保存中...')
+            this.$emit('update:loading', true)
+            try {
+                const payload = {
+                    storeKey: this.storeKey,
+                    sheetName: this.month,
+                    date: this.date,
+                    items: this.items
+                }
+                const result = await submitData(payload)
+                if (!result || result.success !== true) {
+                    throw new Error((result && result.error) || '途中保存に失敗しました。')
+                }
+                this.saveLocally()
+                return { success: true, savedAt: Date.now(), insertedCount: result.insertedCount || 0 }
+            } finally {
+                this.$emit('update:loading', false)
+            }
+        },
+        async onSaveDraftClick() {
+            if (this.draftSaving) return
+            this.draftSaving = true
+            try {
+                const result = await this.saveDraftToSheet()
+                this.draftSavedAt = (result && result.savedAt) ? result.savedAt : Date.now()
+                this.lastSavedSnapshot = this.createAutoSaveSnapshot()
+                this.clearAutoSaveTimer()
+            } catch (e) {
+                alert((e && e.message) ? e.message : '途中データの保存に失敗しました。')
+            } finally {
+                this.draftSaving = false
+            }
+        },
+        async doSubmit() {
+            this.showSubmitConfirmModal = false
+            this.$emit('update:loadingMessage', 'データベースに書き込み中...')
+            this.$emit('update:loading', true)
+            try {
+                const payload = {
+                    storeKey: this.storeKey,
+                    sheetName: this.month,
+                    date: this.date,
+                    items: this.items
+                }
+                const result = await submitData(payload)
+                if (result.success) {
+                    if (result.negativeConsumptionItems && result.negativeConsumptionItems.length > 0) {
+                        alert(`【警告】以下のフレーバーの前月消費量がマイナスになっています：\n\n・${result.negativeConsumptionItems.join('\n・')}\n\n確認してください。`)
+                    } else {
+                        alert('送信が完了しました。')
+                    }
+                    localStorage.removeItem('inventory_draft_' + this.storeKey + '_' + this.month)
+                    this.items = []
+                    this.previewNegativeItems = []
+                    this.previewHighConsumptionItems = []
+                    this.draftSavedAt = 0
+                    this.draftSaving = false
+                    this.clearAutoSaveTimer()
+                    this.lastSavedSnapshot = ''
+                    this.autoSaveEnabled = false
+                    this.$emit('update:storeKey', '')
+                    this.$emit('update:month', '')
+                    this.$emit('update:date', '')
+                    this.$emit('update:brands', [])
+                    this.$emit('update:hasData', false)
+                    this.$emit('update:currentStep', 0)
+                } else {
+                    throw new Error(result.error || '不明なエラー')
+                }
+            } catch (error) {
+                this.errorMessage = 'エラーが発生しました: ' + error.message
+            } finally {
+                this.$emit('update:loading', false)
+            }
+        },
+        saveLocally() {
+            localStorage.setItem('inventory_draft_' + this.storeKey + '_' + this.month, JSON.stringify({ items: this.items, date: this.date, timestamp: Date.now() }))
+        },
+        createAutoSaveSnapshot() {
+            return JSON.stringify({
+                storeKey: this.storeKey,
+                month: this.month,
+                date: this.date,
+                items: this.items
+            })
+        },
+        hasPendingAutoSaveChanges() {
+            if (!this.autoSaveEnabled || this.suppressAutoSave) return false
+            if (!this.storeKey || !this.month || !this.date) return false
+            if (!Array.isArray(this.items) || this.items.length === 0) return false
+            if (this.currentStep <= 0) return false
+            return this.createAutoSaveSnapshot() !== this.lastSavedSnapshot
+        },
+        clearAutoSaveTimer() {
+            if (this.autoSaveTimer) {
+                clearTimeout(this.autoSaveTimer)
+                this.autoSaveTimer = null
+            }
+        },
+        scheduleAutoSave() {
+            if (!this.hasPendingAutoSaveChanges()) {
+                this.clearAutoSaveTimer()
+                return
+            }
+            this.clearAutoSaveTimer()
+            this.autoSaveTimer = setTimeout(() => {
+                this.performAutoSave()
+            }, this.autoSaveDelayMs)
+        },
+        async performAutoSave() {
+            this.clearAutoSaveTimer()
+            if (!this.hasPendingAutoSaveChanges() || this.draftSaving) return
+            this.draftSaving = true
+            try {
+                const result = await this.saveDraftToSheet()
+                this.draftSavedAt = (result && result.savedAt) ? result.savedAt : Date.now()
+                this.lastSavedSnapshot = this.createAutoSaveSnapshot()
+            } catch (e) {
+                this.errorMessage = (e && e.message) ? e.message : '自動保存に失敗しました。'
+            } finally {
+                this.draftSaving = false
+            }
+        },
+        isValid(val) { return val !== null && val !== "" && !isNaN(val) },
+        mergeTupper(raw) {
+            const t = raw && typeof raw === 'object' ? raw : {}
+            return {
+                basic: t.basic !== undefined && t.basic !== null ? t.basic : '',
+                reserve: t.reserve !== undefined && t.reserve !== null ? t.reserve : '',
+                basicEnabled: t.basicEnabled !== false,
+                reserveEnabled: t.reserveEnabled !== false
+            }
+        },
+        setTupperBasicEnabled(item, enabled) {
+            if (!item.tupper) item.tupper = this.mergeTupper(null)
+            item.tupper.basicEnabled = enabled
+            if (!enabled) item.tupper.basic = ''
+        },
+        setTupperReserveEnabled(item, enabled) {
+            if (!item.tupper) item.tupper = this.mergeTupper(null)
+            item.tupper.reserveEnabled = enabled
+            if (!enabled) item.tupper.reserve = ''
+        },
+        tupperPreviewBasicLine(item) {
+            const t = item.tupper || {}
+            if (t.basicEnabled === false) return '基:-'
+            if (this.isValid(t.basic)) return '基:' + t.basic
+            return null
+        },
+        tupperPreviewReserveLine(item) {
+            const t = item.tupper || {}
+            if (t.reserveEnabled === false) return '予:-'
+            if (this.isValid(t.reserve)) return '予:' + t.reserve
+            return null
+        },
+        hasTupperPreview(item) {
+            return this.tupperPreviewBasicLine(item) !== null || this.tupperPreviewReserveLine(item) !== null
+        },
+        hasValues(obj) { return Object.values(obj).some(val => this.isValid(val)) },
+        visibleMerchSizes(item) {
+            return getVisibleMerchSizes(item)
+        },
+        visibleStockGramSizes(item) {
+            return getVisibleStockGramSizes(item)
+        },
+        formatValues(obj) {
+            return Object.entries(obj)
+                .filter(([_, val]) => this.isValid(val))
+                .map(([key, val]) => `${key.replace('val', '')}:${val}`)
+                .join(' / ')
+        },
+        /** 確認テーブル用：制限ブランドでは非表示列を出さない */
+        formatMerchPreview(item) {
+            const keys = this.visibleMerchSizes(item).map(s => `val${s}`)
+            const o = item.merch || {}
+            return keys
+                .filter(k => this.isValid(o[k]))
+                .map(k => `${k.replace('val', '')}:${o[k]}`)
+                .join(' / ')
+        },
+        formatFlavorPreview(item) {
+            const keys = this.visibleStockGramSizes(item).map(s => `val${s}`)
+            const o = item.flavor || {}
+            const parts = keys
+                .filter(k => this.isValid(o[k]))
+                .map(k => `${k.replace('val', '')}:${o[k]}`)
+            if (this.isValid(o.valOther)) parts.push(`その他:${o.valOther}`)
+            return parts.join(' / ')
+        },
+        hasMerchPreview(item) {
+            const o = item.merch || {}
+            return this.visibleMerchSizes(item).some(s => this.isValid(o[`val${s}`]))
+        },
+        hasFlavorPreview(item) {
+            const o = item.flavor || {}
+            const grams = this.visibleStockGramSizes(item).some(s => this.isValid(o[`val${s}`]))
+            return grams || this.isValid(o.valOther)
+        },
+        formatWarningAmount(amount) {
+            const num = Number(amount)
+            if (!Number.isFinite(num)) return amount
+            return Number.isInteger(num) ? String(num) : num.toFixed(1)
+        }
+    }
+}
+</script>

@@ -1,0 +1,69 @@
+﻿recorded_at,period_key,month_num,from_store_key,dest_store_key,brand_name,flavor_name,quantity,status,comment
+2026-03-30,202604,4,office,baba_2nd,AF (Al Fakher),Gum With Mint,250,completed,03/30
+2026-03-30,202604,4,office,baba_2nd,AF (Al Fakher),Mint,250,completed,03/30
+2026-03-31,202604,4,office,nakano,AF (Al Fakher),Orange,250,completed,03/31
+2026-04-01,202604,4,baba_main,baba_2nd,AF (Al Fakher),Two Apples,100,completed,04/01
+2026-04-08,202604,4,baba_main,nakano,AF (Al Fakher),Two Apples,70,completed,04/08
+2026-03-30,202604,4,office,baba_2nd,AF (Al Fakher),Vanilla,250,completed,03/30
+2026-03-30,202604,4,office,baba_2nd,AZ (Afzal),Earlgray,250,completed,03/30
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Alaskan Ice,500,completed,03/30
+2026-03-31,202604,4,office,nakano,AZR GOLD (Azure Gold Line),Alaskan Ice,500,completed,03/31
+2026-03-31,202604,4,office,nakano,AZR GOLD (Azure Gold Line),Barista'S Choice,500,completed,03/31
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Bermuda Mint,500,completed,03/30
+2026-03-30,202604,4,office,baba_main,AZR GOLD (Azure Gold Line),Black Tea,500,completed,03/30
+2026-03-31,202604,4,office,nakano,AZR GOLD (Azure Gold Line),Black Tea,500,completed,03/31
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Chai Masala,500,completed,03/30
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Chocolate Cake,500,completed,03/30
+2026-03-30,202604,4,office,baba_main,AZR GOLD (Azure Gold Line),Chocolate Mint,500,completed,03/30
+2026-04-04,202604,4,nakano,baba_2nd,AZR GOLD (Azure Gold Line),Cucumelon,50,completed,04/04
+2026-03-30,202604,4,office,baba_2nd,AZR BLACK (Azure Black Line),Dubai Apple (Black),200,completed,03/30
+2026-03-30,202604,4,office,baba_main,AZR GOLD (Azure Gold Line),Grapefruit,500,completed,03/30
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Guavi,500,completed,03/30
+2026-03-30,202604,4,office,baba_main,AZR GOLD (Azure Gold Line),Guavi,500,completed,03/30
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Ice Lime,500,completed,03/30
+2026-03-30,202604,4,office,baba_main,AZR GOLD (Azure Gold Line),Ice Lime,500,completed,03/30
+2026-03-31,202604,4,office,nakano,AZR GOLD (Azure Gold Line),Ice Lime,1000,completed,03/31
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Jasmine,500,completed,03/30
+2026-03-31,202604,4,office,nakano,AZR GOLD (Azure Gold Line),Lemongrass,500,completed,03/31
+2026-03-31,202604,4,office,nakano,AZR BLACK (Azure Black Line),Limoncello (Black),500,completed,03/31
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Lychee,500,completed,03/30
+2026-03-30,202604,4,office,,AZR GOLD (Azure Gold Line),Lychee,100,completed,03/30 (dispose)
+2026-03-30,202604,4,office,baba_main,AZR GOLD (Azure Gold Line),Lychee,400,completed,03/30
+2026-03-31,202604,4,office,nakano,AZR BLACK (Azure Black Line),Lychee (Black),400,completed,03/31
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Mexicola,500,completed,03/30
+2026-03-31,202604,4,office,nakano,AZR GOLD (Azure Gold Line),New Grape Mint,500,completed,03/31
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Passion Fruit,500,completed,03/30
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Pineapple Express,500,completed,03/30
+2026-03-30,202604,4,office,baba_main,AZR GOLD (Azure Gold Line),Pineapple Express,500,completed,03/30
+2026-03-30,202604,4,office,baba_main,AZR GOLD (Azure Gold Line),Queen Of Fruits,500,completed,03/30
+2026-03-31,202604,4,office,nakano,AZR GOLD (Azure Gold Line),Queen Of Fruits,500,completed,03/31
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Royal Mango,500,completed,03/30
+2026-03-31,202604,4,office,nakano,AZR GOLD (Azure Gold Line),Sour,500,completed,03/31
+2026-03-30,202604,4,office,baba_2nd,AZR GOLD (Azure Gold Line),Vanilla Bean,500,completed,03/30
+2026-03-30,202604,4,office,baba_2nd,HF (Hookafina),Salted Caramel Waffle,500,completed,03/30
+2026-03-31,202604,4,office,nakano,HF (Hookafina),Salted Caramel Waffle,500,completed,03/31
+2026-04-04,202604,4,nakano,baba_2nd,MH (Musthave),Araram,25,completed,04/04
+2026-04-04,202604,4,nakano,baba_2nd,MH (Musthave),Charlotte Pie,25,completed,04/04
+2026-04-04,202604,4,nakano,baba_2nd,MH (Musthave),Nord Star,25,completed,04/04
+2026-04-15,202604,4,office,,TG NOIR (Tangiers Noir),Bacon,70,completed,04/15 (dispose)
+2026-04-15,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Bacon,180,completed,04/15
+2026-03-31,202604,4,office,nakano,TG NOIR (Tangiers Noir),Banana Foster,200,completed,03/31
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Bubble Gum,100,completed,03/30
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Cane Mint,500,completed,03/30
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Caramel Apple,100,completed,03/30
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Cherry Limeade,100,completed,03/30
+2026-03-31,202604,4,office,nakano,TG NOIR (Tangiers Noir),Cherry Limeade,300,completed,03/31
+2026-03-31,202604,4,office,nakano,TG NOIR (Tangiers Noir),Chocolate Iced Cream,250,completed,03/31
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Cooling,200,completed,03/30
+2026-03-31,202604,4,office,nakano,TG NOIR (Tangiers Noir),Eric'S Mango,300,completed,03/31
+2026-03-30,202604,4,office,baba_2nd,TG NOIR (Tangiers Noir),Foreplay On The Peach,100,completed,03/30
+2026-03-31,202604,4,office,nakano,TG NOIR (Tangiers Noir),Kashmir Lime,200,completed,03/31
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Lemon Tea,100,completed,03/30
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Maraschino Cherry,100,completed,03/30
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Mime,100,completed,03/30
+2026-03-31,202604,4,office,nakano,TG NOIR (Tangiers Noir),Mimon,200,completed,03/31
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Ololiuqui,200,completed,03/30
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Pink Grapefruit,200,completed,03/30
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Raspberry Iced Tea,100,completed,03/30
+2026-03-30,202604,4,office,baba_2nd,TG NOIR (Tangiers Noir),Vanilla,200,completed,03/30
+2026-03-30,202604,4,office,baba_main,TG NOIR (Tangiers Noir),Welsh Cream,250,completed,03/30

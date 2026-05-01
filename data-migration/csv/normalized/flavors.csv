@@ -1,0 +1,309 @@
+﻿brand_name,flavor_name,is_active
+Al Fakher,Banana,TRUE
+Al Fakher,Blueberry,TRUE
+Al Fakher,(パチ) Blueberry,TRUE
+Al Fakher,Blueberry Vanilla Ice Cream,FALSE
+Al Fakher,Cardamom,TRUE
+Al Fakher,Chocolate,TRUE
+Al Fakher,Cinnamon,TRUE
+Al Fakher,Citrus With Mint,FALSE
+Al Fakher,Coconut,TRUE
+Al Fakher,Grapefruit,FALSE
+Al Fakher,Grapefruit With Mint,FALSE
+Al Fakher,Grenadine,TRUE
+Al Fakher,Guava,TRUE
+Al Fakher,Gum With Mint,TRUE
+Al Fakher,Kiwi,TRUE
+Al Fakher,Mint,TRUE
+Al Fakher,(パチ) Mint,TRUE
+Al Fakher,Orange,TRUE
+Al Fakher,(パチ) Orange,FALSE
+Al Fakher,Peach,TRUE
+Al Fakher,Plum,FALSE
+Al Fakher,Rose,TRUE
+Al Fakher,Super Lemon Mint,FALSE
+Al Fakher,Two Apples,TRUE
+Al Fakher,(パチ) Two Apples,FALSE
+Al Fakher,Vanilla,TRUE
+Al Fakher,(パチ) Watermelon,TRUE
+Al Waha Elite Edition,Libella Swing,FALSE
+Afzal,Chocolate,FALSE
+Afzal,Earlgray,TRUE
+Afzal,Gingerale,TRUE
+Afzal,Lychee,TRUE
+Afzal,Pan Raas,TRUE
+Afzal,Red Cherry,TRUE
+Azure Gold Line,Alaskan Ice,TRUE
+Azure Gold Line,Apple Cider,TRUE
+Azure Gold Line,Barista'S Choice,TRUE
+Azure Gold Line,Bermuda Mint,TRUE
+Azure Black Line,Bermuda Mint(Black),TRUE
+Azure Gold Line,Berrymania,TRUE
+Azure Gold Line,Black Tea,TRUE
+Azure Gold Line,California Blue,TRUE
+Azure Black Line,California Blue (Black),TRUE
+Azure Gold Line,Carolina Peach,TRUE
+Azure Gold Line,Chai Masala,TRUE
+Azure Gold Line,Chocolate Cake,TRUE
+Azure Gold Line,Chocolate Mint,TRUE
+Azure Gold Line,Cinnamon Cookies,TRUE
+Azure Gold Line,Cocomania,TRUE
+Azure Gold Line,Copacabana,TRUE
+Azure Gold Line,Cucumelon,TRUE
+Azure Gold Line,D Cherry,TRUE
+Azure Gold Line,Down Under,TRUE
+Azure Black Line,Down Under (Black),TRUE
+Azure Black Line,Dubai Apple (Black),TRUE
+Azure Gold Line,Grapefruit,TRUE
+Azure Gold Line,Green Tea,TRUE
+Azure Black Line,Green Tea (Black),TRUE
+Azure Gold Line,Guavi,TRUE
+Azure Gold Line,Ice Lime,TRUE
+Azure Gold Line,Ice Pear,TRUE
+Azure Black Line,Island City Blend(Black),TRUE
+Azure Gold Line,Jasmine,TRUE
+Azure Gold Line,Jungle Juice,TRUE
+Azure Gold Line,Kokutou,TRUE
+Azure Black Line,Kokutou (Black),TRUE
+Azure Gold Line,Lemongrass,TRUE
+Azure Black Line,Lemongrass (Black),TRUE
+Azure Gold Line,Lemon Muffin,TRUE
+Azure Gold Line,Lemon Sage,TRUE
+Azure Gold Line,Lime,TRUE
+Azure Gold Line,Lime Cola,TRUE
+Azure Gold Line,Limoncello,TRUE
+Azure Black Line,Limoncello (Black),TRUE
+Azure Gold Line,Lychee,TRUE
+Azure Black Line,Lychee (Black),TRUE
+Azure Gold Line,Mexicola,TRUE
+Azure Black Line,Mexicola (Black),TRUE
+Azure Gold Line,New Grape Mint,TRUE
+Azure Gold Line,Orange Crush,TRUE
+Azure Black Line,Orange Crush (Black),TRUE
+Azure Gold Line,Papaya,TRUE
+Azure Gold Line,Passion Fruit,TRUE
+Azure Black Line,Passion Fruit (Black),TRUE
+Azure Black Line,Pineapple (Black),TRUE
+Azure Gold Line,Pineapple Express,TRUE
+Azure Gold Line,Pinky,TRUE
+Azure Gold Line,Plumberry,TRUE
+Azure Gold Line,Queen Of Fruits,TRUE
+Azure Black Line,Queen Of Fruits (Black),TRUE
+Azure Gold Line,Raspberry Vanilla,TRUE
+Azure Gold Line,Rio Mint,TRUE
+Azure Black Line,Royal Citrus (Black),TRUE
+Azure Gold Line,Royal Mango,TRUE
+Azure Black Line,Royal Orange (Black),FALSE
+Azure Gold Line,Royal Queen,TRUE
+Azure Gold Line,Royal Raspberry,TRUE
+Azure Gold Line,Solana Beach,TRUE
+Azure Gold Line,Sour,TRUE
+Azure Black Line,Sour (Black),TRUE
+Azure Gold Line,Strawberry Passion,TRUE
+Azure Gold Line,Strong Lychee,TRUE
+Azure Gold Line,Tropical Paradise,TRUE
+Azure Gold Line,Vanilla Bean,TRUE
+Azure Gold Line,Viva La Horchata,TRUE
+Azure Gold Line,Winter Rose,TRUE
+Debaj,Blue Berry,FALSE
+Debaj,Cardamom,FALSE
+Debaj,Guava,FALSE
+Debaj,Ice Grapefruit,FALSE
+Debaj,Ice Orange Cream,FALSE
+Debaj,Milk,TRUE
+Dozaj,Cinnamon,FALSE
+Dozaj,Dragon Fruits,FALSE
+Dozaj,Nesquickly,FALSE
+Dozaj,Peanut Butter,FALSE
+Fantasia,Hush Honey,FALSE
+Fumari,Banana Custard,TRUE
+Fumari,Caramel Kiss,FALSE
+Fumari,Lemon Mint,TRUE
+Fumari,Spiced Chai,TRUE
+Gixom,Cheese Cream,FALSE
+Gixom,Chocolate Milk,FALSE
+Gixom,Jasmine,FALSE
+Gixom,Pistachio Ice Cream,FALSE
+Gixom,Strawberry Yoghurt,FALSE
+Gixom,Tiramisu,FALSE
+Hookafina,Blueberry Lemonade,TRUE
+Hookafina,Cucumber Lemonade,TRUE
+Hookafina,Deja Blu,TRUE
+Hookafina,Double Melon Blast,TRUE
+Hookafina,Dragon Fruit,TRUE
+Hookafina,Grapefruit Mint,TRUE
+Hookafina,Limeade,TRUE
+Hookafina,Mangolada,TRUE
+Hookafina,Melon Pop,TRUE
+Hookafina,Mint Knockout,TRUE
+Hookafina,Orange Mint,TRUE
+Hookafina,Peppermint,TRUE
+Hookafina,Pinkberry,TRUE
+Hookafina,Pink Grapefruit,TRUE
+Hookafina,Salted Caramel Waffle,TRUE
+Hookafina,Spicy Peach,TRUE
+Hookafina,Strawberry Margarita,TRUE
+Hookafina,Tutti Fruiti,TRUE
+Hookafina,Vanilla Shake,TRUE
+Hookafina,Watermelon Mint,TRUE
+Mazaya,Twist,FALSE
+Musthave,Araram,TRUE
+Musthave,Black Currant,TRUE
+Musthave,Candy Cow,TRUE
+Musthave,Caribbean Rum,TRUE
+Musthave,Charlotte Pie,TRUE
+Musthave,Cheesecake,TRUE
+Musthave,Cherry-Cola,TRUE
+Musthave,Cinnamon,TRUE
+Musthave,Cookie,TRUE
+Musthave,Cranberry,TRUE
+Musthave,Earl Grey,TRUE
+Musthave,Estragon,TRUE
+Musthave,Honey Holls,TRUE
+Musthave,Mad Pear,TRUE
+Musthave,Maple Pecan,TRUE
+Musthave,Marula,TRUE
+Musthave,Milky Rice,TRUE
+Musthave,Morocco,TRUE
+Musthave,Mulled Wine,TRUE
+Musthave,Nord Star,TRUE
+Revoshi,Biscuit,FALSE
+Revoshi,Black Grape,FALSE
+Revoshi,Double Apple Strong,FALSE
+Revoshi,Eskimo Cola,FALSE
+Revoshi,Eskimo Lemon,FALSE
+Revoshi,Grape,FALSE
+Revoshi,Sweet Pineapple,FALSE
+Starbuzz/Bold,Blue Mist,FALSE
+Starbuzz/Bold,Geisha,TRUE
+Starbuzz/Bold,Lebanese Bomb Shell,TRUE
+Starbuzz/Bold,Pirate'S Cave,TRUE
+Starbuzz/Bold,Safari Melon Dew,TRUE
+Social Smoke,Absolute Zero,TRUE
+Social Smoke,Chai Latte,FALSE
+Social Smoke,Cinnamon Roll,TRUE
+Social Smoke,Dulce De Leche,FALSE
+Social Smoke,Golden Delicious Apple,FALSE
+Social Smoke,Hong Kong Milk Tea,TRUE
+Social Smoke,Japanese Yuzu,FALSE
+Social Smoke,Lemon Drop,FALSE
+Social Smoke,Pear Chill,TRUE
+Trifecta,Lemon Mint,FALSE
+Trifecta,Nawar,TRUE
+Trifecta,Peppermint Shake,FALSE
+Trifecta,Pineapple Guava,FALSE
+Trifecta,Tnt,TRUE
+Trifecta,Twice The Ice X,FALSE
+Tangiers Noir,Absinthe,TRUE
+Tangiers Burley,Absinthe (Burley),FALSE
+Tangiers Noir,Apricot Spring Blend,TRUE
+Tangiers Noir,Atmosphere,FALSE
+Tangiers Noir,Bacon,TRUE
+Tangiers Noir,Banana Foster,TRUE
+Tangiers Noir,Basil Strawberry,TRUE
+Tangiers Noir,Blackberry Lime,TRUE
+Tangiers Noir,Blizsturm,FALSE
+Tangiers Noir,Blueberry,TRUE
+Tangiers Noir,Blueberry Grapefruit,TRUE
+Tangiers Noir,Bubble Gum,TRUE
+Tangiers Noir,Cactus Fruit,FALSE
+Tangiers Noir,Cane Mint,TRUE
+Tangiers Burley,Cane Mint (Burley),TRUE
+Tangiers Noir,Cane Mint Alpha,TRUE
+Tangiers Burley,Cane Mint Alpha (Burley),TRUE
+Tangiers Noir,Caramel Apple,TRUE
+Tangiers Noir,Cardamom Cheesecake,TRUE
+Tangiers Noir,Chai,TRUE
+Tangiers Noir,Cherry Lemonade,FALSE
+Tangiers Noir,Cherry Limeade,TRUE
+Tangiers Noir,Chocolate Iced Cream,TRUE
+Tangiers Noir,Cinnamon,TRUE
+Tangiers Noir,Clove,TRUE
+Tangiers Noir,Cocoa,TRUE
+Tangiers Noir,Coconut,TRUE
+Tangiers Noir,Cookie Dough,TRUE
+Tangiers Noir,Cool Strawberry,TRUE
+Tangiers Noir,Cooling,TRUE
+Tangiers Noir,Dark Cherry,TRUE
+Tangiers Noir,Double Orange,FALSE
+Tangiers Noir,Eric'S Mango,TRUE
+Tangiers Noir,Experimint,TRUE
+Tangiers Noir,Extreme Cane Mint,TRUE
+Tangiers Noir,Extreme Experimint,TRUE
+Tangiers Noir,Forbidden Fruit,TRUE
+Tangiers Noir,Foreplay On The Peach,TRUE
+Tangiers Birquq,Foreplay On The Peach (Birquq),TRUE
+Tangiers Noir,Ginger Pear,TRUE
+Tangiers Noir,Grapefruit,TRUE
+Tangiers Noir,Green Apple Stuff,TRUE
+Tangiers Noir,Green Apple Tea,TRUE
+Tangiers Noir,Green Tea,FALSE
+Tangiers Noir,Guanabana,FALSE
+Tangiers Noir,Hacitraegas,FALSE
+Tangiers F-Line,Kashmir (F-Line),TRUE
+Tangiers Noir,Kashmir Apple,TRUE
+Tangiers Noir,Kashmir Lime,TRUE
+Tangiers Noir,Kashmir Peach,TRUE
+Tangiers Noir,Key Lime Pie,TRUE
+Tangiers Noir,Kiwi,TRUE
+Tangiers Noir,Kosmik,TRUE
+Tangiers Noir,Lemon,TRUE
+Tangiers Noir,Lemon Blossom,FALSE
+Tangiers Noir,Lemon Lime,TRUE
+Tangiers Noir,Lemongrass,TRUE
+Tangiers Noir,Lemon Tea,TRUE
+Tangiers Noir,Lime,TRUE
+Tangiers Noir,Liquorice,FALSE
+Tangiers Noir,Little Purple Stuff,TRUE
+Tangiers Noir,Mandarin Orange,TRUE
+Tangiers Noir,Mango Fling,TRUE
+Tangiers Noir,Maraschino Cherry,TRUE
+Tangiers Noir,Marigold,FALSE
+Tangiers Noir,Midnight Orchard Apple,FALSE
+Tangiers Noir,Mime,TRUE
+Tangiers Noir,Mimon,TRUE
+Tangiers Noir,Mixed Fruit With Whipped Cream,TRUE
+Tangiers Noir,Nectarine,TRUE
+Tangiers Noir,New Lemon Lime,FALSE
+Tangiers Noir,Ololiuqui,TRUE
+Tangiers Noir,Orange Soda,TRUE
+Tangiers F-Line,Orange Soda (F-Line),TRUE
+Tangiers Noir,Panic Punch,TRUE
+Tangiers Birquq,Panic Punch (Birquq),TRUE
+Tangiers Noir,Papa'S Foreplay,TRUE
+Tangiers Noir,Papaya Sorbet,TRUE
+Tangiers Noir,Passion Lemonade,TRUE
+Tangiers Noir,Peach Cobbler,TRUE
+Tangiers Noir,Peach Iced Tea,TRUE
+Tangiers Noir,Pear,TRUE
+Tangiers Noir,Pikina Sun,TRUE
+Tangiers Birquq,Pikina Sun (Birquq),TRUE
+Tangiers Noir,Pineapple,TRUE
+Tangiers Noir,Pinepas,TRUE
+Tangiers Birquq,Pinepas (Birquq),TRUE
+Tangiers Noir,Pinetops,FALSE
+Tangiers Noir,Pink Grapefruit,TRUE
+Tangiers Noir,Pomegranate,TRUE
+Tangiers Burley,Prince Of Grey (Burley),FALSE
+Tangiers Noir,Pumpkin,TRUE
+Tangiers Noir,Rangoon Sunrise,FALSE
+Tangiers Noir,Rasfruit,FALSE
+Tangiers Noir,Raspberry Iced Tea,TRUE
+Tangiers Noir,Regal Flower,TRUE
+Tangiers Noir,Sage Mint,FALSE
+Tangiers Noir,Sevilla Orange,FALSE
+Tangiers Noir,Sour,FALSE
+Tangiers Noir,Static Starlight,FALSE
+Tangiers Noir,Strawberry,TRUE
+Tangiers Noir,Strawberry Kiwi,TRUE
+Tangiers Noir,Surfer'S Delight,TRUE
+Tangiers Noir,Tasty Peach,TRUE
+Tangiers Noir,The Last Pie,TRUE
+Tangiers Noir,Tropical Revenge,TRUE
+Tangiers Noir,Tuscan Cantaloupe,FALSE
+Tangiers Noir,Vanilla,TRUE
+Tangiers Noir,Watermelon,TRUE
+Tangiers Noir,Welsh Cream,TRUE
+Tangiers Noir,White Grape,TRUE
+Tangiers Noir,Yunnan Shaddock,TRUE
+Vang Vieng Mix,Double Apple (AF+RV),FALSE
