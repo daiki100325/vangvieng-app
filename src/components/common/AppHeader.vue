@@ -15,7 +15,7 @@
                     :class="appMode === null ? 'bg-slate-600' : (appMode === 'request' ? 'bg-orange-600' : (appMode === 'transfer' ? 'bg-emerald-600' : (appMode === 'dashboard' ? 'bg-red-600' : (appMode === 'cost' ? 'bg-purple-600' : (appMode === 'admin' ? 'bg-slate-600' : 'bg-brand-600')))))">
                 </div>
                 <div v-if="appMode === null" class="flex flex-col min-w-0 leading-tight">
-                    <h1 class="text-xl font-bold tracking-tight text-slate-800">V-MINT test</h1>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-800">V-MINT2.0</h1>
                     <span class="text-[11px] text-slate-500 font-medium">店舗業務ポータル</span>
                 </div>
                 <h1 v-else class="text-xl font-bold tracking-tight text-slate-800">

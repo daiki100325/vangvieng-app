@@ -15,7 +15,7 @@ parent: [[V-MINT2.0/notes/_index]]
 - Tester:
 - Environment: Local / Staging
 - Backend: `Supabase`
-- UI Label Override: `V-MINT test`（lock/top header）
+- UI Label Override: `V-MINT2.0`（lock/top header）
 - Target month: 2026-03（追加照合: 2025-12 / 2026-01 / 2026-02）
 - Compared baseline: `V-MINT` (GAS)
 

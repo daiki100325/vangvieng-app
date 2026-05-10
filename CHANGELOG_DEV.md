@@ -1,5 +1,38 @@
 # CHANGELOG_DEV
 
+## 2026-05-11（ui: プロダクト名表記を V-MINT2.0 に統一）
+
+- What:
+  - PIN認証画面とポータルトップヘッダーの製品名を `V-MINT test` から `V-MINT2.0` に変更
+  - `notes/V-MINT2.0_golden-test-checklist.md` のセッションメタ（UI Label Override）を最新表記へ更新
+- Why:
+  - テスト用ラベルのまま残っていた表示を本来の製品名へ戻し、画面表記とドキュメントを一致させるため
+- Files:
+  - `src/components/common/PinAuth.vue`
+  - `src/components/common/AppHeader.vue`
+  - `notes/V-MINT2.0_golden-test-checklist.md`
+  - `CHANGELOG_DEV.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_golden-test-checklist]]
+
+## 2026-05-11（docs: 本番デプロイ完了後の基本文書を同期）
+
+- What:
+  - `notes/_index.md` の Scope / Weekly Review を、本番運用中（6アプリ + 実質原価運用可）の状態に更新
+  - `notes/V-MINT2.0_requirements.md` を現行仕様へ同期（6アプリ構成、ダッシュボード3サブモード、本番運用要件）
+  - `notes/V-MINT2.0_release-plan.md` を移行フェーズ完了版に更新（Phase 8 完了チェック + 運用フェーズ次アクション）
+  - `notes/V-MINT2.0_architecture.md` に配信基盤（Cloudflare Pages）と環境変数運用方針を追記
+  - `notes/V-MINT2.0_migration-procedure.md` に「本番切替完了」ステータスを追記
+- Why:
+  - 本番反映後も「未実装・未切替」前提の記述が残っていたため、現行運用の実態とノートの参照内容を一致させるため
+- Files:
+  - `notes/_index.md`
+  - `notes/V-MINT2.0_requirements.md`
+  - `notes/V-MINT2.0_release-plan.md`
+  - `notes/V-MINT2.0_architecture.md`
+  - `notes/V-MINT2.0_migration-procedure.md`
+  - `CHANGELOG_DEV.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_release-plan]]
+
 ## 2026-05-11（deploy: Cloudflare Pages 環境変数設定対応）
 
 ## 2026-05-10（data-migration: 5月CSVの変換仕様を修正）

@@ -11,7 +11,7 @@
                             </path>
                         </svg>
                     </div>
-                    <h1 class="text-2xl font-bold text-white">V-MINT test</h1>
+                    <h1 class="text-2xl font-bold text-white">V-MINT2.0</h1>
                     <p class="text-slate-400 text-xs mt-0.5">店舗業務ポータル</p>
                     <p class="text-slate-400 text-sm mt-2">暗証番号を入力してください</p>
                 </div>
