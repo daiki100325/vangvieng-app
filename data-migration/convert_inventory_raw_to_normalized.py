@@ -38,6 +38,18 @@ def normalize_number(raw):
     return str(n)
 
 
+def extract_brand_name(raw):
+    s = str(raw or "").strip()
+    if not s:
+        return ""
+    m = re.search(r"\(([^)]+)\)", s)
+    if m:
+        inner = m.group(1).strip()
+        if inner:
+            return inner
+    return s
+
+
 def normalize_date(raw, fallback=""):
     s = str(raw or "").strip()
     if not s:
@@ -159,7 +171,7 @@ def main():
     for r in body:
         if len(r) < 2:
             continue
-        brand = (r[brand_col] or "").strip()
+        brand = extract_brand_name(r[brand_col])
         flavor = (r[flavor_col] or "").strip()
         if not brand or not flavor:
             continue

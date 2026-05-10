@@ -5,3 +5,13 @@
 
 node_modules
 dist
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Data files (sensitive business data)
+*.xlsx
+*.xls
+data-migration/csv/

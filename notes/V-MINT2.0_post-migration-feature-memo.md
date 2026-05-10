@@ -1,14 +1,14 @@
 ---
-tags: [project/project-slug, type/note, type/memo]
-parent: [[PROJECT/notes/_index]]
+tags: [project/v-mint2, type/note, type/memo]
+parent: [[V-MINT2.0/notes/_index]]
 ---
 
-# PROJECT — 移行後追加機能メモ
+# V-MINT2.0 — 移行後追加機能メモ
 
 ## Purpose
 - 移行テスト完了後に追加する機能を、要件定義前のメモとして記録する。
 - 本ノートは草案であり、正式要件は別途定義する。
-- Source: [[PROJECT/notes/PROJECT_release-plan]]
+- Source: [[V-MINT2.0/notes/V-MINT2.0_release-plan]]
 
 ## 前提
 - 対象: `V-MINT2.0`

@@ -215,16 +215,16 @@
                                     <div v-for="rec in allTransferRecords" :key="'amend-'+rec.blockIndex"
                                         class="rounded-2xl border-2 transition-all overflow-hidden"
                                         :class="amendSelectedBlock === rec.blockIndex ? 'border-emerald-500 bg-emerald-50' : 'border-slate-100 bg-white'">
-                                        <label class="flex items-center gap-3 p-4 cursor-pointer"
+                                        <div @click="amendSelectedBlock = rec.blockIndex"
+                                            class="flex items-center gap-3 p-4 cursor-pointer select-none"
                                             :class="amendSelectedBlock === rec.blockIndex ? '' : 'hover:bg-slate-50'">
-                                            <input type="radio" v-model="amendSelectedBlock" :value="rec.blockIndex" class="sr-only">
                                             <div class="flex-1 min-w-0">
                                                 <div class="font-bold text-slate-800 truncate">{{ recordRouteLabel(rec) }}</div>
                                                 <div class="text-xs text-slate-400 mt-0.5">{{ rec.date }}</div>
                                             </div>
                                             <span v-if="rec.inspected" class="text-[10px] font-bold text-emerald-700 bg-emerald-100 rounded-full px-2 py-0.5">検品済</span>
                                             <span v-else class="text-[10px] font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5">未検品</span>
-                                        </label>
+                                        </div>
                                         <button @click="toggleBlockDetail(rec)"
                                             class="w-full flex items-center justify-between px-4 py-2 text-left text-xs font-bold text-slate-500 border-t border-slate-100 hover:bg-slate-50 transition-colors">
                                             <span>明細を表示</span>
@@ -551,13 +551,21 @@
                 </div>
             </div>
 
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm px-5 py-4">
+                <label for="amend-comment" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">コメント（任意）</label>
+                <textarea id="amend-comment" v-model="amendComment" rows="3" maxlength="500"
+                    placeholder="担当者・修正理由など、必要に応じて入力してください"
+                    class="w-full text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 focus:outline-none resize-y min-h-[4.5rem] placeholder:text-slate-300"></textarea>
+                <p class="text-[10px] text-slate-400 mt-1.5">{{ amendComment.length }}/500</p>
+            </div>
+
             <div class="h-24"></div>
         </div>
     </div>
 </template>
 
 <script>
-import { getFlavorListForTransfer, getPendingTransferRecords, getTransferRecordDetail, submitTransferRecord, completeInspection, getAllTransferRecords, getDisposeRecordDetail, addFlavorForArrival, fetchLatestInventoryPeriodKey, amendTransferRecord } from '../../api.js'
+import { getFlavorListForTransfer, getPendingTransferRecords, getTransferRecordDetail, submitTransferRecord, completeInspection, getAllTransferRecords, getDisposeRecordDetail, addFlavorForArrival, fetchLatestInventoryPeriodKey, amendTransferRecord, deleteTransferRecordBlock } from '../../api.js'
 import { buildYearOptions, buildMonthOptions, composePeriodKey, formatPeriodLabel, parsePeriodKey, getNextPeriodKey, getCurrentPeriodKey } from '../../utils/periods.js'
 
 export default {
@@ -603,8 +611,10 @@ export default {
       amendSelectedBlock: null,
       amendSelectedRecord: null,
       amendItems: [],
+      amendOriginalItems: [],
       amendAvailableItems: [],
       amendAddSelectedFlavor: '',
+      amendComment: '',
       allTransferRecords: [],
       allRecordsLoading: false,
       allRecordsExpanded: false,
@@ -980,7 +990,9 @@ export default {
         this.amendSelectedRecord = rec
         this.amendAvailableItems = allItems
         this.amendAddSelectedFlavor = ''
+        this.amendComment = rec.comment ? String(rec.comment).trim() : ''
         this.amendItems = detail.map(i => ({ ...i, originalQty: i.qty }))
+        this.amendOriginalItems = this.amendItems.map(i => ({ ...i }))
         this.$emit('update:transferStep', '1c')
       } catch (e) {
         alert(e.message || 'データ読み込みに失敗しました。')
@@ -1012,13 +1024,42 @@ export default {
     },
     async submitAmend() {
       if (!this.amendSelectedRecord) return
-      const normalizedItems = this.amendItems
-        .map(i => ({ flavorId: i.rowIndex, qty: Number(i.qty) || 0 }))
-        .filter(i => i.qty > 0)
-      if (normalizedItems.length === 0) {
-        alert('最低1件以上の銘柄を残してください。')
+
+      // 全銘柄削除のケース：移動記録ブロックそのものを削除する
+      if (this.amendItems.length === 0) {
+        if (!await this.requestConfirm('この移動記録に含まれる銘柄が全て削除されています。\n移動記録自体を削除してよろしいですか？\n※元に戻すことはできません。')) return
+        this.$emit('update:loading', true)
+        this.$emit('update:loadingMessage', '移動記録を削除中...')
+        try {
+          const result = await deleteTransferRecordBlock({
+            periodKey: this.transferMonth,
+            blockIndex: this.amendSelectedRecord.blockIndex
+          })
+          if (!result.success) throw new Error('削除対象の移動記録が見つかりませんでした。')
+          alert('移動記録を削除しました。')
+          this.resetTransferApp()
+          if (this.transferMonth) await this.loadAllTransferRecords()
+        } catch (e) {
+          alert(e.message || '移動記録の削除に失敗しました。')
+        } finally {
+          this.$emit('update:loading', false)
+        }
         return
       }
+
+      // 残存アイテム (qty > 0 のもの)
+      const updatedItems = this.amendItems
+        .map(i => ({ flavorId: i.rowIndex, qty: Number(i.qty) || 0 }))
+        .filter(i => i.qty > 0)
+
+      // 削除されたアイテム: 修正開始時にあったが現在のリストにないもの → qty=0 で送信
+      const currentIds = new Set(this.amendItems.map(i => i.rowIndex))
+      const deletedItems = this.amendOriginalItems
+        .filter(i => !currentIds.has(i.rowIndex))
+        .map(i => ({ flavorId: i.rowIndex, qty: 0 }))
+
+      const normalizedItems = [...updatedItems, ...deletedItems]
+
       if (!await this.requestConfirm('移動記録の修正内容を保存してよろしいですか？\n※既存の移動記録が上書きされます。')) return
       this.$emit('update:loading', true)
       this.$emit('update:loadingMessage', '修正内容を保存中...')
@@ -1026,7 +1067,8 @@ export default {
         await amendTransferRecord({
           periodKey: this.transferMonth,
           blockIndex: this.amendSelectedRecord.blockIndex,
-          items: normalizedItems
+          items: normalizedItems,
+          comment: this.amendComment
         })
         alert('移動記録を修正しました。')
         this.resetTransferApp()
@@ -1083,7 +1125,7 @@ export default {
       this.inspectDestStore = ''; this.inspectPendingList = []; this.inspectSelectedBlock = null
       this.inspectDetail = []; this.inspectChecked = {}; this.transferSubMode = null
       this.amendSelectedBlock = null; this.amendSelectedRecord = null
-      this.amendItems = []; this.amendAvailableItems = []; this.amendAddSelectedFlavor = ''
+      this.amendItems = []; this.amendOriginalItems = []; this.amendAvailableItems = []; this.amendAddSelectedFlavor = ''; this.amendComment = ''
       this.allRecordsLoading = false
       this.expandedBlocks = {}; this.blockDetails = {}; this.blockDetailsLoading = {}
       this.$emit('update:issueFromName', '')

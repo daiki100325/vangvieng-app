@@ -12,15 +12,14 @@
 
             <div class="flex items-center gap-2" :class="{'ml-12': appMode !== null}">
                 <div class="w-2 h-7 rounded-full shrink-0 self-center"
-                    :class="appMode === null ? 'bg-slate-600' : (appMode === 'request' ? 'bg-orange-600' : (appMode === 'transfer' ? 'bg-emerald-600' : (appMode === 'dashboard' ? 'bg-red-600' : 'bg-brand-600')))">
+                    :class="appMode === null ? 'bg-slate-600' : (appMode === 'request' ? 'bg-orange-600' : (appMode === 'transfer' ? 'bg-emerald-600' : (appMode === 'dashboard' ? 'bg-red-600' : (appMode === 'cost' ? 'bg-purple-600' : (appMode === 'admin' ? 'bg-slate-600' : 'bg-brand-600')))))">
                 </div>
                 <div v-if="appMode === null" class="flex flex-col min-w-0 leading-tight">
                     <h1 class="text-xl font-bold tracking-tight text-slate-800">V-MINT test</h1>
                     <span class="text-[11px] text-slate-500 font-medium">店舗業務ポータル</span>
                 </div>
                 <h1 v-else class="text-xl font-bold tracking-tight text-slate-800">
-                    {{ appMode === 'request' ? '補充依頼' : (appMode === 'inventory' ? '棚卸し入力' : (appMode === 'transfer'
-                    ? '移動記録' : 'ダッシュボードモード')) }}
+                    {{ appMode === 'request' ? '補充依頼' : (appMode === 'inventory' ? '棚卸し入力' : (appMode === 'transfer' ? '移動記録' : (appMode === 'cost' ? '原価計算' : (appMode === 'admin' ? '管理者画面' : 'ダッシュボード')))) }}
                 </h1>
                 <span v-if="currentStoreName && appMode === 'inventory'"
                     class="ml-2 px-3 py-1 bg-gradient-to-br from-brand-600 to-brand-500 text-white font-bold text-base rounded-lg shadow-sm border border-brand-400">

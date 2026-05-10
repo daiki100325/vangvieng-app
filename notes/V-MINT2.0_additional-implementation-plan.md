@@ -1,9 +1,9 @@
 ---
-tags: [project/project-slug, type/note, type/plan]
-parent: [[PROJECT/notes/_index]]
+tags: [project/v-mint2, type/note, type/plan]
+parent: [[V-MINT2.0/notes/_index]]
 ---
 
-# PROJECT — 追加実装計画メモ（要件定義前）
+# V-MINT2.0 — 追加実装計画メモ（要件定義前）
 
 ## Purpose
 - DB側ゴールデンテスト完了後に着手する追加実装の、現時点要望を整理する。

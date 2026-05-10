@@ -20,9 +20,11 @@
 - 生CSV（棚卸しまとめ）からの変換:
   - `python data-migration/convert_inventory_raw_to_normalized.py --input <raw.csv> --output <normalized.csv> --recorded-at YYYY-MM-DD --month-num M`
   - `recorded_at` は棚卸し完了日列（IH〜IK、店舗別）を優先し、空欄行は `--recorded-at` を使用
+  - ブランド名は `AZR GOLD (Azure Gold Line)` のような表記から、`Azure Gold Line`（括弧内の正式名称）を `brand_name` に採用
 - `transfer_logs` 生CSV変換:
   - `python data-migration/convert_transfer_raw_to_normalized.py --input <raw.csv> --output <normalized.csv> --month-num M --base-year YYYY`
-  - 移動記録列（CW〜HL）を解析し、from/dest/quantity を推定して出力
+  - 移動記録列（CW〜HL, 120列）を 4列1ブロック（事務所/本店/中野店/馬場2）として解析し、from/dest/quantity を推定
+  - 各ブロックのコメントは「左から3列目の1行目」セル値を `comment` に採用
 - Supabase取り込み:
   - `supabase/import_normalized_csv.sql` を使用
   - staging (`stg_brands`, `stg_flavors`, `stg_inventory_logs`, `stg_transfer_logs`) にCSVをImport後、master upsert + transactional insertを実行

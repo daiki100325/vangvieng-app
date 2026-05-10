@@ -10,6 +10,7 @@ drop function if exists fetch_transfer_record_detail(integer, bigint, bigint);
 drop function if exists fetch_dispose_record_detail(integer, bigint, bigint);
 drop function if exists complete_transfer_inspection(integer, bigint, bigint, bigint, jsonb);
 drop function if exists amend_transfer_record(integer, bigint, jsonb);
+drop function if exists delete_transfer_record_block(integer, bigint);
 
 create or replace function fetch_transfer_flavors(p_period_key int)
 returns table (
@@ -879,8 +880,8 @@ with grouped as (
     t.from_store_id,
     t.dest_store_id,
     t.status,
-    t.comment,
-    t.created_at
+    t.created_at,
+    max(t.comment) as comment
   from transfer_logs t
   where t.period_key = p_period_key
   group by
@@ -890,7 +891,6 @@ with grouped as (
     t.from_store_id,
     t.dest_store_id,
     t.status,
-    t.comment,
     t.created_at
 )
 select
@@ -1171,12 +1171,15 @@ $$;
 create or replace function amend_transfer_record(
   p_period_key int,
   p_block_index bigint,
-  p_items jsonb
+  p_items jsonb,
+  p_comment text default null
 )
 returns table (
   success boolean
 )
 language plpgsql
+security definer
+set search_path = public
 as $$
 declare
   target_month_num int;
@@ -1186,6 +1189,7 @@ declare
   target_status text;
   target_from_store_id bigint;
   target_dest_store_id bigint;
+  final_comment text;
   item_count int;
 begin
   select
@@ -1206,14 +1210,20 @@ begin
     target_dest_store_id
   from transfer_logs t
   where t.period_key = p_period_key
-  group by t.month_num, t.recorded_at, t.comment, t.created_at, t.status, t.from_store_id, t.dest_store_id
-  having min(t.block_index) = p_block_index
+    and t.block_index = p_block_index
   limit 1;
 
   if target_recorded_at is null then
     return query select false as success;
     return;
   end if;
+
+  -- p_comment = null → 既存コメントを維持 / p_comment = '' → コメント削除
+  final_comment := case
+    when p_comment is null then target_comment
+    when p_comment = '' then null
+    else p_comment
+  end;
 
   with input_rows as (
     select
@@ -1226,9 +1236,19 @@ begin
   where flavor_id is not null and qty > 0;
 
   if item_count <= 0 then
-    raise exception 'amend_transfer_record requires at least one item with qty > 0';
+    -- 全銘柄削除：ブロックに属する全行を削除して終了
+    delete from transfer_logs t
+    where t.period_key = p_period_key
+      and t.recorded_at = target_recorded_at
+      and t.created_at = target_created_at
+      and t.status = target_status
+      and coalesce(t.from_store_id, -1) = coalesce(target_from_store_id, -1)
+      and coalesce(t.dest_store_id, -1) = coalesce(target_dest_store_id, -1);
+    return query select true as success;
+    return;
   end if;
 
+  -- input_rows に qty > 0 で存在しない銘柄を削除（コメント条件を除去して確実に特定）
   with input_rows as (
     select
       coalesce((x->>'flavorId')::bigint, (x->>'rowIndex')::bigint) as flavor_id,
@@ -1239,7 +1259,6 @@ begin
   where t.period_key = p_period_key
     and t.recorded_at = target_recorded_at
     and t.created_at = target_created_at
-    and coalesce(t.comment, '') = coalesce(target_comment, '')
     and t.status = target_status
     and coalesce(t.from_store_id, -1) = coalesce(target_from_store_id, -1)
     and coalesce(t.dest_store_id, -1) = coalesce(target_dest_store_id, -1)
@@ -1250,6 +1269,7 @@ begin
         and i.qty > 0
     );
 
+  -- 既存銘柄の数量とコメントを更新
   with input_rows as (
     select
       coalesce((x->>'flavorId')::bigint, (x->>'rowIndex')::bigint) as flavor_id,
@@ -1257,18 +1277,19 @@ begin
     from jsonb_array_elements(coalesce(p_items, '[]'::jsonb)) x
   )
   update transfer_logs t
-  set quantity = i.qty
+  set quantity = i.qty,
+      comment = final_comment
   from input_rows i
   where t.period_key = p_period_key
     and t.recorded_at = target_recorded_at
     and t.created_at = target_created_at
-    and coalesce(t.comment, '') = coalesce(target_comment, '')
     and t.status = target_status
     and coalesce(t.from_store_id, -1) = coalesce(target_from_store_id, -1)
     and coalesce(t.dest_store_id, -1) = coalesce(target_dest_store_id, -1)
     and t.flavor_id = i.flavor_id
     and i.qty > 0;
 
+  -- 新規追加銘柄をINSERT
   with input_rows as (
     select
       coalesce((x->>'flavorId')::bigint, (x->>'rowIndex')::bigint) as flavor_id,
@@ -1285,14 +1306,13 @@ begin
     i.flavor_id,
     i.qty,
     target_status,
-    target_comment,
+    final_comment,
     target_created_at
   from input_rows i
   left join transfer_logs t on
     t.period_key = p_period_key
     and t.recorded_at = target_recorded_at
     and t.created_at = target_created_at
-    and coalesce(t.comment, '') = coalesce(target_comment, '')
     and t.status = target_status
     and coalesce(t.from_store_id, -1) = coalesce(target_from_store_id, -1)
     and coalesce(t.dest_store_id, -1) = coalesce(target_dest_store_id, -1)
@@ -1302,5 +1322,64 @@ begin
     and t.id is null;
 
   return query select true as success;
+end;
+$$;
+
+-- 移動記録ブロック自体を削除する専用RPC（全銘柄削除時に使用）
+create or replace function delete_transfer_record_block(
+  p_period_key int,
+  p_block_index bigint
+)
+returns table (
+  success boolean,
+  deleted_count int
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_recorded_at date;
+  target_created_at timestamptz;
+  target_status text;
+  target_from_store_id bigint;
+  target_dest_store_id bigint;
+  rows_deleted int := 0;
+begin
+  select
+    t.recorded_at,
+    t.created_at,
+    t.status,
+    t.from_store_id,
+    t.dest_store_id
+  into
+    target_recorded_at,
+    target_created_at,
+    target_status,
+    target_from_store_id,
+    target_dest_store_id
+  from transfer_logs t
+  where t.period_key = p_period_key
+    and t.block_index = p_block_index
+  limit 1;
+
+  if target_recorded_at is null then
+    return query select false as success, 0 as deleted_count;
+    return;
+  end if;
+
+  with deleted as (
+    delete from transfer_logs t
+    where t.period_key = p_period_key
+      and t.recorded_at = target_recorded_at
+      and t.created_at = target_created_at
+      and t.status = target_status
+      and coalesce(t.from_store_id, -1) = coalesce(target_from_store_id, -1)
+      and coalesce(t.dest_store_id, -1) = coalesce(target_dest_store_id, -1)
+    returning 1
+  )
+  select count(*)::int into rows_deleted from deleted;
+
+  return query select true as success, rows_deleted as deleted_count;
 end;
 $$;

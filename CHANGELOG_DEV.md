@@ -1,5 +1,70 @@
 # CHANGELOG_DEV
 
+## 2026-05-10（data-migration: 5月CSVの変換仕様を修正）
+
+- What:
+  - `convert_transfer_raw_to_normalized.py` を修正し、移動記録列 `CW〜HL` を 4列1ブロックで固定解釈。各ブロックの **左から3列目・1行目** の値を `comment` として出力するよう変更
+  - `convert_inventory_raw_to_normalized.py` / `convert_transfer_raw_to_normalized.py` にブランド名抽出を追加し、`AZR GOLD (Azure Gold Line)` のような値を `Azure Gold Line` に正規化
+  - `supabase/import_normalized_csv.sql` のブランド解決を更新し、括弧内正式名称（および短縮名）を解決可能にして CSV 正規化ルールと整合
+  - 上記修正で `inventory_logs_2026-05.normalized.csv` / `transfer_logs_2026-05.normalized.csv` を再生成
+- Why: 5月の raw 仕様（4列ブロックコメント）と Supabase のブランド管理（正式名称 + short_name）に合わせて、変換結果と取り込みSQLの不整合を解消するため
+- Files:
+  - `data-migration/convert_inventory_raw_to_normalized.py`
+  - `data-migration/convert_transfer_raw_to_normalized.py`
+  - `data-migration/csv/normalized/inventory_logs_2026-05.normalized.csv`
+  - `data-migration/csv/normalized/transfer_logs_2026-05.normalized.csv`
+  - `supabase/import_normalized_csv.sql`
+  - `supabase/migration_runbook.md`
+  - `notes/V-MINT2.0_architecture.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+
+## 2026-05-10（docs: 基本ノートファイル名を V-MINT2.0_ プレフィックスに統一）
+
+- What: `notes/PROJECT_*.md` を `notes/V-MINT2.0_*.md` にリネームし、Vault 内リンク・見出し・フロントマタ（tags/parent）・`TROUBLESHOOTING` の `[[PROJECT/...]]` を `V-MINT2.0` パスに合わせて更新した
+- Why: プロジェクト識別子をファイル名とタイトルで一貫させ、Obsidian のリンク切れとテンプレート用 `PROJECT` 残りを解消するため
+- Files:
+  - `notes/V-MINT2.0_*.md`（旧 `PROJECT_*.md` 全13件）
+  - `notes/_index.md`, `DECISIONS.md`, `TROUBLESHOOTING.md`, `CHANGELOG_DEV.md`, `notes/schema-review-QA_20260509.md`
+  - ノートのフロントマタ（`project/v-mint2` / `parent`）を更新した各 `notes/V-MINT2.0_*.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+
+## 2026-05-09（docs: テーブル設計 Q&A ドキュメント作成）
+
+- What: 上司からのテーブル設計レビューコメントに対する回答ドキュメントを作成
+- Why: BRANDS パッケージサイズ管理・period_key の役割・tupper フィールド増設・EAV 構成比較・メニュー機能追加案など、今後の実装判断に影響する論点を整理・記録するため
+- Files:
+  - `notes/schema-review-QA_20260509.md` — 新規作成
+  - `notes/_index.md` — リンク追加
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]], [[V-MINT2.0/notes/schema-review-QA_20260509]]
+
+## 2026-05-09（docs: architecture.md を現行実装に同期・可読性改善）
+
+- What: `notes/V-MINT2.0_architecture.md` を現行実装と照合し、抜け漏れ修正と読みやすさ向上
+- Why:
+  - AdminApp（管理者画面）が実装済みだがドキュメントに未記載だった
+  - アプリ数が「5つ」と誤記されており、実際は6つ（Admin追加後）
+  - Dashboard の3つ目のサブモード「実質原価（cost）」が未記載だった
+  - `src/utils/periods.js`, `src/constants/inventoryPackageRules.js` が未記載だった
+  - 共通コンポーネント群（PinAuth / AppFooter / BrandFilterSheet / ConfirmDialog / LoadingOverlay）が未記載だった
+  - `StockApp.vue` の未使用状態を明記した
+  - 全体を表・セクション分けで読みやすく再構成
+- Files:
+  - `notes/V-MINT2.0_architecture.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+
+## 2026-05-08（docs: notes更新 — Cost App反映・PLACEHOLDERクリーンアップ）
+
+- What: notes配下ドキュメントを現行実装に合わせて一括更新
+- Why:
+  - Cost App（原価計算）が実装済みだが notes に記載がなかった
+  - `PROJECT` プレースホルダが tags・見出し・内部リンクに残っており Obsidian リンクが機能していなかった
+- Files:
+  - `notes/_index.md` — タグ/タイトル/リンクを `V-MINT2.0` に修正、Cost App関連notesリンク追加、Weekly Review更新
+  - `notes/V-MINT2.0_architecture.md` — タグ/見出し/リンク修正、CostApp.vue コンポーネント記述追加、`cost_reports`/`flavor_brand_sales`/`drink_orders` テーブル記述追加、`brands.is_cost_group`/`cost_group_id` 追加、Cost App API一覧追加
+  - `notes/V-MINT2.0_requirements.md` — タグ/見出し/リンク修正、原価計算要件セクション追加
+  - `notes/V-MINT2.0_release-plan.md` — タグ/見出し/リンク修正、Phase 7（Cost App）を完了記録、Phase 8（実質原価ダッシュボード等）を次フェーズとして追加
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+
 ## 2026-04-30（移動記録「修正」サブモード追加）
 - What:
   - 移動記録トップに `修正` サブモードを追加し、対象月の既存記録から修正対象を選択できるようにした
@@ -15,11 +80,11 @@
   - `src/components/apps/TransferApp.vue`
   - `src/components/common/AppFooter.vue`
   - `src/App.vue`
-  - `notes/PROJECT_requirements.md`
-  - `notes/PROJECT_architecture.md`
+  - `notes/V-MINT2.0_requirements.md`
+  - `notes/V-MINT2.0_architecture.md`
   - `DECISIONS.md`
   - `CHANGELOG_DEV.md`
-- Related: [[PROJECT/notes/PROJECT_requirements]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_requirements]]
 
 ## 2026-04-30（全モードの対象月デフォルト）
 - What:
@@ -36,60 +101,60 @@
   - `src/components/apps/TransferApp.vue`
   - `src/components/apps/RequestApp.vue`
   - `src/components/apps/DashboardApp.vue`
-  - `notes/PROJECT_requirements.md`
+  - `notes/V-MINT2.0_requirements.md`
   - `CHANGELOG_DEV.md`
-- Related: [[PROJECT/notes/PROJECT_requirements]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_requirements]]
 
 ## 2026-04-30（棚卸し結果 全体 PASS 記録）
 - What:
-  - `notes/PROJECT_dashboard-data-verification.md` の B章・Sampling・Record DDV-06〜10・Exit を棚卸し結果 PASS に更新
-  - `notes/PROJECT_golden-test-checklist.md` の DASH-06 / DASH-07 を PASS に更新
+  - `notes/V-MINT2.0_dashboard-data-verification.md` の B章・Sampling・Record DDV-06〜10・Exit を棚卸し結果 PASS に更新
+  - `notes/V-MINT2.0_golden-test-checklist.md` の DASH-06 / DASH-07 を PASS に更新
 - Why:
   - 棚卸し結果が正本と整合したことを帳票で完了状態にするため
 - Files:
-  - `notes/PROJECT_dashboard-data-verification.md`
-  - `notes/PROJECT_golden-test-checklist.md`
+  - `notes/V-MINT2.0_dashboard-data-verification.md`
+  - `notes/V-MINT2.0_golden-test-checklist.md`
   - `CHANGELOG_DEV.md`
-- Related: [[PROJECT/notes/PROJECT_dashboard-data-verification]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]]
 
 ## 2026-04-30（当月消費ハイライトのテスト項目 PASS 記録）
 - What:
-  - `notes/PROJECT_dashboard-data-verification.md` に B章 step6（拠点別色分け）を追記しチェック済み
+  - `notes/V-MINT2.0_dashboard-data-verification.md` に B章 step6（拠点別色分け）を追記しチェック済み
   - Record Sheet に DDV-11 を追加し PASS
   - Exit に色分け確認済みを追記
-  - `notes/PROJECT_golden-test-checklist.md` に DASH-08 を追加し PASS
+  - `notes/V-MINT2.0_golden-test-checklist.md` に DASH-08 を追加し PASS
 - Why:
   - 色分け仕様の検証完了を帳票に残すため
 - Files:
-  - `notes/PROJECT_dashboard-data-verification.md`
-  - `notes/PROJECT_golden-test-checklist.md`
+  - `notes/V-MINT2.0_dashboard-data-verification.md`
+  - `notes/V-MINT2.0_golden-test-checklist.md`
   - `CHANGELOG_DEV.md`
-- Related: [[PROJECT/notes/PROJECT_dashboard-data-verification]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]]
 
 ## 2026-04-30（棚卸し結果 当月消費量ハイライト追加）
 - What:
   - `src/components/apps/DashboardApp.vue` の `棚卸し結果` テーブルで、`当月消費量` のハイライト条件を拠点別に追加
   - `office`: 0以外を赤ハイライト、`office` 以外: マイナスを赤ハイライト、500以上を黄ハイライト
-  - `notes/PROJECT_requirements.md` に表示ルールを追記
+  - `notes/V-MINT2.0_requirements.md` に表示ルールを追記
 - Why:
   - 事務所と店舗で異なる異常検知ルールを視覚的に判別しやすくするため
 - Files:
   - `src/components/apps/DashboardApp.vue`
-  - `notes/PROJECT_requirements.md`
+  - `notes/V-MINT2.0_requirements.md`
   - `CHANGELOG_DEV.md`
-- Related: [[PROJECT/notes/PROJECT_requirements]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_requirements]]
 
 ## 2026-04-30（在庫量確認 PASS 記録）
 - What:
-  - `notes/PROJECT_dashboard-data-verification.md` の A章チェック・記録表 DDV-01〜05・Exit の在庫量項目を PASS に更新
-  - `notes/PROJECT_golden-test-checklist.md` の DASH-01〜05 を PASS に更新
+  - `notes/V-MINT2.0_dashboard-data-verification.md` の A章チェック・記録表 DDV-01〜05・Exit の在庫量項目を PASS に更新
+  - `notes/V-MINT2.0_golden-test-checklist.md` の DASH-01〜05 を PASS に更新
 - Why:
   - 在庫量確認が正本と整合したことを帳票に残し、次工程（棚卸し結果）へ進むため
 - Files:
-  - `notes/PROJECT_dashboard-data-verification.md`
-  - `notes/PROJECT_golden-test-checklist.md`
+  - `notes/V-MINT2.0_dashboard-data-verification.md`
+  - `notes/V-MINT2.0_golden-test-checklist.md`
   - `CHANGELOG_DEV.md`
-- Related: [[PROJECT/notes/PROJECT_dashboard-data-verification]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]]
 
 ## 2026-04-30
 - What:
@@ -100,46 +165,46 @@
 - Files:
   - `TROUBLESHOOTING.md`
   - `CHANGELOG_DEV.md`
-  - `notes/PROJECT_dashboard-data-verification.md`
-- Related: [[PROJECT/notes/PROJECT_dashboard-data-verification]]
+  - `notes/V-MINT2.0_dashboard-data-verification.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]]
 
 ## 2026-04-28
 - What:
-  - 移行テスト完了後の機能追加メモとして `notes/PROJECT_post-migration-feature-memo.md` を新規作成
+  - 移行テスト完了後の機能追加メモとして `notes/V-MINT2.0_post-migration-feature-memo.md` を新規作成
   - 追加予定3機能（`原価入力モード` / ダッシュボード `実質原価` / ダッシュボード `消費量推移`）の草案を記録
   - `notes/_index.md` に新規メモへのリンクを追加
 - Why:
   - 移行後の実装着手前に、要件定義の起点となるメモを残して認識齟齬を防ぐため
 - Files:
-  - `notes/PROJECT_post-migration-feature-memo.md`
+  - `notes/V-MINT2.0_post-migration-feature-memo.md`
   - `notes/_index.md`
-- Related: [[PROJECT/notes/PROJECT_release-plan]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_release-plan]]
 
 - What:
-  - 明日移行時の数値照合用に `notes/PROJECT_dashboard-data-verification.md` を新規追加
+  - 明日移行時の数値照合用に `notes/V-MINT2.0_dashboard-data-verification.md` を新規追加
   - ダッシュボードモードの `在庫量` / `棚卸し結果` を正本データと照合するための事前条件、期待ロジック、確認手順、記録欄を整理
   - `notes/_index.md` に検証ノートへのリンクを追加
 - Why:
   - 移行当日にダッシュボード表示値の妥当性を短時間で確認できる、実施用チェックシートを用意するため
 - Files:
-  - `notes/PROJECT_dashboard-data-verification.md`
+  - `notes/V-MINT2.0_dashboard-data-verification.md`
   - `notes/_index.md`
-- Related: [[PROJECT/notes/PROJECT_release-plan]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_release-plan]]
 
 - What:
   - `src/components/common/PinAuth.vue` のPIN照合を平文比較から `VITE_PIN_SHA256`（+ `VITE_PIN_SALT`）による SHA-256 照合へ変更
   - PIN認証画面の UI は維持したまま、PC物理キーボード（`0-9`, `Numpad0-9`, `Backspace/Delete`）入力を追加
   - `.env.example` に `VITE_PIN_SHA256` / `VITE_PIN_SALT` を追記
-  - `notes/PROJECT_requirements.md` と `DECISIONS.md` をPIN認証方針へ同期
+  - `notes/V-MINT2.0_requirements.md` と `DECISIONS.md` をPIN認証方針へ同期
 - Why:
   - ロック解除PINの平文ハードコードを除去し、漏えいリスクを下げるため
   - タブレット・PCの両運用で同じPIN入力体験を提供するため
 - Files:
   - `src/components/common/PinAuth.vue`
   - `.env.example`
-  - `notes/PROJECT_requirements.md`
+  - `notes/V-MINT2.0_requirements.md`
   - `DECISIONS.md`
-- Related: [[PROJECT/notes/PROJECT_requirements]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_requirements]]
 
 - What:
   - `在庫量確認` 導線を `ダッシュボードモード` へ置き換え、`DashboardApp.vue` を追加
@@ -148,7 +213,7 @@
   - 棚卸し結果確認サブモードで、対象月 + 拠点ごとの棚卸し結果一覧と詳細パネルを追加
   - `src/api.js` から `GAS/Supabase` 切替分岐を除去し、Supabase 専用 API 層へ整理
   - `supabase/rpc.sql` に `fetch_dashboard_stock_overview` / `fetch_inventory_result_details` を追加
-  - `notes/PROJECT_requirements.md`, `notes/PROJECT_architecture.md`, `notes/PROJECT_release-plan.md`, `notes/PROJECT_golden-test-checklist.md`, `DECISIONS.md` をダッシュボードモード + Supabase 専用前提で更新
+  - `notes/V-MINT2.0_requirements.md`, `notes/V-MINT2.0_architecture.md`, `notes/V-MINT2.0_release-plan.md`, `notes/V-MINT2.0_golden-test-checklist.md`, `DECISIONS.md` をダッシュボードモード + Supabase 専用前提で更新
   - Dashboard テーブルの sticky ヘッダー位置を調整し、先頭行がヘッダー上部にチラ見えする表示崩れを修正
   - サブモード名を `在庫量` / `棚卸し結果` へ変更
   - `getDashboardStockOverview` / `getInventoryResultDetails` に RPC 未反映環境向けフォールバックを追加
@@ -164,12 +229,12 @@
   - `src/components/common/BrandFilterSheet.vue`
   - `src/api.js`
   - `supabase/rpc.sql`
-  - `notes/PROJECT_requirements.md`
-  - `notes/PROJECT_architecture.md`
-  - `notes/PROJECT_release-plan.md`
-  - `notes/PROJECT_golden-test-checklist.md`
+  - `notes/V-MINT2.0_requirements.md`
+  - `notes/V-MINT2.0_architecture.md`
+  - `notes/V-MINT2.0_release-plan.md`
+  - `notes/V-MINT2.0_golden-test-checklist.md`
   - `DECISIONS.md`
-- Related: [[PROJECT/notes/PROJECT_architecture]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
 
 ## 2026-04-14
 - What:
@@ -200,7 +265,7 @@
   - `data-migration/convert_inventory_raw_to_normalized.py`
   - `data-migration/convert_transfer_raw_to_normalized.py`
   - `supabase/import_normalized_csv.sql`
-- Related: [[PROJECT/notes/PROJECT_architecture]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
 
 ## 2026-04-15
 - What:
@@ -216,17 +281,17 @@
   - `data-migration/csv/normalized/transfer_logs_2026-01.normalized.csv`
   - `data-migration/csv/normalized/transfer_logs_2026-02.normalized.csv`
   - `data-migration/csv/normalized/transfer_logs_2026-03.normalized.csv`
-  - `notes/PROJECT_architecture.md`
+  - `notes/V-MINT2.0_architecture.md`
   - `TROUBLESHOOTING.md`
-  - `notes/PROJECT_release-plan.md`（ローカル検証→Git 反映の運用を追記）
+  - `notes/V-MINT2.0_release-plan.md`（ローカル検証→Git 反映の運用を追記）
   - `.env.local/` フォルダ＋`template.env` を廃止し、Vite が読む **ルートの `.env.local` ファイル**へ移行（手元で実施）
   - `.gitignore` を追加し `.env.local` をコミット対象外に固定
   - `.env.example` に「`.env.local` はプロジェクト直下のファイル」と明記
 - Files (追記):
   - `.gitignore`
   - `.env.example`
-  - `notes/PROJECT_release-plan.md`
-- Related: [[PROJECT/notes/PROJECT_architecture]]
+  - `notes/V-MINT2.0_release-plan.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
 
 ## 2026-04-15 (UI parity implementation)
 - What:
@@ -235,8 +300,8 @@
   - `index.html` / `src/style.css` / `favicon.png` を現行同等に同期
   - Transfer フロー向け RPC を追加（一覧・未検品一覧・明細・廃棄明細・検品完了）
   - `src/api.js` を補強（Transfer レスポンス整形、検品完了 RPC 呼び出し、`flavor_id` マッピング修正）
-  - `notes/PROJECT_release-plan.md` を Phase 4〜6 と受け入れゲートで更新
-  - `notes/PROJECT_golden-test-checklist.md` を新規作成（PRODUCT_SPEC準拠の実施チェックシート）
+  - `notes/V-MINT2.0_release-plan.md` を Phase 4〜6 と受け入れゲートで更新
+  - `notes/V-MINT2.0_golden-test-checklist.md` を新規作成（PRODUCT_SPEC準拠の実施チェックシート）
   - `DECISIONS.md` に UI パリティ方針 ADR を追記
 - Why:
   - ユーザー体験を現行 `V-MINT` と一致させたまま Supabase へ移行完了するため
@@ -255,16 +320,16 @@
   - `src/components/apps/StockApp.vue`
   - `src/api.js`
   - `supabase/rpc.sql`
-  - `notes/PROJECT_release-plan.md`
-  - `notes/PROJECT_golden-test-checklist.md`
+  - `notes/V-MINT2.0_release-plan.md`
+  - `notes/V-MINT2.0_golden-test-checklist.md`
   - `notes/_index.md`
   - `DECISIONS.md`
-- Related: [[PROJECT/notes/PROJECT_release-plan]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_release-plan]]
 
 ## 2026-04-16
 - What:
   - ゴールデンテスト識別のため、ロック画面とポータルヘッダーの製品名表示を `V-MINT test` に変更
-  - `notes/PROJECT_golden-test-checklist.md` のセッションメタに UI ラベル上書き条件を追記
+  - `notes/V-MINT2.0_golden-test-checklist.md` のセッションメタに UI ラベル上書き条件を追記
   - ゴールデンテスト結果として `SHELL-04` / `SHELL-05` / `SHELL-06` を記録し、棚卸し入力モードの商品カード非表示を Defect Log に起票
   - `InventoryApp` / `TransferApp` の送信・確認文言に残っていた `スプレッドシート` 表記を `データベース` 表記へ統一
   - `SHELL-07` を FAIL（文言不一致）で記録し、修正後の再確認待ちとして Defect Log 更新
@@ -295,7 +360,7 @@
   - `TROUBLESHOOTING.md` に未実施月の棚卸し0件表示ケースを追加
   - `TROUBLESHOOTING.md` に新規月のタッパートグル全OFFケースを追加
   - `TROUBLESHOOTING.md` に Supabase 版の消費量警告未表示ケースを追加
-  - `notes/PROJECT_architecture.md` / `notes/PROJECT_release-plan.md` / `supabase/migration_runbook.md` / `DECISIONS.md` を新方針に同期
+  - `notes/V-MINT2.0_architecture.md` / `notes/V-MINT2.0_release-plan.md` / `supabase/migration_runbook.md` / `DECISIONS.md` を新方針に同期
 - Why:
   - 現行 `V-MINT` と並行検証時に、テスト対象（`V-MINT2.0`）の画面を誤認しないため
   - テスト進捗と未検証理由を同一ドキュメントで追跡できるようにするため
@@ -306,7 +371,7 @@
 - Files:
   - `src/components/common/PinAuth.vue`
   - `src/components/common/AppHeader.vue`
-  - `notes/PROJECT_golden-test-checklist.md`
+  - `notes/V-MINT2.0_golden-test-checklist.md`
   - `src/components/apps/InventoryApp.vue`
   - `src/components/apps/TransferApp.vue`
   - `supabase/schema.sql`
@@ -331,26 +396,26 @@
   - `src/utils/periods.js`
   - `supabase/rpc.sql`
   - `TROUBLESHOOTING.md`
-  - `notes/PROJECT_architecture.md`
-  - `notes/PROJECT_release-plan.md`
+  - `notes/V-MINT2.0_architecture.md`
+  - `notes/V-MINT2.0_release-plan.md`
   - `DECISIONS.md`
   - `src/api.js`
   - `src/components/apps/InventoryApp.vue`
-  - `notes/PROJECT_requirements.md`
-  - `notes/PROJECT_architecture.md`
-  - `notes/PROJECT_release-plan.md`
+  - `notes/V-MINT2.0_requirements.md`
+  - `notes/V-MINT2.0_architecture.md`
+  - `notes/V-MINT2.0_release-plan.md`
   - `TROUBLESHOOTING.md`
   - `supabase/schema.sql`
   - `DECISIONS.md`
   - `supabase/migrations/20260416_inventory_logs_upsert.sql`
   - `supabase/migration_runbook.md`
-- Related: [[PROJECT/notes/PROJECT_golden-test-checklist]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_golden-test-checklist]]
 
 ## YYYY-MM-DD
 - What:
 - Why:
 - Files:
-- Related: [[PROJECT/notes/<related-note>]]
+- Related: [[V-MINT2.0/notes/<related-note>]]
 
 ## 2026-04-28
 - What:
@@ -377,9 +442,9 @@
   - `data-migration/csv/normalized/inventory_logs_2026-04.normalized.csv`
   - `data-migration/csv/normalized/transfer_logs_2026-04.normalized.csv`
   - `data-migration/csv/normalized/transfer_logs_2026-03.normalized.csv`
-  - `notes/PROJECT_release-plan.md`
+  - `notes/V-MINT2.0_release-plan.md`
   - `TROUBLESHOOTING.md`
-- Related: [[PROJECT/notes/PROJECT_golden-test-checklist]]
+- Related: [[V-MINT2.0/notes/V-MINT2.0_golden-test-checklist]]
 
 ## 2026-04-20
 - What:
@@ -412,8 +477,8 @@
   - `src/api.js`
   - `supabase/rpc.sql`
   - `src/components/apps/TransferApp.vue`
-  - `notes/PROJECT_golden-test-checklist.md`
-- Related: [[PROJECT/notes/PROJECT_golden-test-checklist]]
+  - `notes/V-MINT2.0_golden-test-checklist.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_golden-test-checklist]]
 
 ## YYYY-MM-DD
 - What:

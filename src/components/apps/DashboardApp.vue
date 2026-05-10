@@ -1,10 +1,9 @@
 <template>
-    <main class="container mx-auto px-4 pt-0 pb-6 max-w-lg md:max-w-7xl transition-all duration-300 flex-grow">
+    <main class="container mx-auto px-4 pt-6 pb-6 max-w-lg md:max-w-7xl transition-all duration-300 flex-grow">
         <transition name="slide-up">
             <div class="space-y-4 mt-2">
-                <div v-if="!activeSubMode" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5">
+                <div v-if="!activeSubMode" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5 max-w-md mx-auto">
                     <div class="text-center space-y-2">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Dashboard</div>
                         <h2 class="text-xl font-bold text-slate-800">何を確認しますか？</h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -14,8 +13,11 @@
                             type="button"
                             @click="selectSubMode(mode.key)"
                             class="text-left rounded-2xl border border-slate-200 bg-slate-50 hover:bg-red-50 hover:border-red-200 p-5 transition-colors">
-                            <div class="text-base font-bold text-slate-800">{{ mode.label }}</div>
-                            <div class="mt-2 text-sm text-slate-500">{{ mode.description }}</div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-2xl">{{ mode.icon }}</span>
+                                <span class="text-base font-bold text-slate-800">{{ mode.label }}</span>
+                            </div>
+                            <div class="text-sm text-slate-500">{{ mode.description }}</div>
                         </button>
                     </div>
                 </div>
@@ -35,7 +37,8 @@
                             </button>
                         </div>
 
-                        <div>
+                        <!-- 月選択: cost以外のサブモードで表示 -->
+                        <div v-if="activeSubMode !== 'cost'">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">対象月</label>
                             <div class="grid grid-cols-2 gap-3">
                                 <select v-model="dashboardYear"
@@ -53,12 +56,31 @@
                             </div>
                         </div>
 
+                        <!-- 拠点選択: resultsのみ -->
                         <div v-if="activeSubMode === 'results'">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">対象拠点</label>
                             <select v-model="selectedStoreKey"
                                 class="appearance-none w-full bg-slate-50 border border-slate-200 text-base font-bold rounded-xl focus:ring-2 focus:ring-red-500 block p-4 text-center text-slate-800">
                                 <option v-for="store in stores" :key="store.key" :value="store.key">{{ store.name }}</option>
                             </select>
+                        </div>
+
+                        <!-- 店舗選択: costのみ -->
+                        <div v-if="activeSubMode === 'cost'">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">対象店舗</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button
+                                    v-for="store in costStores"
+                                    :key="store.key"
+                                    type="button"
+                                    @click="selectedStoreKey = store.key"
+                                    :class="['py-2.5 rounded-xl text-sm font-bold border-2 transition-colors',
+                                        selectedStoreKey === store.key
+                                            ? 'border-purple-500 bg-purple-50 text-purple-700'
+                                            : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-purple-300']">
+                                    {{ store.name }}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -196,10 +218,66 @@
 
                 </div>
 
-                <div v-else-if="activeSubMode && dashboardMonth && !isLoading" class="text-center py-12 text-slate-400 text-sm font-medium">
+                <!-- 実質原価サブモード -->
+                <div v-if="activeSubMode === 'cost' && costHistory.length > 0" class="space-y-4">
+                    <!-- グラフ -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">原価指標の推移</div>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <button v-for="metric in costMetrics" :key="metric.key" type="button"
+                                @click="toggleCostMetric(metric.key)"
+                                :class="['px-3 py-1 rounded-full text-xs font-bold border transition-colors',
+                                    activeCostMetrics.includes(metric.key)
+                                        ? `border-transparent text-white ${metric.bgClass}`
+                                        : 'border-slate-200 text-slate-500 bg-white']">
+                                {{ metric.label }}
+                            </button>
+                        </div>
+                        <canvas ref="costChart" style="max-height:280px;"></canvas>
+                    </div>
+                    <!-- サマリーテーブル -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="overflow-auto">
+                            <table class="w-full text-sm border-separate border-spacing-0 min-w-[640px]">
+                                <thead class="sticky top-0 z-10">
+                                    <tr>
+                                        <th class="bg-slate-50 text-left px-4 py-2.5 text-xs font-bold text-slate-400 border-b border-slate-200">集計月</th>
+                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-slate-400 border-b border-slate-200">提供本数</th>
+                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-slate-400 border-b border-slate-200">来客数</th>
+                                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">A: フレーバー/1本(g)</th>
+                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">B: フレーバー/1本(円)</th>
+                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">C: 炭/1本(g)</th>
+                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">D: 炭/1本(円)</th>
+                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">E: ドリンク/1人(円)</th>
+                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">F: 本数/人</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="row in costHistory" :key="row.periodKey"
+                                        class="border-b border-slate-50 last:border-0">
+                                        <td class="px-4 py-2.5 font-bold text-slate-700 text-xs">{{ formatPeriodKey(row.periodKey) }}</td>
+                                        <td class="px-3 py-2.5 text-right font-bold text-slate-600 text-xs">{{ row.totalServings }}</td>
+                                        <td class="px-3 py-2.5 text-right font-bold text-slate-600 text-xs">{{ row.totalVisitors }}</td>
+                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.A }}</td>
+                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.B }}</td>
+                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.C }}</td>
+                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.D }}</td>
+                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.E }}</td>
+                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.F }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="activeSubMode === 'cost' && !isLoading" class="text-center py-12 text-slate-400 text-sm font-medium">
+                    選択した店舗の原価計算データがありません
+                </div>
+
+                <div v-else-if="activeSubMode !== 'cost' && activeSubMode && dashboardMonth && !isLoading" class="text-center py-12 text-slate-400 text-sm font-medium">
                     {{ activeSubMode === 'overview' ? '対象月のダッシュボードデータがありません' : '対象月・拠点の棚卸し結果がありません' }}
                 </div>
-                <div v-else-if="activeSubMode && !dashboardMonth" class="text-center py-12 text-slate-400 text-sm font-medium">
+                <div v-else-if="activeSubMode !== 'cost' && activeSubMode && !dashboardMonth" class="text-center py-12 text-slate-400 text-sm font-medium">
                     対象月を選択するとダッシュボードが表示されます
                 </div>
 
@@ -210,8 +288,10 @@
 </template>
 
 <script>
-import { getDashboardStockOverview, getInventoryResultDetails, fetchLatestInventoryPeriodKey } from '../../api.js'
+import { getDashboardStockOverview, getInventoryResultDetails, fetchLatestInventoryPeriodKey, getCostReportHistory } from '../../api.js'
 import { buildYearOptions, buildMonthOptions, composePeriodKey, parsePeriodKey, getNextPeriodKey, getCurrentPeriodKey } from '../../utils/periods.js'
+import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip } from 'chart.js'
+Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip)
 
 export default {
     name: 'DashboardApp',
@@ -237,7 +317,11 @@ export default {
             overviewItems: [],
             resultItems: [],
             errorMessage: '',
-            isLoading: false
+            isLoading: false,
+            // 実質原価サブモード
+            costHistory: [],
+            activeCostMetrics: ['B', 'D', 'E'],
+            costChartInstance: null
         }
     },
     computed: {
@@ -252,8 +336,9 @@ export default {
         },
         dashboardModes() {
             return [
-                { key: 'overview', label: '在庫量', description: '総在庫量、各拠点在庫、前月消費量を確認します。' },
-                { key: 'results', label: '棚卸し結果', description: '拠点ごとの棚卸し結果と関連指標を確認します。' }
+                { key: 'overview', label: '在庫量', icon: '📦', description: '総在庫量、各拠点在庫、前月消費量を確認します。' },
+                { key: 'results', label: '棚卸し結果', icon: '📋', description: '拠点ごとの棚卸し結果と関連指標を確認します。' },
+                { key: 'cost', label: '実質原価', icon: '💴', description: '原価指標の月次推移を確認します。' }
             ]
         },
         activeSubModeLabel() {
@@ -269,6 +354,19 @@ export default {
         },
         overviewTableWidthClass() {
             return this.showStoreStocks ? 'min-w-[720px]' : 'min-w-full'
+        },
+        costStores() {
+            return (this.stores || []).filter((s) => s.key !== 'office')
+        },
+        costMetrics() {
+            return [
+                { key: 'A', label: 'A: フレーバー/1本(g)', bgClass: 'bg-blue-500', color: '#3b82f6' },
+                { key: 'B', label: 'B: フレーバー/1本(円)', bgClass: 'bg-purple-500', color: '#8b5cf6' },
+                { key: 'C', label: 'C: 炭/1本(g)', bgClass: 'bg-amber-500', color: '#f59e0b' },
+                { key: 'D', label: 'D: 炭/1本(円)', bgClass: 'bg-orange-500', color: '#f97316' },
+                { key: 'E', label: 'E: ドリンク/1人(円)', bgClass: 'bg-emerald-500', color: '#10b981' },
+                { key: 'F', label: 'F: 本数/人', bgClass: 'bg-slate-500', color: '#64748b' }
+            ]
         }
     },
     watch: {
@@ -279,12 +377,28 @@ export default {
             if (this.activeSubMode === 'results') {
                 this.loadDashboardData()
             }
+            if (this.activeSubMode === 'cost') {
+                this.loadCostHistory()
+            }
+        },
+        costHistory() {
+            this.$nextTick(() => this.renderCostChart())
+        },
+        activeCostMetrics() {
+            this.$nextTick(() => this.renderCostChart())
         }
     },
     methods: {
         async selectSubMode(modeKey) {
             this.activeSubMode = modeKey
             this.$emit('update:subModeActive', true)
+            if (modeKey === 'cost') {
+                if (!this.selectedStoreKey || this.selectedStoreKey === 'office') {
+                    this.selectedStoreKey = this.costStores[0]?.key || ''
+                }
+                await this.loadCostHistory()
+                return
+            }
             const prevMonth = this.dashboardMonth
             await this.applyDashboardMonthDefault(modeKey)
             await this.$nextTick()
@@ -317,8 +431,81 @@ export default {
             this.activeSubMode = null
             this.errorMessage = ''
             this.resetDataState()
+            this.costHistory = []
+            if (this.costChartInstance) {
+                this.costChartInstance.destroy()
+                this.costChartInstance = null
+            }
             this.$emit('update:subModeActive', false)
             this.$emit('update:loading', false)
+        },
+        async loadCostHistory() {
+            if (!this.selectedStoreKey || this.selectedStoreKey === 'office') return
+            this.errorMessage = ''
+            this.isLoading = true
+            this.$emit('update:loading', true)
+            this.$emit('update:loadingMessage', '原価データを読み込み中...')
+            try {
+                this.costHistory = await getCostReportHistory(this.selectedStoreKey)
+            } catch (e) {
+                this.errorMessage = e.message || '原価データの取得に失敗しました。'
+                this.costHistory = []
+            } finally {
+                this.isLoading = false
+                this.$emit('update:loading', false)
+            }
+        },
+        formatPeriodKey(pk) {
+            const s = String(pk)
+            if (s.length === 6) return `${s.slice(0, 4)}年${s.slice(4)}月`
+            return s
+        },
+        toggleCostMetric(key) {
+            const idx = this.activeCostMetrics.indexOf(key)
+            if (idx >= 0) {
+                if (this.activeCostMetrics.length > 1) {
+                    this.activeCostMetrics = this.activeCostMetrics.filter((k) => k !== key)
+                }
+            } else {
+                this.activeCostMetrics = [...this.activeCostMetrics, key]
+            }
+        },
+        renderCostChart() {
+            const canvas = this.$refs.costChart
+            if (!canvas || this.costHistory.length === 0) return
+
+            if (this.costChartInstance) this.costChartInstance.destroy()
+
+            const labels = this.costHistory.map((r) => this.formatPeriodKey(r.periodKey))
+            const metricMap = {}
+            this.costMetrics.forEach((m) => { metricMap[m.key] = m })
+
+            const datasets = this.activeCostMetrics.map((key) => {
+                const m = metricMap[key]
+                return {
+                    label: m.label,
+                    data: this.costHistory.map((r) => r[key]),
+                    borderColor: m.color,
+                    backgroundColor: m.color + '22',
+                    tension: 0.3,
+                    pointRadius: 4,
+                    borderWidth: 2
+                }
+            })
+
+            this.costChartInstance = new Chart(canvas, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } } },
+                    scales: {
+                        x: { ticks: { font: { size: 11 } } },
+                        y: { ticks: { font: { size: 11 } } }
+                    }
+                }
+            })
         },
         formatNumber(value) {
             return Number(value || 0).toLocaleString()

@@ -1,0 +1,49 @@
+CREATE OR REPLACE FUNCTION public.delete_transfer_record_block(p_period_key integer, p_block_index bigint)
+ RETURNS TABLE(success boolean, deleted_count integer)
+ LANGUAGE plpgsql
+AS $function$
+declare
+  target_recorded_at date;
+  target_created_at timestamptz;
+  target_status text;
+  target_from_store_id bigint;
+  target_dest_store_id bigint;
+  rows_deleted int := 0;
+begin
+  select
+    t.recorded_at,
+    t.created_at,
+    t.status,
+    t.from_store_id,
+    t.dest_store_id
+  into
+    target_recorded_at,
+    target_created_at,
+    target_status,
+    target_from_store_id,
+    target_dest_store_id
+  from transfer_logs t
+  where t.period_key = p_period_key
+    and t.block_index = p_block_index
+  limit 1;
+
+  if target_recorded_at is null then
+    return query select false as success, 0 as deleted_count;
+    return;
+  end if;
+
+  with deleted as (
+    delete from transfer_logs t
+    where t.period_key = p_period_key
+      and t.recorded_at = target_recorded_at
+      and t.created_at = target_created_at
+      and t.status = target_status
+      and coalesce(t.from_store_id, -1) = coalesce(target_from_store_id, -1)
+      and coalesce(t.dest_store_id, -1) = coalesce(target_dest_store_id, -1)
+    returning 1
+  )
+  select count(*)::int into rows_deleted from deleted;
+
+  return query select true as success, rows_deleted as deleted_count;
+end;
+$function$

@@ -18,8 +18,8 @@
 - 
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: 未実施月の棚卸しで商品カードが0件になる
 - Date: 2026-04-16
@@ -42,8 +42,8 @@
 - ゴールデンテストに「未実施月で棚卸し開始できること」を追加する
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: 新規月の棚卸しでタッパートグルが全てOFFになる
 - Date: 2026-04-16
@@ -66,8 +66,8 @@
 - ゴールデンテストに「前月トグル引き継ぎ」を追加する
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: 棚卸し画面で商品カードが0件になる
 - Date: 2026-04-16
@@ -90,8 +90,8 @@
 - 受け入れテストに「別モードでブランド選択後、棚卸しへ遷移」を追加する
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: Supabase 接続環境変数不足
 - Date: 2026-04-14
@@ -114,8 +114,8 @@
 - CI で最低限の env 存在チェックを行う
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: inventory_logs 列不一致（merch_/stock_）
 - Date: 2026-04-14
@@ -137,8 +137,8 @@
 - 環境立ち上げ時は `schema.sql` / `rpc.sql` と migration 適用順をチェックリスト化
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: transfer正規化で `dest_store_key` が NULL になる
 - Date: 2026-04-15
@@ -162,8 +162,8 @@
 - 代表銘柄（例: AF Cardamom）で from/dest の両側が出ているかをゴールデンテストに追加する
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: Supabase 版の棚卸し Step4 で消費量警告が出ない
 - Date: 2026-04-16
@@ -186,8 +186,8 @@
 - ゴールデンテストで Step4 警告の表示有無だけでなく、警告種別も確認する
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: transfer正規化で右端の廃棄補正列が欠落する
 - Date: 2026-04-28
@@ -211,8 +211,8 @@
 - 月次照合で純移動総量が正本と一致すること（例: 2026-03 は `+12400g`）を必須チェックにする
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: transfer正規化で `MM/DD` 見出し月のイベント列を誤検出する
 - Date: 2026-04-28
@@ -237,8 +237,8 @@
 - 4月形式と3月形式の両方で `transfer_logs_*.normalized.csv` のサンプル目視確認を行う
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: 棚卸しの途中保存で未変更フレーバーまで重複計上し得る
 - Date: 2026-04-16
@@ -264,8 +264,8 @@
 - 最新状態テーブルは、履歴用途と混在させず `UPSERT` 前提のキー制約を持たせる
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
 
 ## Case: ダッシュボード在庫・消費が正本とずれる（移動の period_key 誤り）
 - Date: 2026-04-30
@@ -289,6 +289,6 @@
 - 照合前に `transfer_logs` を対象 `period_key` でフィルタし、意図しない月の行がないか確認する
 
 ### Links
-- Dev log: [[PROJECT/CHANGELOG_DEV]]
-- Decision: [[PROJECT/DECISIONS]]
-- Checklist: [[PROJECT/notes/PROJECT_dashboard-data-verification]]
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Decision: [[V-MINT2.0/DECISIONS]]
+- Checklist: [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]]

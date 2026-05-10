@@ -63,7 +63,7 @@
                         検品を完了
                     </button>
                     <!-- 1C: 修正 → 保存 -->
-                    <button v-if="transferStep === '1c'" @click="$emit('submit-transfer-amend')" :disabled="amendItemsEmpty"
+                    <button v-if="transferStep === '1c'" @click="$emit('submit-transfer-amend')"
                         class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-emerald-500/30 transition-transform transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                         修正を保存
                     </button>

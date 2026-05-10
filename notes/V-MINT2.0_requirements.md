@@ -1,14 +1,14 @@
 ---
-tags: [project/project-slug, type/note]
-parent: [[PROJECT/notes/_index]]
+tags: [project/v-mint2, type/note]
+parent: [[V-MINT2.0/notes/_index]]
 ---
 
-# PROJECT — Requirements
+# V-MINT2.0 — Requirements
 
 ## Summary
-- 現行 `V-MINT` の運用知見を踏まえつつ、`V-MINT2.0` は Supabase 専用バックエンドで実装する。
-- フロントの公開 API 名は維持するが、内部実装は Supabase RPC / query のみを前提とする。
-- 重点実装は Transfer新規銘柄追加、Inventory タッパーNULL対応、Request の全拠点横並び表示、Dashboard モード追加。
+- `V-MINT2.0` は Supabase 専用バックエンドで実装した完全移行版。GAS依存なし。
+- フロントの公開 API 名は維持し、内部実装は Supabase RPC / query のみ。
+- 5アプリ実装済み: Transfer（新規銘柄追加・修正サブモード）、Inventory（タッパーNULL対応・消費量警告）、Request（全拠点横並び）、Dashboard（在庫量確認・棚卸し結果確認）、**Cost App（原価計算 新規追加）**。
 
 ## Context
 - `V-MINT/src/api.js` の既存インターフェースに依存した Vue コンポーネントが稼働中。
@@ -57,8 +57,16 @@ parent: [[PROJECT/notes/_index]]
   - ロック解除PINの平文をフロントコードへハードコードしない
   - `VITE_PIN_SHA256`（`SHA-256(${VITE_PIN_SALT}<4桁PIN>)`）との照合で認証する
   - PIN入力UIは現状のテンキーを維持し、PCでは物理キーボード（`0-9`, `Numpad0-9`, `Backspace/Delete`）でも同じ入力操作を受け付ける
+- 原価計算要件:
+  - 対象店舗は馬場本店・中野店・馬場2号店（事務所は除外）
+  - `シーシャ` サブモード: 集計期間（開始日・終了日）、フック本数（初回/おかわり/スタッフ/イベント/チャージ）、ブランド別物販個数（`brands.is_cost_group=true` または `cost_group_id IS NULL` のブランドのみ）、炭種別消費量入力
+  - `ドリンク` サブモード: 発注日・金額・備考の随時追加・編集・削除（月内複数件可）
+  - 計算指標 A〜G: 1本あたりフレーバー使用量(g) / 原価(¥) / 炭使用量(g) / 炭原価(¥) / 1人あたりドリンク代(¥) / 1人あたりシーシャ本数 / 1人あたり実質原価(¥)
+  - ブランドグループ集約: Azure Gold/Black Line は1ブランドに、Tangiers各種は1ブランドに集約して物販管理
+  - `merch_count_secondary`: 250g袋など2種類目の物販個数を別途保持（グラム/パック計算で利用）
+  - 詳細要件: [[V-MINT2.0/notes/V-MINT2.0_reuquirements_cost_calculation]]
 - Source: [[_LINEmemo/2026-04-14]]
 
 ## Related
-- [[PROJECT/DECISIONS]]
-- [[PROJECT/CHANGELOG_DEV]]
+- [[V-MINT2.0/DECISIONS]]
+- [[V-MINT2.0/CHANGELOG_DEV]]

@@ -4,6 +4,9 @@
         <!-- PIN認証オーバーレイ -->
         <PinAuth v-if="!authenticated" @authenticated="authenticated = true" />
 
+        <!-- 管理者PIN認証オーバーレイ -->
+        <AdminPinAuth v-if="showAdminAuth" @authenticated="onAdminAuthenticated" @cancel="showAdminAuth = false" />
+
         <!-- Header -->
         <AppHeader
             :appMode="appMode"
@@ -35,6 +38,8 @@
                     @open-request="openRequestApp"
                     @open-transfer="openTransferApp"
                     @open-dashboard="openDashboardApp"
+                    @open-cost="openCostApp"
+                    @open-admin="handleOpenAdmin"
                 />
             </transition>
 
@@ -98,8 +103,21 @@
         </main>
 
         <!-- ========================================== -->
+        <!-- COST APP (原価計算)                        -->
         <!-- ========================================== -->
-        <!-- DASHBOARD APP (ダッシュボードモード)          -->
+        <CostApp
+            v-if="appMode === 'cost'"
+            ref="costApp"
+            :stores="stores"
+            @update:loading="val => loading = val"
+            @update:loadingMessage="msg => loadingMessage = msg"
+            @update:stepActive="val => costStepActive = val"
+            @submitted="onCostSubmitted"
+        />
+
+        <!-- ========================================== -->
+        <!-- ========================================== -->
+        <!-- DASHBOARD APP (ダッシュボード)          -->
         <!-- ========================================== -->
         <DashboardApp
             v-if="appMode === 'dashboard'"
@@ -112,6 +130,17 @@
             @update:hasData="val => dashboardHasData = val"
             @update:subModeActive="val => dashboardSubModeActive = val"
         />
+
+        <!-- ========================================== -->
+        <!-- ADMIN APP (管理者画面)                    -->
+        <!-- ========================================== -->
+        <main v-if="appMode === 'admin'" class="container mx-auto px-4 py-6 max-w-lg md:max-w-2xl transition-all duration-300 flex-grow">
+            <AdminApp
+                ref="adminApp"
+                @update:loading="loading = $event"
+                @update:loadingMessage="loadingMessage = $event"
+            />
+        </main>
 
         <!-- Brand Filter -->
         <BrandFilterSheet
@@ -167,6 +196,7 @@ import {
 } from './api.js'
 
 import PinAuth from './components/common/PinAuth.vue'
+import AdminPinAuth from './components/common/AdminPinAuth.vue'
 import LoadingOverlay from './components/common/LoadingOverlay.vue'
 import AppHeader from './components/common/AppHeader.vue'
 import AppFooter from './components/common/AppFooter.vue'
@@ -175,6 +205,8 @@ import DashboardApp from './components/apps/DashboardApp.vue'
 import InventoryApp from './components/apps/InventoryApp.vue'
 import RequestApp from './components/apps/RequestApp.vue'
 import TransferApp from './components/apps/TransferApp.vue'
+import CostApp from './components/apps/CostApp.vue'
+import AdminApp from './components/apps/AdminApp.vue'
 import BrandFilterSheet from './components/common/BrandFilterSheet.vue'
 import ConfirmDialog from './components/common/ConfirmDialog.vue'
 import { buildYearOptions, buildMonthOptions, formatPeriodLabel, getCurrentPeriodKey } from './utils/periods.js'
@@ -182,6 +214,7 @@ import { buildYearOptions, buildMonthOptions, formatPeriodLabel, getCurrentPerio
 export default {
   components: {
     PinAuth,
+    AdminPinAuth,
     LoadingOverlay,
     AppHeader,
     AppFooter,
@@ -190,6 +223,8 @@ export default {
     InventoryApp,
     RequestApp,
     TransferApp,
+    CostApp,
+    AdminApp,
     BrandFilterSheet,
     ConfirmDialog
   },
@@ -202,6 +237,7 @@ export default {
   data() {
     return {
       authenticated: false,
+      showAdminAuth: false,
       currentStep: 0,
       appMode: null,
       loading: false,
@@ -237,6 +273,8 @@ export default {
       dashboardBrands: [],
       dashboardHasData: false,
       dashboardSubModeActive: false,
+      // Cost
+      costStepActive: false,
       // Global confirm dialog
       confirmDialog: { visible: false, message: '', okLabel: 'OK', okClass: 'text-emerald-600 hover:bg-emerald-50', resolve: null }
     }
@@ -337,7 +375,8 @@ export default {
       const footerBackVisible =
         (this.appMode !== null && this.currentStep > 0) ||
         (this.appMode === 'transfer' && this.transferStep !== 0) ||
-        (this.appMode === 'dashboard' && this.dashboardSubModeActive)
+        (this.appMode === 'dashboard' && this.dashboardSubModeActive) ||
+        (this.appMode === 'cost' && this.costStepActive)
       if (footerBackVisible) {
         this.prevStep()
       } else if (this.appMode !== null) {
@@ -367,10 +406,30 @@ export default {
       this.errorMessage = ''; this.dashboardHasData = false; this.dashboardSubModeActive = false
       this.pushHistoryState()
     },
+    openCostApp() {
+      this.appMode = 'cost'; this.costStepActive = false
+      this.pushHistoryState()
+    },
+    handleOpenAdmin() {
+      this.showAdminAuth = true
+    },
+    onAdminAuthenticated() {
+      this.showAdminAuth = false
+      this.appMode = 'admin'
+      this.pushHistoryState()
+    },
+    onCostSubmitted() {
+      // 保存完了後の通知（必要に応じて拡張）
+    },
     // ─── Header back button ───────────────────────────────────────────────
     async returnToPortal() {
       if (this.appMode === 'transfer') {
         await this.handleTransferHeaderBack()
+        return
+      }
+      if (this.appMode === 'cost' && this.costStepActive) {
+        if (this.$refs.costApp) this.$refs.costApp.goBackToTop()
+        this.costStepActive = false
         return
       }
       if (this.appMode === 'dashboard' && this.dashboardSubModeActive) {

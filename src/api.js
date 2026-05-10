@@ -33,6 +33,20 @@ async function getOrderedFlavorsWithBrand() {
   return data || []
 }
 
+export async function getAllFlavorsWithBrand() {
+  requireSupabase()
+  return getOrderedFlavorsWithBrand()
+}
+
+export async function batchUpdateFlavorIsActive(updates) {
+  requireSupabase()
+  await Promise.all(
+    updates.map(({ id, is_active }) =>
+      supabase.from('flavors').update({ is_active }).eq('id', id).then(({ error }) => { if (error) throw error })
+    )
+  )
+}
+
 function normalizePeriodKey(periodValue) {
   const parsed = parsePeriodKey(periodValue)
   return parsed ? parsed.periodKey : null
@@ -598,18 +612,38 @@ export async function completeInspection(payload) {
 
 export async function amendTransferRecord(payload) {
   requireSupabase()
+  const pk = normalizePeriodKey(payload.periodKey ?? payload.monthNum)
   const items = (payload.items || []).map((item) => ({
     flavorId: item.flavorId || item.id || item.rowIndex,
     qty: item.qty
   }))
-  const { data, error } = await supabase.rpc('amend_transfer_record', {
-    p_period_key: normalizePeriodKey(payload.periodKey ?? payload.monthNum),
+  const rpcParams = {
+    p_period_key: pk,
     p_block_index: payload.blockIndex,
     p_items: items
-  })
+  }
+  if (payload.comment !== undefined) {
+    rpcParams.p_comment = payload.comment ?? null
+  }
+  const { data, error } = await supabase.rpc('amend_transfer_record', rpcParams)
   if (error) throw error
   const row = Array.isArray(data) ? data[0] : data
   return { success: row?.success !== false }
+}
+
+export async function deleteTransferRecordBlock(payload) {
+  requireSupabase()
+  const pk = normalizePeriodKey(payload.periodKey ?? payload.monthNum)
+  const { data, error } = await supabase.rpc('delete_transfer_record_block', {
+    p_period_key: pk,
+    p_block_index: payload.blockIndex
+  })
+  if (error) throw error
+  const row = Array.isArray(data) ? data[0] : data
+  return {
+    success: row?.success !== false,
+    deletedCount: Number(pick(row, 'deletedCount', 'deleted_count', 'deletedcount')) || 0
+  }
 }
 
 export async function getStockOverview(monthNum) {
@@ -815,4 +849,260 @@ export async function listTransferBrandsOrdered() {
   return rows
     .map((r) => ({ brand: r.brands?.name || '', flavorName: r.name }))
     .sort((a, b) => (a.brand + a.flavorName).localeCompare(b.brand + b.flavorName, 'ja'))
+}
+
+// ============================================================
+// 原価計算 API
+// ============================================================
+
+export async function getBrandsForCost() {
+  requireSupabase()
+  // 原価計算では集約ブランド（is_cost_group=true）と
+  // どのグループにも属さないスタンドアロンブランド（cost_group_id IS NULL）のみ返す。
+  // Azure Gold Line / Azure Black Line / Tangiers 各種は cost_group_id で集約ブランドへ紐付け済み。
+  const { data, error } = await supabase
+    .from('brands')
+    .select('id,name,short_name')
+    .or('is_cost_group.eq.true,cost_group_id.is.null')
+    .order('name', { ascending: true })
+  if (error) throw error
+  return data || []
+}
+
+export async function getCostReport(storeKey, periodKey) {
+  requireSupabase()
+  const pk = normalizePeriodKey(periodKey)
+  const storeId = await getStoreIdByKey(storeKey)
+  const { data: report, error: reportError } = await supabase
+    .from('cost_reports')
+    .select('*')
+    .eq('store_id', storeId)
+    .eq('period_key', pk)
+    .maybeSingle()
+  if (reportError) throw reportError
+
+  if (!report) return null
+
+  const { data: brandSales, error: salesError } = await supabase
+    .from('flavor_brand_sales')
+    .select('*')
+    .eq('report_id', report.id)
+  if (salesError) throw salesError
+
+  const { data: drinks, error: drinksError } = await supabase
+    .from('drink_orders')
+    .select('*')
+    .eq('store_id', storeId)
+    .eq('period_key', pk)
+    .order('order_date', { ascending: true })
+    .order('created_at', { ascending: true })
+  if (drinksError) throw drinksError
+
+  return { report, brandSales: brandSales || [], drinks: drinks || [] }
+}
+
+export async function upsertCostReport(storeKey, periodKey, fields) {
+  requireSupabase()
+  const pk = normalizePeriodKey(periodKey)
+  const storeId = await getStoreIdByKey(storeKey)
+  const row = {
+    store_id: storeId,
+    period_key: pk,
+    updated_at: toJstTimestampString(),
+    ...fields
+  }
+  const { data, error } = await supabase
+    .from('cost_reports')
+    .upsert(row, { onConflict: 'store_id,period_key' })
+    .select('id')
+    .single()
+  if (error) throw error
+  return data.id
+}
+
+export async function saveBrandSales(reportId, brandSalesArray) {
+  requireSupabase()
+  if (!brandSalesArray.length) return
+  const rows = brandSalesArray.map((b) => ({
+    report_id: reportId,
+    brand_id: b.brandId,
+    total_consumption_g: b.totalConsumptionG,
+    merch_count: b.merchCount,
+    merch_count_secondary: b.merchCount250 || 0,
+    grams_per_pack: b.gramsPerPack
+  }))
+  const { error } = await supabase
+    .from('flavor_brand_sales')
+    .upsert(rows, { onConflict: 'report_id,brand_id' })
+  if (error) throw error
+}
+
+/** 指定店舗・対象月の棚卸し結果からブランドグループ別消費量(g)を返す Map<brandId, grams> */
+export async function getBrandConsumptionForCost(storeKey, periodKey) {
+  requireSupabase()
+  const pk = normalizePeriodKey(periodKey)
+  const prevPk = getPreviousPeriodKey(pk)
+  const storeId = await getStoreIdByKey(storeKey)
+
+  // アクティブなフレーバーと cost_group_id を含むブランド情報を取得
+  const { data: flavors, error: flavorsError } = await supabase
+    .from('flavors')
+    .select('id, brand_id, brands(id, cost_group_id)')
+    .eq('is_active', true)
+  if (flavorsError) throw flavorsError
+
+  // 今月の棚卸し在庫・前月の棚卸し在庫・今月の移動量を並列取得
+  const [currentInv, prevInv, currentTransfer] = await Promise.all([
+    fetchLatestInventoryByFlavor(storeId, pk),
+    prevPk ? fetchLatestInventoryByFlavor(storeId, prevPk) : Promise.resolve(new Map()),
+    fetchCompletedTransferDeltaByFlavor(storeId, pk)
+  ])
+
+  // フレーバーごとの消費量を原価計算ブランドグループ単位で集計
+  // 消費量 = 前月末在庫 + 今月の移動量 - 今月末在庫
+  const consumptionByBrandId = new Map()
+  for (const flavor of flavors || []) {
+    const effectiveBrandId = flavor.brands?.cost_group_id ?? flavor.brand_id
+    const prev = toNumeric(prevInv.get(flavor.id))
+    const transfer = toNumeric(currentTransfer.get(flavor.id))
+    const current = toNumeric(currentInv.get(flavor.id))
+    const consumption = prev + transfer - current
+    consumptionByBrandId.set(
+      effectiveBrandId,
+      toNumeric(consumptionByBrandId.get(effectiveBrandId)) + consumption
+    )
+  }
+
+  return consumptionByBrandId
+}
+
+export async function addDrinkOrder(storeKey, periodKey, orderData) {
+  requireSupabase()
+  const pk = normalizePeriodKey(periodKey)
+  const storeId = await getStoreIdByKey(storeKey)
+  const { data, error } = await supabase
+    .from('drink_orders')
+    .insert({
+      store_id: storeId,
+      period_key: pk,
+      order_date: orderData.orderDate,
+      amount: orderData.amount,
+      description: orderData.description || null
+    })
+    .select('id,order_date,amount,description,created_at')
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function updateDrinkOrder(orderId, orderData) {
+  requireSupabase()
+  const { data, error } = await supabase
+    .from('drink_orders')
+    .update({
+      order_date: orderData.orderDate,
+      amount: orderData.amount,
+      description: orderData.description || null
+    })
+    .eq('id', orderId)
+    .select('id,order_date,amount,description,created_at')
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function deleteDrinkOrder(orderId) {
+  requireSupabase()
+  const { error } = await supabase
+    .from('drink_orders')
+    .delete()
+    .eq('id', orderId)
+  if (error) throw error
+}
+
+export async function getDrinkOrders(storeKey, periodKey) {
+  requireSupabase()
+  const pk = normalizePeriodKey(periodKey)
+  const storeId = await getStoreIdByKey(storeKey)
+  const { data, error } = await supabase
+    .from('drink_orders')
+    .select('id,order_date,amount,description,created_at')
+    .eq('store_id', storeId)
+    .eq('period_key', pk)
+    .order('order_date', { ascending: true })
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data || []
+}
+
+export async function getCostReportHistory(storeKey) {
+  requireSupabase()
+  const storeId = await getStoreIdByKey(storeKey)
+  const { data: reports, error } = await supabase
+    .from('cost_reports')
+    .select('*')
+    .eq('store_id', storeId)
+    .order('period_key', { ascending: true })
+  if (error) throw error
+  if (!reports || reports.length === 0) return []
+
+  const reportIds = reports.map((r) => r.id)
+  const { data: allSales, error: salesError } = await supabase
+    .from('flavor_brand_sales')
+    .select('*')
+    .in('report_id', reportIds)
+  if (salesError) throw salesError
+
+  const { data: allDrinks, error: drinksError } = await supabase
+    .from('drink_orders')
+    .select('period_key,amount')
+    .eq('store_id', storeId)
+  if (drinksError) throw drinksError
+
+  const drinkTotalByPeriod = new Map()
+  for (const d of allDrinks || []) {
+    drinkTotalByPeriod.set(d.period_key, toNumeric(drinkTotalByPeriod.get(d.period_key)) + toNumeric(d.amount))
+  }
+  const salesByReport = new Map()
+  for (const s of allSales || []) {
+    if (!salesByReport.has(s.report_id)) salesByReport.set(s.report_id, [])
+    salesByReport.get(s.report_id).push(s)
+  }
+
+  return reports.map((r) => {
+    const sales = salesByReport.get(r.id) || []
+    const flavorServe = sales.reduce((acc, s) => {
+      const merchG = toNumeric(s.merch_count) * toNumeric(s.grams_per_pack)
+      return acc + Math.max(0, toNumeric(s.total_consumption_g) - merchG)
+    }, 0)
+    const drinkTotal = toNumeric(drinkTotalByPeriod.get(r.period_key))
+
+    const totalServings = toNumeric(r.hookahs_first) + toNumeric(r.hookahs_refill) + toNumeric(r.hookahs_staff) + toNumeric(r.hookahs_event)
+    const totalVisitors = toNumeric(r.hookahs_charge) + toNumeric(r.hookahs_refill) + toNumeric(r.hookahs_staff) + toNumeric(r.hookahs_event)
+    const charcoalServe = toNumeric(r.charcoal_nyanco_flat_serve) + toNumeric(r.charcoal_kingco_flat_serve)
+
+    const A = totalServings > 0 ? flavorServe / totalServings : 0
+    const B = toNumeric(r.price_flavor_per_g) * A
+    const C = totalServings > 0 ? charcoalServe * 1000 / totalServings : 0
+    const D = toNumeric(r.price_charcoal_per_kg) * C / 1000
+    const E = totalVisitors > 0 ? drinkTotal / totalVisitors : 0
+    const F = totalVisitors > 0 ? totalServings / totalVisitors : 0
+
+    return {
+      periodKey: r.period_key,
+      startDate: r.start_date,
+      endDate: r.end_date,
+      totalServings,
+      totalVisitors,
+      flavorServeG: flavorServe,
+      charcoalServeKg: charcoalServe,
+      drinkTotal,
+      A: Math.round(A * 100) / 100,
+      B: Math.round(B * 100) / 100,
+      C: Math.round(C * 100) / 100,
+      D: Math.round(D * 100) / 100,
+      E: Math.round(E * 100) / 100,
+      F: Math.round(F * 1000) / 1000
+    }
+  })
 }

@@ -1,9 +1,9 @@
 ---
-tags: [project/project-slug, type/note]
-parent: [[PROJECT/notes/_index]]
+tags: [project/v-mint2, type/note]
+parent: [[V-MINT2.0/notes/_index]]
 ---
 
-# PROJECT — Auto Task Inbox
+# V-MINT2.0 — Auto Task Inbox
 
 ## Summary
 - Slack会話から受け付けた自動実行タスクの保管。

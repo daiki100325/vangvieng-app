@@ -1,30 +1,34 @@
 ---
-tags: [project/project-slug, type/hub]
+tags: [project/v-mint2, type/hub]
 ---
 
-# PROJECT Hub
+# V-MINT2.0 Hub
 
 ## Overview
-- Goal: GAS運用を維持しつつ Supabase 移行版を独立開発する
-- Scope: API切替基盤、Transfer/Inventory/Request/Stock の Supabase 接続、移行手順
-- Owner: V-MINT2.0 migration team
+- Goal: GAS運用を廃止し Supabase 専用バックエンドで V-MINT2.0 として完全移行する
+- Scope: Inventory / Transfer / Request / Dashboard / Cost App の Supabase 接続、原価計算機能
+- Owner: つーくん
 
 ## Key Links
-- Decisions: [[PROJECT/DECISIONS]]
-- Dev Log: [[PROJECT/CHANGELOG_DEV]]
-- Troubleshooting: [[PROJECT/TROUBLESHOOTING]]
+- Decisions: [[V-MINT2.0/DECISIONS]]
+- Dev Log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Troubleshooting: [[V-MINT2.0/TROUBLESHOOTING]]
 
 ## Notes
-- [[PROJECT/notes/PROJECT_architecture]]
-- [[PROJECT/notes/PROJECT_supabase-er-diagram]]
-- [[PROJECT/notes/PROJECT_requirements]]
-- [[PROJECT/notes/PROJECT_release-plan]]
-- [[PROJECT/notes/PROJECT_golden-test-checklist]]
-- [[PROJECT/notes/PROJECT_dashboard-data-verification]]
-- [[PROJECT/notes/PROJECT_additional-implementation-plan]]
-- [[PROJECT/notes/PROJECT_post-migration-feature-memo]]
+- [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+- [[V-MINT2.0/notes/V-MINT2.0_supabase-er-diagram]]
+- [[V-MINT2.0/notes/V-MINT2.0_requirements]]
+- [[V-MINT2.0/notes/V-MINT2.0_reuquirements_cost_calculation]]
+- [[V-MINT2.0/notes/V-MINT2.0_release-plan]]
+- [[V-MINT2.0/notes/V-MINT2.0_golden-test-checklist]]
+- [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]]
+- [[V-MINT2.0/notes/V-MINT2.0_test-plan_cost_calculation]]
+- [[V-MINT2.0/notes/V-MINT2.0_additional-implementation-plan]]
+- [[V-MINT2.0/notes/V-MINT2.0_post-migration-feature-memo]]
+- [[V-MINT2.0/notes/schema-review-QA_20260509]] — テーブル設計 Q&A（上司レビュー回答）
+- [[V-MINT2.0/notes/V-MINT2.0_migration-procedure]] — 正式リリース移行手順（Cloudflare 切替 + シニマネ招待）
 
 ## Weekly Review
-- Wins: UI/機能の現行パリティ実装を完了し、Transfer 系 RPC まで Supabase 側で接続
-- Risks: 本番切替前の並走受け入れ検証（GAS比較）と運用手順最終化が残る
-- Next Actions: ローカルで受け入れチェックリストを消化し、Git 反映後に Cloudflare 切替判断
+- Wins: 5アプリ（Inventory/Transfer/Request/Dashboard/Cost）Supabase 完全接続、Cost App 原価計算・ドリンク発注・ブランドグループ集約まで実装完了
+- Risks: ダッシュボード「実質原価」サブモード（推移グラフ）が未実装
+- Next Actions: 実質原価ダッシュボードサブモード実装 → 受け入れチェック → Cloudflare 本番切替

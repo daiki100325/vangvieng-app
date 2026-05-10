@@ -1,9 +1,9 @@
 ---
-tags: [project/project-slug, type/note, type/checklist]
-parent: [[PROJECT/notes/_index]]
+tags: [project/v-mint2, type/note, type/checklist]
+parent: [[V-MINT2.0/notes/_index]]
 ---
 
-# PROJECT — Golden Test Checklist
+# V-MINT2.0 — Golden Test Checklist
 
 ## Purpose
 - `V-MINT2.0` が `V-MINT` と同一 UI/同一挙動であることを、Supabase バックエンドで検証する。
@@ -94,14 +94,14 @@ parent: [[PROJECT/notes/_index]]
 
 | ID | Check | Expected | Result | Evidence | Note |
 |---|---|---|---|---|---|
-| DASH-01 | 在庫量確認取得 | `fetch_dashboard_stock_overview` が取得成功 | PASS | 対象月選択後に在庫量確認サブモードが表示されること | [[PROJECT/notes/PROJECT_dashboard-data-verification]] A章 2026-04-30 |
+| DASH-01 | 在庫量確認取得 | `fetch_dashboard_stock_overview` が取得成功 | PASS | 対象月選択後に在庫量確認サブモードが表示されること | [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]] A章 2026-04-30 |
 | DASH-02 | 在庫量確認表示 | 総在庫量 / 各拠点在庫 / 前月消費量が表示 | PASS | 正本と数値整合を確認 | 同上 |
 | DASH-03 | 表示切替 | 総在庫 / 各拠点在庫を表示切替できる | PASS | チェックボックスON/OFFで対応列の表示が切り替わること | 同上 |
 | DASH-04 | 0以下ハイライト | `totalStock <= 0` 行を強調 | PASS | `totalStock <= 0` の行が強調表示されること | 同上 |
 | DASH-05 | ブランドフィルタ | BrandFilterSheet と連動 | PASS | BrandFilterSheet の選択内容に応じて一覧が連動すること | 同上 |
-| DASH-06 | 棚卸し結果確認取得 | `fetch_inventory_result_details` が取得成功 | PASS | 対象月 + 拠点選択後に一覧が表示されること | [[PROJECT/notes/PROJECT_dashboard-data-verification]] B章 2026-04-30 |
+| DASH-06 | 棚卸し結果確認取得 | `fetch_inventory_result_details` が取得成功 | PASS | 対象月 + 拠点選択後に一覧が表示されること | [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]] B章 2026-04-30 |
 | DASH-07 | 棚卸し結果確認詳細 | 指標8項目が確認できる | PASS | 正本と数値整合（タッパー / 物販 / 在庫 / 各種集計列） | 同上 |
-| DASH-08 | 棚卸し結果 当月消費ハイライト | 拠点別に当月消費量セルを強調 | PASS | `office`: 0以外は赤／その他: マイナスは赤・500以上は黄 | [[PROJECT/notes/PROJECT_dashboard-data-verification]] B章 step6 2026-04-30 |
+| DASH-08 | 棚卸し結果 当月消費ハイライト | 拠点別に当月消費量セルを強調 | PASS | `office`: 0以外は赤／その他: マイナスは赤・500以上は黄 | [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]] B章 step6 2026-04-30 |
 
 ---
 

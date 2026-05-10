@@ -20,7 +20,7 @@
 - Negative:
 
 ### Links
-- Related note: [[PROJECT/notes/<related-note>]]
+- Related note: [[V-MINT2.0/notes/<related-note>]]
 
 ## ADR-20260414-01: API互換アダプタでSupabase移行
 - Status: Deprecated
@@ -48,7 +48,7 @@
   - RPC/戻り値形の整合管理が必要
 
 ### Links
-- Related note: [[PROJECT/notes/PROJECT_architecture]]
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
 
 ## ADR-20260428-01: V-MINT2.0はSupabase専用で運用する
 - Status: Accepted
@@ -77,7 +77,7 @@
   - 既存メモや手順の GAS 前提記述を順次更新する必要がある
 
 ### Links
-- Related note: [[PROJECT/notes/PROJECT_architecture]]
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
 
 ## ADR-20260414-02: inventory_logsの物販/在庫分離
 - Status: Accepted
@@ -104,7 +104,7 @@
   - APIマッピング修正が必要
 
 ### Links
-- Related note: [[PROJECT/notes/PROJECT_requirements]]
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_requirements]]
 
 ## ADR-20260416-03: 棚卸し保存は UPSERT で最新スナップショットを維持
 - Status: Accepted
@@ -132,7 +132,7 @@
   - 棚卸しの保存履歴は別途残らない
 
 ### Links
-- Related note: [[PROJECT/notes/PROJECT_architecture]]
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
 
 ## ADR-20260415-01: UI完全パリティはコピー移植で達成
 - Status: Accepted
@@ -160,7 +160,7 @@
   - Transfer 系 RPC の補完実装が必須になる
 
 ### Links
-- Related note: [[PROJECT/notes/PROJECT_release-plan]]
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_release-plan]]
 
 ## ADR-20260416-01: 月次キーを `period_key(YYYYMM)` へ拡張
 - Status: Accepted
@@ -190,7 +190,7 @@
   - 旧CSV（`month_num` のみ）利用時は補完ロジックに依存する
 
 ### Links
-- Related note: [[PROJECT/notes/PROJECT_architecture]]
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
 
 ## ADR-20260416-02: 棚卸し消費量警告は Step4 で二段階表示する
 - Status: Accepted
@@ -218,7 +218,7 @@
   - Step4 UI と API の戻り値が少し複雑になる
 
 ### Links
-- Related note: [[PROJECT/notes/PROJECT_requirements]]
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_requirements]]
 
 ## ADR-20260430-04: 移動記録修正はRPCでブロック単位更新する
 - Status: Accepted
@@ -246,7 +246,7 @@
   - SQL のテスト観点が増える
 
 ### Links
-- Related note: [[PROJECT/notes/PROJECT_requirements]]
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_requirements]]
 
 ## ADR-20260428-02: PIN認証はハッシュ照合 + キーボード入力対応に統一する
 - Status: Accepted
@@ -275,4 +275,4 @@
   - 環境変数未設定時に認証失敗となるため、初期セットアップ手順の明記が必須
 
 ### Links
-- Related note: [[PROJECT/notes/PROJECT_requirements]]
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_requirements]]

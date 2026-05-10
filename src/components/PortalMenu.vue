@@ -31,6 +31,34 @@
                 </div>
             </button>
 
+            <!-- Cost Calculation Card -->
+            <button @click="$emit('open-cost')"
+                class="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-colors transition-transform transition-shadow duration-300 text-left flex flex-col h-full focus:outline-none focus:ring-4 focus:ring-purple-500/20 active:scale-95">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center mb-6 shadow-inner group-hover:bg-purple-600 transition-colors duration-300">
+                    <svg class="w-8 h-8 text-purple-600 group-hover:text-white transition-colors duration-300"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                </div>
+                <h3
+                    class="text-2xl font-bold text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
+                    原価計算</h3>
+                <p class="text-slate-500 font-medium leading-relaxed flex-grow">
+                    シーシャ提供数・物販数・炭消費量・ドリンク発注額を入力し、実質原価を計算します。</p>
+                <div
+                    class="mt-6 flex items-center text-purple-600 font-bold text-sm bg-purple-50 px-4 py-2 rounded-full self-start">
+                    <span>開く</span>
+                    <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                        </path>
+                    </svg>
+                </div>
+            </button>
+
             <!-- Request App Card -->
             <button @click="$emit('open-request')"
                 class="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-colors transition-transform transition-shadow duration-300 text-left flex flex-col h-full focus:outline-none focus:ring-4 focus:ring-orange-500/20 active:scale-95">
@@ -100,11 +128,42 @@
                 </div>
                 <h3
                     class="text-2xl font-bold text-slate-800 mb-2 group-hover:text-red-600 transition-colors">
-                    ダッシュボードモード</h3>
+                    ダッシュボード</h3>
                 <p class="text-slate-500 font-medium leading-relaxed flex-grow">
-                    在庫量確認と棚卸し結果確認を切り替えながら、月次の在庫状況を横断的に確認できます。</p>
+                    在庫量・消費量・原価など、月次の各種指標を確認できます。</p>
                 <div
                     class="mt-6 flex items-center text-red-600 font-bold text-sm bg-red-50 px-4 py-2 rounded-full self-start">
+                    <span>開く</span>
+                    <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                        </path>
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Admin Card -->
+            <button @click="$emit('open-admin')"
+                class="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-colors transition-transform transition-shadow duration-300 text-left flex flex-col h-full focus:outline-none focus:ring-4 focus:ring-slate-500/20 active:scale-95">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-6 shadow-inner group-hover:bg-slate-600 transition-colors duration-300">
+                    <svg class="w-8 h-8 text-slate-600 group-hover:text-white transition-colors duration-300"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                        </path>
+                    </svg>
+                </div>
+                <h3
+                    class="text-2xl font-bold text-slate-800 mb-2 group-hover:text-slate-600 transition-colors">
+                    管理者画面</h3>
+                <p class="text-slate-500 font-medium leading-relaxed flex-grow">
+                    フレーバーマスタの表示制御、新規ブランド・銘柄の登録を行います。</p>
+                <div
+                    class="mt-6 flex items-center text-slate-600 font-bold text-sm bg-slate-100 px-4 py-2 rounded-full self-start">
                     <span>開く</span>
                     <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
@@ -120,6 +179,6 @@
 <script>
 export default {
     name: 'PortalMenu',
-    emits: ['open-inventory', 'open-request', 'open-transfer', 'open-dashboard']
+    emits: ['open-inventory', 'open-request', 'open-transfer', 'open-dashboard', 'open-cost', 'open-admin']
 }
 </script>

@@ -122,11 +122,17 @@ with resolved_inventory as (
     b.id as brand_id
   from stg_inventory_logs s
   join brands b
-    on b.name = s.brand_name
+    on b.name = coalesce(
+      nullif(btrim(substring(s.brand_name from '\(([^)]*)\)')), ''),
+      btrim(s.brand_name)
+    )
     or (
       b.short_name is not null
       and btrim(b.short_name) <> ''
-      and (b.short_name || ' (' || b.name || ')') = s.brand_name
+      and b.short_name = coalesce(
+        nullif(btrim(substring(s.brand_name from '\(([^)]*)\)')), ''),
+        btrim(s.brand_name)
+      )
     )
 )
 insert into inventory_logs (
@@ -195,11 +201,17 @@ with resolved_transfer as (
     b.id as brand_id
   from stg_transfer_logs s
   join brands b
-    on b.name = s.brand_name
+    on b.name = coalesce(
+      nullif(btrim(substring(s.brand_name from '\(([^)]*)\)')), ''),
+      btrim(s.brand_name)
+    )
     or (
       b.short_name is not null
       and btrim(b.short_name) <> ''
-      and (b.short_name || ' (' || b.name || ')') = s.brand_name
+      and b.short_name = coalesce(
+        nullif(btrim(substring(s.brand_name from '\(([^)]*)\)')), ''),
+        btrim(s.brand_name)
+      )
     )
 )
 insert into transfer_logs (
@@ -247,13 +259,13 @@ join flavors f on f.brand_id = s.brand_id and f.name = s.flavor_name;
 -- 5-1) monthly row counts
 select period_key, month_num, count(*) as inventory_rows
 from inventory_logs
-where period_key in (202512, 202601, 202602, 202603)
+where period_key in (202512, 202601, 202602, 202603, 202604, 202605)
 group by period_key, month_num
 order by period_key;
 
 select period_key, month_num, count(*) as transfer_rows
 from transfer_logs
-where period_key in (202512, 202601, 202602, 202603)
+where period_key in (202512, 202601, 202602, 202603, 202604, 202605)
 group by period_key, month_num
 order by period_key;
 
@@ -282,7 +294,7 @@ select
   ) as total_grams
 from inventory_logs il
 join stores s on s.id = il.store_id
-where il.period_key in (202512, 202601, 202602, 202603)
+where il.period_key in (202512, 202601, 202602, 202603, 202604, 202605)
 group by il.period_key, il.month_num, s.store_key
 order by il.period_key, s.store_key;
 
@@ -300,7 +312,7 @@ select
   ) as net_transfer_grams
 from transfer_logs t
 join stores s on s.id in (t.from_store_id, t.dest_store_id)
-where t.period_key in (202512, 202601, 202602, 202603)
+where t.period_key in (202512, 202601, 202602, 202603, 202604, 202605)
 group by t.period_key, t.month_num, s.store_key
 order by t.period_key, s.store_key;
 

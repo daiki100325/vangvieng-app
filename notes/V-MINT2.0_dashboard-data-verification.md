@@ -1,14 +1,14 @@
 ---
-tags: [project/project-slug, type/note, type/checklist]
-parent: [[PROJECT/notes/_index]]
+tags: [project/v-mint2, type/note, type/checklist]
+parent: [[V-MINT2.0/notes/_index]]
 ---
 
-# PROJECT — Dashboard Data Verification
+# V-MINT2.0 — Dashboard Data Verification
 
 ## Purpose
 - 明日移行時に、`V-MINT2.0` のダッシュボードモードで表示される数値が、正本データと一致しているかを確認する。
 - UI操作の成否ではなく、`在庫量確認` / `棚卸し結果確認` の数値整合を重点確認する。
-- Source: [[PROJECT/notes/PROJECT_golden-test-checklist]]
+- Source: [[V-MINT2.0/notes/V-MINT2.0_golden-test-checklist]]
 
 ## Scope
 - 対象画面:
@@ -132,4 +132,4 @@ parent: [[PROJECT/notes/_index]]
 ## Notes
 - 数値不一致が出た場合は、UIだけでなく `period_key`、`status=completed` 条件、店舗キー変換（`baba` -> `baba_main`）も確認する。
 - 正本と比較するときは、同じ月の定義になっているか（`period_key` ベースか）を先に合わせる。
-- 2026-04-30: 照合対象月と異なる `period_key`（例: 5月ラベル）で `transfer_logs` にテスト移動を入れると、在庫推定・前月消費の両方がずれる。削除・修正後に正本と整合することを確認済み。Source: [[PROJECT/TROUBLESHOOTING]]
+- 2026-04-30: 照合対象月と異なる `period_key`（例: 5月ラベル）で `transfer_logs` にテスト移動を入れると、在庫推定・前月消費の両方がずれる。削除・修正後に正本と整合することを確認済み。Source: [[V-MINT2.0/TROUBLESHOOTING]]

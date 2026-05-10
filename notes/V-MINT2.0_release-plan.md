@@ -1,17 +1,14 @@
 ---
-tags: [project/project-slug, type/note]
-parent: [[PROJECT/notes/_index]]
+tags: [project/v-mint2, type/note]
+parent: [[V-MINT2.0/notes/_index]]
 ---
 
-# PROJECT — Release plan
+# V-MINT2.0 — Release plan
 
 ## Summary
-- Phase 1: 開発環境（V-MINT2.0）で Supabase 接続を成立
-- Phase 2: 重点機能と Dashboard モードの挙動を検証
-- Phase 3: CSV移行リハーサル後に段階的切替判断
-- Phase 4: V-MINT と同一のアプリシェル/UI（PIN・ポータル・ヘッダー/フッター・ブランドシート）を実装
-- Phase 5: 4アプリ + Dashboard を Supabase RPC で完結
-- Phase 6: Supabase 前提の受け入れ確認を完了し、本番切替可否を判定
+- Phase 1〜6: **完了** — Supabase 接続確立 → UIパリティ → 5アプリ完全実装 → 受け入れ確認
+- Phase 7: **Cost App** — 原価計算機能実装（`cost_reports` / `flavor_brand_sales` / `drink_orders`）→ ブランドグループ集約対応 → 済
+- Phase 8（次フェーズ）: ダッシュボード「実質原価」サブモード（推移グラフ・サマリーテーブル）→ Cloudflare 本番切替
 
 ## Context
 - 現行運用版は `V-MINT` のまま維持する必要がある
@@ -67,8 +64,20 @@ parent: [[PROJECT/notes/_index]]
   - Inventory: 保存・再読込・`NULL` タッパー挙動・消費量確認（マイナス/事務所0以外/500g超）が一致
   - Request/Dashboard: ブランドフィルタ・数量表示・並び順が一致
   - ゴールデンテストSQLで `prev_month_stock_grams / march_net_transfer_grams / march_stock_grams / consumption_from_prev_month_grams` が一貫する
-- Source: [[PROJECT/notes/PROJECT_requirements]]
+- **Phase 7 実施内容（2026-05）**
+  - `cost_reports` / `flavor_brand_sales` / `drink_orders` テーブル作成（`supabase/cost_calculation.sql`）
+  - `brands` テーブルへ `is_cost_group` / `cost_group_id` 追加（migration 20260507）
+  - `flavor_brand_sales` へ `merch_count_secondary` 追加（migration 20260507）
+  - `CostApp.vue` 実装: シーシャ入力・ドリンク随時入力・原価計算プレビュー・保存
+  - `src/api.js` に Cost App API 群追加（`getBrandsForCost` / `getCostReport` / `upsertCostReport` / `saveBrandSales` / `getBrandConsumptionForCost` / `addDrinkOrder` 等）
+- **Phase 8 残作業チェックリスト**
+  - [ ] ダッシュボード「実質原価」サブモード（推移グラフ・サマリーテーブル）
+  - [ ] `getCostReportHistory` を Dashboard に接続
+  - [ ] 受け入れチェックリスト完了（`V-MINT2.0_test-plan_cost_calculation.md`）
+  - [ ] `npm run build` 成功確認
+  - [ ] Cloudflare 切替判断・本番反映
+- Source: [[V-MINT2.0/notes/V-MINT2.0_requirements]]
 
 ## Related
-- [[PROJECT/DECISIONS]]
-- [[PROJECT/CHANGELOG_DEV]]
+- [[V-MINT2.0/DECISIONS]]
+- [[V-MINT2.0/CHANGELOG_DEV]]
