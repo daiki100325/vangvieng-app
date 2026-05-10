@@ -1,5 +1,7 @@
 # CHANGELOG_DEV
 
+## 2026-05-11（deploy: Cloudflare Pages 環境変数設定対応）
+
 ## 2026-05-10（data-migration: 5月CSVの変換仕様を修正）
 
 - What:
