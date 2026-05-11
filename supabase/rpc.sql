@@ -816,10 +816,7 @@ prev_latest as (
 )
 select
   f.id as flavor_id,
-  case
-    when b.short_name is not null and btrim(b.short_name) <> '' then b.short_name || ' (' || b.name || ')'
-    else b.name
-  end as brand_name,
+  b.name as brand_name,
   f.name as flavor_name,
   case
     when l.flavor_id is not null then il.tupper_basic is not null
