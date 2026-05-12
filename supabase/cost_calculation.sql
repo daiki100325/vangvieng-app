@@ -57,3 +57,23 @@ CREATE TABLE IF NOT EXISTS flavor_brand_sales (
 );
 
 -- RLS は既存テーブルと同じポリシーに従い、必要に応じて別途設定すること
+
+-- ==========================================================================
+-- 単位原価・販売値マスタテーブル（価格改定履歴）
+-- ==========================================================================
+-- 適用開始月 (effective_from) ごとに各種単価・販売値を保持する。
+-- 特定 period_key への適用価格は effective_from <= period_key の最大レコードを使用する。
+
+CREATE TABLE IF NOT EXISTS cost_price_masters (
+  id bigserial PRIMARY KEY,
+  effective_from int NOT NULL,              -- YYYYMM (適用開始月)
+  price_flavor_per_g numeric NOT NULL,     -- フレーバー原価 (円/g)
+  price_charcoal_per_kg numeric NOT NULL,  -- 炭原価 (円/kg)
+  price_hookah_first int NOT NULL,         -- 1本目料金 (円)
+  price_hookah_refill int NOT NULL,        -- おかわり料金 (円)
+  price_hookah_staff int NOT NULL,         -- スタッフ料金 (円)
+  price_charge int NOT NULL,               -- チャージ料金 (円)
+  note text,                               -- 改定理由メモ
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(effective_from)
+);

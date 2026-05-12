@@ -8,12 +8,12 @@ parent: [[V-MINT2.0/notes/_index]]
 ## Summary
 - `V-MINT2.0` は Supabase 専用バックエンドで実装した完全移行版。GAS依存なし。
 - フロントの公開 API 名は維持し、内部実装は Supabase RPC / query のみ。
-- 5アプリ実装済み: Transfer（新規銘柄追加・修正サブモード）、Inventory（タッパーNULL対応・消費量警告）、Request（全拠点横並び）、Dashboard（在庫量確認・棚卸し結果確認）、**Cost App（原価計算 新規追加）**。
+- 6アプリ運用中: Transfer（新規銘柄追加・修正サブモード）、Inventory（タッパーNULL対応・消費量警告）、Request（全拠点横並び）、Dashboard（在庫量・棚卸し結果・実質原価）、Cost（原価計算）、Admin（フレーバー表示設定・パッケージサイズ設定・新規登録）。
 
 ## Context
 - `V-MINT/src/api.js` の既存インターフェースに依存した Vue コンポーネントが稼働中。
-- Supabase はアカウント取得済みだが、テーブル・View・RPC は未作成。
-- 本番運用影響回避のため、作業は `V-MINT2.0` ディレクトリのみで実施。
+- Supabase のテーブル・View・RPC は本番運用前提で作成済み、`V-MINT2.0` は Cloudflare Pages 本番環境にデプロイ済み。
+- 既存 URL を維持したまま `V-MINT2.0` を本番運用し、継続改善は `V-MINT2.0` ディレクトリを起点に行う。
 
 ## Details
 - **対象月のデフォルト（初期選択）** — DB に該当データがない場合はカレンダー当月／翌月でフォールバックする。
@@ -24,19 +24,23 @@ parent: [[V-MINT2.0/notes/_index]]
 - 環境変数:
   - `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
   - `VITE_PIN_SHA256`, `VITE_PIN_SALT`
+  - `VITE_ADMIN_PIN_SHA256`（管理者画面専用 PIN のハッシュ。`SHA-256(${VITE_PIN_SALT}<4桁PIN>)` 形式）
 - DB要件:
   - `stores`, `brands`, `flavors`, `inventory_logs`, `transfer_logs`
   - `v_current_stock`, `v_monthly_summary`
   - 店舗キーは `baba` を `baba_main` に統一
   - `inventory_logs` のパッケージ数量は物販 (`merch_*`) と在庫 (`stock_*`) を分離保持（`merch_other` は持たない）
   - 在庫算出は物販と在庫を合算して扱う
+  - `brands` テーブルはパッケージサイズフラグ（`has_pkg_50/100/125/200/250/1kg`, `packages_configured`）を持ち、棚卸し入力画面の入力欄表示制御に使用
+  - `cost_price_masters` テーブルで単位原価・販売値の価格改定を `effective_from`（YYYYMM）単位で管理。原価計算時は該当月以前の最新レコードを自動適用
 - ダッシュボード要件:
   - ポータルの `在庫量確認` 導線は `ダッシュボードモード` に置き換える
-  - ダッシュボードは `在庫量確認` と `棚卸し結果確認` の2サブモードを持つ
+  - ダッシュボードは `在庫量確認` / `棚卸し結果確認` / `実質原価` の3サブモードを持つ
   - `在庫量確認` サブモードは、銘柄ごとに `総在庫量`、`各拠点在庫`、`前月消費量` を表示する
   - `各拠点在庫` と `総在庫量` は UI 上のチェックボックスで表示/非表示を切り替えられる
   - `棚卸し結果確認` サブモードは、対象月 + 拠点ごとに `当月タッパー`、`当月物販`、`当月在庫`、`当月トータル棚卸し結果`、`前月棚卸し結果`、`前月消費量`、`当月移動量`、`当月消費量` を参照できる
   - `棚卸し結果確認` の `当月消費量` は拠点別に強調表示条件を変える（`office`: 0以外は赤、`office` 以外: マイナスは赤、500以上は黄）
+  - `実質原価` サブモードは、店舗別に `getCostReportHistory` を参照し、月次推移グラフとサマリーテーブルを表示する
 - 移動記録要件:
   - `移動記録` は `起票` / `検品` / `入荷` / `廃棄` に加えて `修正` サブモードを持つ
   - `修正` サブモードでは、対象月の既存記録から修正対象を選択し、対象銘柄と数量を更新できる
@@ -57,6 +61,7 @@ parent: [[V-MINT2.0/notes/_index]]
   - ロック解除PINの平文をフロントコードへハードコードしない
   - `VITE_PIN_SHA256`（`SHA-256(${VITE_PIN_SALT}<4桁PIN>)`）との照合で認証する
   - PIN入力UIは現状のテンキーを維持し、PCでは物理キーボード（`0-9`, `Numpad0-9`, `Backspace/Delete`）でも同じ入力操作を受け付ける
+  - 管理者画面（`AdminApp`）には別途管理者PIN認証（`AdminPinAuth.vue`）が必要。`VITE_ADMIN_PIN_SHA256` で照合し、セッション中は再入力不要
 - 原価計算要件:
   - 対象店舗は馬場本店・中野店・馬場2号店（事務所は除外）
   - `シーシャ` サブモード: 集計期間（開始日・終了日）、フック本数（初回/おかわり/スタッフ/イベント/チャージ）、ブランド別物販個数（`brands.is_cost_group=true` または `cost_group_id IS NULL` のブランドのみ）、炭種別消費量入力
@@ -64,7 +69,18 @@ parent: [[V-MINT2.0/notes/_index]]
   - 計算指標 A〜G: 1本あたりフレーバー使用量(g) / 原価(¥) / 炭使用量(g) / 炭原価(¥) / 1人あたりドリンク代(¥) / 1人あたりシーシャ本数 / 1人あたり実質原価(¥)
   - ブランドグループ集約: Azure Gold/Black Line は1ブランドに、Tangiers各種は1ブランドに集約して物販管理
   - `merch_count_secondary`: 250g袋など2種類目の物販個数を別途保持（グラム/パック計算で利用）
+  - 単位原価（フレーバー原価・炭原価）と販売値（1本目・おかわり・スタッフ・チャージ）は `cost_price_masters` から `effective_from <= period_key` の最新レコードを自動取得して計算に使用する
   - 詳細要件: [[V-MINT2.0/notes/V-MINT2.0_reuquirements_cost_calculation]]
+- 管理者画面要件:
+  - `フレーバー表示設定` サブモード: `flavors.is_active` を一括 toggle・保存
+  - `新フレーバー追加` サブモード: 新規ブランド（略称 + 正式名称）と銘柄名を `brands` + `flavors` テーブルへ登録
+  - `パッケージサイズ設定` サブモード: ブランドごとに `packages_configured` フラグと `has_pkg_*` フラグを設定・保存（棚卸し入力欄の出し分けに反映）
+  - `単位原価・販売値設定` サブモード: `cost_price_masters` の価格改定レコードを追加・削除。最古レコードは削除不可。改定内容はノートに記録可
+  - 管理者画面への入室には `AdminPinAuth.vue` による別途 PIN 認証が必要（`VITE_ADMIN_PIN_SHA256` で照合）
+- 本番運用要件:
+  - 配信基盤は Cloudflare Pages を使用し、Production branch を `v2` とする
+  - 本番環境変数は Cloudflare 側で `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` / `VITE_PIN_SHA256` / `VITE_PIN_SALT` / `VITE_ADMIN_PIN_SHA256` を管理し、ローカル `.env.local` はコミットしない
+  - 本番切替後のロールバックは Production branch を `main` に戻して実施できる
 - Source: [[_LINEmemo/2026-04-14]]
 
 ## Related

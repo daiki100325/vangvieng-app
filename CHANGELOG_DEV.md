@@ -1,5 +1,88 @@
 # CHANGELOG_DEV
 
+## 2026-05-13（feat: 単位原価・販売値設定サブモード追加 + 基本文書アップデート）
+
+- What:
+  - `AdminApp.vue` に `単位原価・販売値設定`（`unit-price-control`）サブモードを追加
+  - `cost_price_masters` テーブルを新規作成（`supabase/migrations/20260513_add_cost_price_masters.sql`）。`effective_from`（YYYYMM）単位で価格改定を管理し、原価計算時に自動適用
+  - `src/api.js` に `getActiveCostPrice` / `getCostPriceMasters` / `addCostPriceMaster` / `deleteCostPriceMaster` を追加
+  - 基本文書（`architecture.md` / `requirements.md`）を現行実装に同期（パッケージサイズ設定・単位原価設定・`AdminPinAuth.vue`・新 API 群・環境変数 `VITE_ADMIN_PIN_SHA256` を追記）
+- Why:
+  - 価格改定時に `cost_reports` 保存値を手動更新していた運用をなくし、`cost_price_masters` から自動参照する構成へ移行するため
+  - ドキュメントに 2026-05-12 以降の実装差分が未記録のままだったため
+- Files:
+  - `supabase/migrations/20260513_add_cost_price_masters.sql`
+  - `src/components/apps/AdminApp.vue`
+  - `src/api.js`
+  - `notes/V-MINT2.0_architecture.md`
+  - `notes/V-MINT2.0_requirements.md`
+  - `CHANGELOG_DEV.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+
+## 2026-05-12（feat: パッケージサイズ設定サブモード + 管理者PIN認証追加）
+
+- What:
+  - `AdminApp.vue` に `パッケージサイズ設定`（`package-control`）サブモードを追加
+  - `brands` テーブルへパッケージサイズフラグ列（`has_pkg_50/100/125/200/250/1kg`, `packages_configured`）を追加（`supabase/migrations/20260512_add_brand_package_flags.sql`）し、既存ブランドをバックフィル
+  - `src/api.js` に `getBrandsWithPackageFlags` / `updateBrandPackageFlags` を追加
+  - `AdminPinAuth.vue` を追加し、管理者画面入室時に `VITE_ADMIN_PIN_SHA256` でハッシュ照合する別途 PIN 認証を実装
+  - `src/api.js` に `deleteTransferRecordBlock` を追加（移動記録ブロック単位の削除）
+- Why:
+  - 棚卸し入力の物販・在庫パッケージ欄を、ハードコードの `inventoryPackageRules.js` だけでなく DB のフラグで動的に制御できるようにするため
+  - 管理者操作（マスタ編集）には一般 PIN とは別の認証を要求し、誤操作リスクを下げるため
+- Files:
+  - `supabase/migrations/20260512_add_brand_package_flags.sql`
+  - `src/components/apps/AdminApp.vue`
+  - `src/components/common/AdminPinAuth.vue`
+  - `src/api.js`
+  - `CHANGELOG_DEV.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+
+## 2026-05-12（ui: 管理者画面のサブモード表示名を「設定」に統一）
+
+- What: 管理者画面のカード見出し・セクション見出しで「フレーバー表示制御」→「フレーバー表示設定」、「パッケージサイズ制御」→「パッケージサイズ設定」に変更。要件・ユーザーマニュアルの表記を追随。
+- Why: 実態（表示のオンオフやパッケージ表示の設定）に合わせたラベルにするため。
+- Files: `src/components/apps/AdminApp.vue`, `notes/V-MINT2.0_requirements.md`, `notes/V-MINT2.0_user-manual.md`, `CHANGELOG_DEV.md`
+
+## 2026-05-11（docs: transfer の staging→本番 INSERT を単体 SQL に切り出し）
+
+- What: `import_normalized_csv.sql` の 4-2 ブロック相当を `supabase/import_transfer_logs_from_staging_only.sql` として分離した
+- Why: マスタ upsert なしで移動だけ再投入するときに、そのまま SQL Editor で実行できるようにするため
+- Files: `supabase/import_transfer_logs_from_staging_only.sql`, `CHANGELOG_DEV.md`
+- Related: [[V-MINT2.0/supabase/migration_runbook]]
+
+## 2026-05-11（data-migration: 2026-03 transfer 正規化CSVの再生成と runbook 追記）
+
+- What: `convert_transfer_raw_to_normalized.py` で `棚卸しまとめ_2026年 - 3月.csv` から `transfer_logs_2026-03_regenerated.normalized.csv` を再生成（Events 15 / 115 rows）。`transfer_logs_2026-03.normalized.csv` はロック時は手動差し替え。
+- Why: 事務所→馬場2号店の3月移動の取り込み欠けを正規化から張り直すため。
+- Files: `data-migration/csv/normalized/transfer_logs_2026-03_regenerated.normalized.csv`, `supabase/migration_runbook.md`, `CHANGELOG_DEV.md`
+- Related: [[V-MINT2.0/supabase/migration_runbook]]
+
+## 2026-05-11（docs: 原価計算 Azure 消費ズレの切り分けを TROUBLESHOOTING に追記）
+
+- What: ダッシュボードと原価計算の Azure 集約消費が食い違う場合の原因（`brands.cost_group_id` と `getBrandsForCost` の表示キー不一致）と確認手順を `TROUBLESHOOTING.md` に追記した
+- Why: 馬場2号店の事例で再発防止の参照先が欲しいため
+- Files: `TROUBLESHOOTING.md`, `CHANGELOG_DEV.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+
+## 2026-05-11（docs-tooling: user-manual PDF の画像埋め込み不具合修正）
+
+- What:
+  - `generate-pdf.mjs` の画像探索先を修正し、`notes/screenshots` 配下の画像を正しく Base64 埋め込みするよう更新
+  - 画像探索を複数候補ディレクトリでフォールバックするようにし、未検出時は警告ログを出すよう追加
+  - 画像表示サイズを縮小し、画像ブロックの改ページ分割を避けるレイアウトへ最適化（画像前後の余白も拡張）
+  - `notes/V-MINT2.0_user-manual.md` の最終更新表記を PDF レイアウト最適化に合わせて更新
+  - 空白過多を抑えるため本文/見出し/表の余白とフォントサイズを再調整し、章区切り（`---`）で改ページする構成へ変更
+  - 画像サイズを再調整（`max-width: 74%`, `max-height: 98mm`）して、情報の塊が1ページ内で読み取りやすい密度へ改善
+  - `notes/V-MINT2.0_user-manual.md` の「クイックリファレンス」セクションを削除し、PDF出力からも除外
+- Why:
+  - `V-MINT2.0_user-manual_v2.pdf` でスクリーンショットが読み込みエラーになる不具合を解消し、一覧性と可読性を上げるため
+- Files:
+  - `generate-pdf.mjs`
+  - `notes/V-MINT2.0_user-manual.md`
+  - `CHANGELOG_DEV.md`
+- Related: [[V-MINT2.0/notes/V-MINT2.0_user-manual]]
+
 ## 2026-05-11（ui: プロダクト名表記を V-MINT2.0 に統一）
 
 - What:

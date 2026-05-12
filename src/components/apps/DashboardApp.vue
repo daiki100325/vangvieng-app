@@ -104,7 +104,7 @@
                     </div>
 
                     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <div class="overflow-auto max-h-[55vh]">
+                        <div class="overflow-auto max-h-[72vh]">
                             <table :class="['w-full text-sm border-separate border-spacing-0', overviewTableWidthClass]">
                                 <thead class="sticky top-0 z-30">
                                     <tr>
@@ -149,7 +149,7 @@
 
                 <div v-else-if="activeSubMode === 'results' && resultItems.length > 0">
                     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <div class="overflow-auto max-h-[55vh]">
+                        <div class="overflow-auto max-h-[72vh]">
                             <table class="w-full min-w-[1200px] text-sm border-separate border-spacing-0">
                                 <thead class="sticky top-0 z-30">
                                     <tr>
@@ -219,63 +219,65 @@
                 </div>
 
                 <!-- 実質原価サブモード -->
-                <div v-if="activeSubMode === 'cost' && costHistory.length > 0" class="space-y-4">
-                    <!-- グラフ -->
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">原価指標の推移</div>
-                        <div class="flex flex-wrap gap-2 mb-3">
-                            <button v-for="metric in costMetrics" :key="metric.key" type="button"
-                                @click="toggleCostMetric(metric.key)"
-                                :class="['px-3 py-1 rounded-full text-xs font-bold border transition-colors',
-                                    activeCostMetrics.includes(metric.key)
-                                        ? `border-transparent text-white ${metric.bgClass}`
-                                        : 'border-slate-200 text-slate-500 bg-white']">
-                                {{ metric.label }}
-                            </button>
+                <div v-if="activeSubMode === 'cost'" class="space-y-4">
+                    <div v-show="costHistory.length > 0">
+                        <!-- グラフ -->
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">原価指標の推移</div>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <button v-for="metric in costMetrics" :key="metric.key" type="button"
+                                    @click="toggleCostMetric(metric.key)"
+                                    :class="['px-3 py-1 rounded-full text-xs font-bold border transition-colors',
+                                        activeCostMetrics.includes(metric.key)
+                                            ? `border-transparent text-white ${metric.bgClass}`
+                                            : 'border-slate-200 text-slate-500 bg-white']">
+                                    {{ metric.label }}
+                                </button>
+                            </div>
+                            <canvas ref="costChart" style="max-height:280px;"></canvas>
                         </div>
-                        <canvas ref="costChart" style="max-height:280px;"></canvas>
-                    </div>
-                    <!-- サマリーテーブル -->
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <div class="overflow-auto">
-                            <table class="w-full text-sm border-separate border-spacing-0 min-w-[640px]">
-                                <thead class="sticky top-0 z-10">
-                                    <tr>
-                                        <th class="bg-slate-50 text-left px-4 py-2.5 text-xs font-bold text-slate-400 border-b border-slate-200">集計月</th>
-                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-slate-400 border-b border-slate-200">提供本数</th>
-                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-slate-400 border-b border-slate-200">来客数</th>
-                                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">A: フレーバー/1本(g)</th>
-                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">B: フレーバー/1本(円)</th>
-                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">C: 炭/1本(g)</th>
-                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">D: 炭/1本(円)</th>
-                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">E: ドリンク/1人(円)</th>
-                                        <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">F: 本数/人</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="row in costHistory" :key="row.periodKey"
-                                        class="border-b border-slate-50 last:border-0">
-                                        <td class="px-4 py-2.5 font-bold text-slate-700 text-xs">{{ formatPeriodKey(row.periodKey) }}</td>
-                                        <td class="px-3 py-2.5 text-right font-bold text-slate-600 text-xs">{{ row.totalServings }}</td>
-                                        <td class="px-3 py-2.5 text-right font-bold text-slate-600 text-xs">{{ row.totalVisitors }}</td>
-                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.A }}</td>
-                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.B }}</td>
-                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.C }}</td>
-                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.D }}</td>
-                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.E }}</td>
-                                        <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.F }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <!-- サマリーテーブル -->
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+                            <div class="overflow-auto">
+                                <table class="w-full text-sm border-separate border-spacing-0 min-w-[640px]">
+                                    <thead class="sticky top-0 z-10">
+                                        <tr>
+                                            <th class="bg-slate-50 text-left px-4 py-2.5 text-xs font-bold text-slate-400 border-b border-slate-200">集計月</th>
+                                            <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-slate-400 border-b border-slate-200">提供本数</th>
+                                            <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-slate-400 border-b border-slate-200">来客数</th>
+                                            <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">A: フレーバー/1本(g)</th>
+                                            <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">B: フレーバー/1本(円)</th>
+                                            <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">C: 炭/1本(g)</th>
+                                            <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">D: 炭/1本(円)</th>
+                                            <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">E: ドリンク/1人(円)</th>
+                                            <th class="bg-slate-50 text-right px-3 py-2.5 text-xs font-bold text-purple-400 border-b border-slate-200">F: 本数/人</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="row in costHistory.slice().reverse()" :key="row.periodKey"
+                                            class="border-b border-slate-50 last:border-0">
+                                            <td class="px-4 py-2.5 font-bold text-slate-700 text-xs">{{ formatPeriodKey(row.periodKey) }}</td>
+                                            <td class="px-3 py-2.5 text-right font-bold text-slate-600 text-xs">{{ row.totalServings }}</td>
+                                            <td class="px-3 py-2.5 text-right font-bold text-slate-600 text-xs">{{ row.totalVisitors }}</td>
+                                            <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.A }}</td>
+                                            <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.B }}</td>
+                                            <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.C }}</td>
+                                            <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.D }}</td>
+                                            <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.E }}</td>
+                                            <td class="px-3 py-2.5 text-right font-bold text-purple-700 text-xs">{{ row.F }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div v-else-if="activeSubMode === 'cost' && !isLoading" class="text-center py-12 text-slate-400 text-sm font-medium">
-                    選択した店舗の原価計算データがありません
+                    <div v-if="!isLoading && costHistory.length === 0" class="text-center py-12 text-slate-400 text-sm font-medium">
+                        選択した店舗の原価計算データがありません
+                    </div>
                 </div>
 
-                <div v-else-if="activeSubMode !== 'cost' && activeSubMode && dashboardMonth && !isLoading" class="text-center py-12 text-slate-400 text-sm font-medium">
-                    {{ activeSubMode === 'overview' ? '対象月のダッシュボードデータがありません' : '対象月・拠点の棚卸し結果がありません' }}
+                <div v-else-if="activeSubMode !== 'cost' && activeSubMode && dashboardMonth && !isLoading && ((activeSubMode === 'overview' && overviewItems.length === 0) || (activeSubMode === 'results' && resultItems.length === 0))" class="text-center py-12 text-slate-400 text-sm font-medium">
+                    {{ activeSubMode === 'overview' ? '対象月のダッシュボードデータがありません' : '対象月・拠点の棚卸し結果がありません。' }}
                 </div>
                 <div v-else-if="activeSubMode !== 'cost' && activeSubMode && !dashboardMonth" class="text-center py-12 text-slate-400 text-sm font-medium">
                     対象月を選択するとダッシュボードが表示されます
@@ -381,9 +383,6 @@ export default {
                 this.loadCostHistory()
             }
         },
-        costHistory() {
-            this.$nextTick(() => this.renderCostChart())
-        },
         activeCostMetrics() {
             this.$nextTick(() => this.renderCostChart())
         }
@@ -395,8 +394,11 @@ export default {
             if (modeKey === 'cost') {
                 if (!this.selectedStoreKey || this.selectedStoreKey === 'office') {
                     this.selectedStoreKey = this.costStores[0]?.key || ''
+                    // selectedStoreKey が変わった → watch が loadCostHistory() を呼ぶ
+                } else {
+                    // selectedStoreKey が変わらない場合のみ明示的に呼ぶ
+                    await this.loadCostHistory()
                 }
-                await this.loadCostHistory()
                 return
             }
             const prevMonth = this.dashboardMonth
@@ -445,8 +447,14 @@ export default {
             this.isLoading = true
             this.$emit('update:loading', true)
             this.$emit('update:loadingMessage', '原価データを読み込み中...')
+            if (this.costChartInstance) {
+                this.costChartInstance.destroy()
+                this.costChartInstance = null
+            }
             try {
                 this.costHistory = await getCostReportHistory(this.selectedStoreKey)
+                await this.$nextTick()
+                this.renderCostChart()
             } catch (e) {
                 this.errorMessage = e.message || '原価データの取得に失敗しました。'
                 this.costHistory = []
@@ -474,7 +482,10 @@ export default {
             const canvas = this.$refs.costChart
             if (!canvas || this.costHistory.length === 0) return
 
-            if (this.costChartInstance) this.costChartInstance.destroy()
+            if (this.costChartInstance) {
+                this.costChartInstance.destroy()
+                this.costChartInstance = null
+            }
 
             const labels = this.costHistory.map((r) => this.formatPeriodKey(r.periodKey))
             const metricMap = {}

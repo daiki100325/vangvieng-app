@@ -1,107 +1,116 @@
 ﻿recorded_at,period_key,month_num,from_store_key,dest_store_key,brand_name,flavor_name,quantity,status,comment
-2026-03-02,202603,3,baba_main,baba_2nd,AF (Al Fakher),Cardamom,250,completed,(8)移動: 3/2(月)
-2026-03-01,202603,3,office,baba_2nd,AF (Al Fakher),Cinnamon,250,completed,(6)移動: 3/1(日)
-2026-02-26,202603,3,,office,AF (Al Fakher),Coconut,500,completed,(1)入荷: 2/26(木) (arrival)
-2026-02-28,202603,3,office,nakano,AF (Al Fakher),Coconut,250,completed,(3)移動: 2/28(日)
-2026-02-26,202603,3,,office,AF (Al Fakher),Gum With Mint,1000,completed,(1)入荷: 2/26(木) (arrival)
-2026-02-28,202603,3,office,nakano,AF (Al Fakher),Gum With Mint,500,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AF (Al Fakher),Gum With Mint,250,completed,(6)移動: 3/1(日)
-2026-03-14,202603,3,office,nakano,AF (Al Fakher),Gum With Mint,250,completed,(12)移動: 3/14(土)
-2026-03-14,202603,3,nakano,office,AF (Al Fakher),Gum With Mint,250,completed,(13)移動: 3/14(土)
-2026-03-01,202603,3,office,baba_2nd,AF (Al Fakher),Kiwi,250,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AF (Al Fakher),Mint,500,completed,(9)移動: 3/2(月)
-2026-03-01,202603,3,office,baba_2nd,AF (Al Fakher),Orange,250,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AF (Al Fakher),Orange,250,completed,(9)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,AF (Al Fakher),Peach,250,completed,(3)移動: 2/28(日)
-2026-03-02,202603,3,office,baba_main,AF (Al Fakher),Peach,250,completed,(9)移動: 3/2(月)
-2026-02-26,202603,3,,office,AF (Al Fakher),Two Apples,750,completed,(1)入荷: 2/26(木) (arrival)
-2026-02-28,202603,3,office,nakano,AF (Al Fakher),Two Apples,500,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AF (Al Fakher),Two Apples,250,completed,(6)移動: 3/1(日)
-2026-02-26,202603,3,,office,AF (Al Fakher),Vanilla,1500,completed,(1)入荷: 2/26(木) (arrival)
-2026-03-02,202603,3,office,baba_main,AF (Al Fakher),Vanilla,500,completed,(9)移動: 3/2(月)
-2026-03-14,202603,3,office,nakano,AF (Al Fakher),Vanilla,500,completed,(12)移動: 3/14(土)
-2026-02-26,202603,3,,office,AZ (Afzal),Earlgray,2250,completed,(1)入荷: 2/26(木) (arrival)
-2026-02-28,202603,3,office,nakano,AZ (Afzal),Earlgray,500,completed,(3)移動: 2/28(日)
-2026-03-14,202603,3,office,nakano,AZ (Afzal),Gingerale,500,completed,(12)移動: 3/14(土)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Alaskan Ice,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AZR GOLD (Azure Gold Line),Alaskan Ice,500,completed,(9)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Bermuda Mint,500,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Bermuda Mint,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AZR GOLD (Azure Gold Line),Bermuda Mint,1000,completed,(9)移動: 3/2(月)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Black Tea,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AZR BLACK (Azure Black Line),California Blue (Black),200,completed,(9)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Carolina Peach,1000,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Chocolate Cake,500,completed,(6)移動: 3/1(日)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Chocolate Mint,500,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Down Under,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AZR GOLD (Azure Gold Line),Down Under,1000,completed,(9)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,AZR BLACK (Azure Black Line),Dubai Apple (Black),500,completed,(3)移動: 2/28(日)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Grapefruit,1000,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Grapefruit,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AZR GOLD (Azure Gold Line),Green Tea,500,completed,(9)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,AZR BLACK (Azure Black Line),Green Tea (Black),500,completed,(3)移動: 2/28(日)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Guavi,1000,completed,(3)移動: 2/28(日)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Ice Lime,1500,completed,(4)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Ice Lime,1500,completed,(7)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AZR GOLD (Azure Gold Line),Ice Lime,1500,completed,(10)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Ice Pear,500,completed,(3)移動: 2/28(日)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Jungle Juice,1000,completed,(3)移動: 2/28(日)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Kokutou,500,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Kokutou,500,completed,(6)移動: 3/1(日)
-2026-03-01,202603,3,office,baba_2nd,AZR BLACK (Azure Black Line),Kokutou (Black),500,completed,(6)移動: 3/1(日)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Lime,1000,completed,(3)移動: 2/28(日)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Limoncello,1000,completed,(3)移動: 2/28(日)
-2026-03-07,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Limoncello,500,completed,(11)移動: 3/7(土)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Lychee,1000,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Lychee,1000,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AZR GOLD (Azure Gold Line),Lychee,500,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,AZR BLACK (Azure Black Line),Lychee (Black),200,completed,(9)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Mexicola,1000,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Mexicola,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AZR GOLD (Azure Gold Line),Mexicola,1000,completed,(9)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Orange Crush,500,completed,(3)移動: 2/28(日)
-2026-02-28,202603,3,office,nakano,AZR BLACK (Azure Black Line),Orange Crush (Black),500,completed,(3)移動: 2/28(日)
-2026-03-02,202603,3,office,baba_main,AZR BLACK (Azure Black Line),Orange Crush (Black),500,completed,(9)移動: 3/2(月)
-2026-03-16,202603,3,baba_2nd,,AZR BLACK (Azure Black Line),Orange Crush (Black),100,completed,2026-03-16 (dispose)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Passion Fruit,500,completed,(3)移動: 2/28(日)
-2026-03-07,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Queen Of Fruits,500,completed,(11)移動: 3/7(土)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Rio Mint,500,completed,(6)移動: 3/1(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Royal Mango,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,AZR GOLD (Azure Gold Line),Royal Mango,500,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,baba_main,baba_2nd,AZR GOLD (Azure Gold Line),Solana Beach,100,completed,(8)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,AZR GOLD (Azure Gold Line),Sour,500,completed,(9)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,AZR GOLD (Azure Gold Line),Tropical Paradise,500,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,AZR GOLD (Azure Gold Line),Tropical Paradise,500,completed,(6)移動: 3/1(日)
-2026-02-26,202603,3,,office,FM (Fumari),Banana Custard,1200,completed,(1)入荷: 2/26(木) (arrival)
-2026-02-28,202603,3,office,nakano,FM (Fumari),Banana Custard,500,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,FM (Fumari),Banana Custard,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,FM (Fumari),Banana Custard,200,completed,(9)移動: 3/2(月)
-2026-02-26,202603,3,,office,HF (Hookafina),Double Melon Blast,300,completed,(1)入荷: 2/26(木) (arrival)
-2026-03-01,202603,3,office,baba_2nd,HF (Hookafina),Double Melon Blast,300,completed,(6)移動: 3/1(日)
-2026-02-26,202603,3,nakano,baba_2nd,HF (Hookafina),Orange Mint,100,completed,(2)移動: 2/26(木)
-2026-02-26,202603,3,,office,HF (Hookafina),Salted Caramel Waffle,5000,completed,(1)入荷: 2/26(木) (arrival)
-2026-03-01,202603,3,office,baba_2nd,HF (Hookafina),Salted Caramel Waffle,500,completed,(6)移動: 3/1(日)
-2026-02-26,202603,3,office,,HF (Hookafina),Salted Caramel Waffle,500,completed,02/26 / 通関ミスの為、そもそもー500g入荷してた。 (dispose)
-2026-02-26,202603,3,nakano,baba_2nd,HF (Hookafina),Strawberry Margarita,100,completed,(2)移動: 2/26(木)
-2026-03-01,202603,3,office,baba_2nd,HF (Hookafina),Vanilla Shake,200,completed,(6)移動: 3/1(日)
-2026-02-26,202603,3,nakano,baba_2nd,MH (Musthave),Cookie,25,completed,(2)移動: 2/26(木)
-2026-02-26,202603,3,nakano,baba_2nd,MH (Musthave),Marula,50,completed,(2)移動: 2/26(木)
-2026-02-26,202603,3,nakano,baba_2nd,MH (Musthave),Nord Star,25,completed,(2)移動: 2/26(木)
-2026-03-01,202603,3,office,baba_2nd,SB (Starbuzz/Bold),Lebanese Bomb Shell,250,completed,(6)移動: 3/1(日)
-2026-03-01,202603,3,office,baba_2nd,TF (Trifecta),Nawar,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Bacon,250,completed,(9)移動: 3/2(月)
-2026-02-28,202603,3,office,nakano,TG NOIR (Tangiers Noir),Cane Mint,500,completed,(3)移動: 2/28(日)
-2026-03-01,202603,3,office,baba_2nd,TG NOIR (Tangiers Noir),Cane Mint,500,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,TG BURLEY (Tangiers Burley),Cane Mint (Burley),200,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Caramel Apple,200,completed,(9)移動: 3/2(月)
-2026-03-01,202603,3,office,baba_2nd,TG NOIR (Tangiers Noir),Cherry Limeade,200,completed,(6)移動: 3/1(日)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Chocolate Iced Cream,250,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Foreplay On The Peach,100,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Ginger Pear,250,completed,(9)移動: 3/2(月)
-2026-02-26,202603,3,,office,TG NOIR (Tangiers Noir),Kiwi,500,completed,(1)入荷: 2/26(木) (arrival)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Kiwi,500,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Lemon Tea,200,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Maraschino Cherry,100,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Raspberry Iced Tea,100,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Strawberry,100,completed,(9)移動: 3/2(月)
-2026-03-02,202603,3,office,baba_main,TG NOIR (Tangiers Noir),Yunnan Shaddock,100,completed,(9)移動: 3/2(月)
+2026-03-02,202603,3,baba_main,baba_2nd,Al Fakher,Cardamom,250,completed,
+2026-03-01,202603,3,office,baba_2nd,Al Fakher,Cinnamon,250,completed,
+2026-02-26,202603,3,,office,Al Fakher,Coconut,500,completed,
+2026-02-28,202603,3,office,nakano,Al Fakher,Coconut,250,completed,
+2026-02-26,202603,3,,office,Al Fakher,Gum With Mint,1000,completed,
+2026-02-28,202603,3,office,nakano,Al Fakher,Gum With Mint,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Al Fakher,Gum With Mint,250,completed,
+2026-03-14,202603,3,office,nakano,Al Fakher,Gum With Mint,250,completed,
+2026-03-14,202603,3,nakano,office,Al Fakher,Gum With Mint,250,completed,
+2026-03-01,202603,3,office,baba_2nd,Al Fakher,Kiwi,250,completed,
+2026-03-02,202603,3,office,baba_main,Al Fakher,Mint,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Al Fakher,Orange,250,completed,
+2026-03-02,202603,3,office,baba_main,Al Fakher,Orange,250,completed,
+2026-02-28,202603,3,office,nakano,Al Fakher,Peach,250,completed,
+2026-03-02,202603,3,office,baba_main,Al Fakher,Peach,250,completed,
+2026-02-26,202603,3,,office,Al Fakher,Two Apples,750,completed,
+2026-02-28,202603,3,office,nakano,Al Fakher,Two Apples,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Al Fakher,Two Apples,250,completed,
+2026-02-26,202603,3,,office,Al Fakher,Vanilla,1500,completed,
+2026-03-02,202603,3,office,baba_main,Al Fakher,Vanilla,500,completed,
+2026-03-14,202603,3,office,nakano,Al Fakher,Vanilla,500,completed,
+2026-02-26,202603,3,,office,Afzal,Earlgray,2250,completed,
+2026-02-28,202603,3,office,nakano,Afzal,Earlgray,500,completed,
+2026-03-14,202603,3,office,nakano,Afzal,Gingerale,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Alaskan Ice,500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Gold Line,Alaskan Ice,500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Bermuda Mint,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Bermuda Mint,500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Gold Line,Bermuda Mint,1000,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Black Tea,500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Black Line,California Blue (Black),200,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Carolina Peach,1000,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Chocolate Cake,500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Chocolate Mint,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Down Under,500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Gold Line,Down Under,1000,completed,
+2026-02-28,202603,3,office,nakano,Azure Black Line,Dubai Apple (Black),500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Grapefruit,1000,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Grapefruit,500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Gold Line,Green Tea,500,completed,
+2026-03-16,202603,3,office,baba_2nd,Azure Gold Line,Green Tea,500,completed,
+2026-02-28,202603,3,office,nakano,Azure Black Line,Green Tea (Black),500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Guavi,1000,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Ice Lime,1500,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Ice Lime,1500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Gold Line,Ice Lime,1500,completed,
+2026-03-16,202603,3,office,baba_2nd,Azure Gold Line,Ice Lime,1000,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Ice Pear,500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Jungle Juice,1000,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Kokutou,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Kokutou,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Black Line,Kokutou (Black),500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Lime,1000,completed,
+2026-03-16,202603,3,office,baba_2nd,Azure Gold Line,Lime,500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Limoncello,1000,completed,
+2026-03-07,202603,3,office,baba_2nd,Azure Gold Line,Limoncello,500,completed,
+2026-03-16,202603,3,office,baba_2nd,Azure Gold Line,Limoncello,500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Lychee,1000,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Lychee,1000,completed,
+2026-03-02,202603,3,office,baba_main,Azure Gold Line,Lychee,500,completed,
+2026-03-16,202603,3,office,baba_2nd,Azure Gold Line,Lychee,500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Black Line,Lychee (Black),200,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Mexicola,1000,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Mexicola,500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Gold Line,Mexicola,1000,completed,
+2026-03-16,202603,3,office,baba_2nd,Azure Gold Line,Mexicola,500,completed,
+2026-03-16,202603,3,office,baba_2nd,Azure Gold Line,New Grape Mint,500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Orange Crush,500,completed,
+2026-02-28,202603,3,office,nakano,Azure Black Line,Orange Crush (Black),500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Black Line,Orange Crush (Black),500,completed,
+2026-03-16,202603,3,baba_2nd,,Azure Black Line,Orange Crush (Black),100,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Passion Fruit,500,completed,
+2026-03-16,202603,3,office,baba_2nd,Azure Gold Line,Pineapple Express,500,completed,
+2026-03-07,202603,3,office,baba_2nd,Azure Gold Line,Queen Of Fruits,500,completed,
+2026-03-16,202603,3,office,baba_2nd,Azure Gold Line,Queen Of Fruits,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Rio Mint,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Royal Mango,500,completed,
+2026-03-02,202603,3,office,baba_main,Azure Gold Line,Royal Mango,500,completed,
+2026-03-02,202603,3,baba_main,baba_2nd,Azure Gold Line,Solana Beach,100,completed,
+2026-03-02,202603,3,office,baba_main,Azure Gold Line,Sour,500,completed,
+2026-02-28,202603,3,office,nakano,Azure Gold Line,Tropical Paradise,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Azure Gold Line,Tropical Paradise,500,completed,
+2026-02-26,202603,3,,office,Fumari,Banana Custard,1200,completed,
+2026-02-28,202603,3,office,nakano,Fumari,Banana Custard,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Fumari,Banana Custard,500,completed,
+2026-03-02,202603,3,office,baba_main,Fumari,Banana Custard,200,completed,
+2026-02-26,202603,3,,office,Hookafina,Double Melon Blast,300,completed,
+2026-03-01,202603,3,office,baba_2nd,Hookafina,Double Melon Blast,300,completed,
+2026-02-26,202603,3,nakano,baba_2nd,Hookafina,Orange Mint,100,completed,
+2026-02-26,202603,3,,office,Hookafina,Salted Caramel Waffle,5000,completed,
+2026-03-01,202603,3,office,baba_2nd,Hookafina,Salted Caramel Waffle,500,completed,
+2026-02-26,202603,3,office,,Hookafina,Salted Caramel Waffle,500,completed,通関ミスの為、そもそもー500g入荷してた。
+2026-02-26,202603,3,nakano,baba_2nd,Hookafina,Strawberry Margarita,100,completed,
+2026-03-01,202603,3,office,baba_2nd,Hookafina,Vanilla Shake,200,completed,
+2026-02-26,202603,3,nakano,baba_2nd,Musthave,Cookie,25,completed,
+2026-02-26,202603,3,nakano,baba_2nd,Musthave,Marula,50,completed,
+2026-02-26,202603,3,nakano,baba_2nd,Musthave,Nord Star,25,completed,
+2026-03-01,202603,3,office,baba_2nd,Starbuzz/Bold,Lebanese Bomb Shell,250,completed,
+2026-03-01,202603,3,office,baba_2nd,Trifecta,Nawar,500,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Bacon,250,completed,
+2026-02-28,202603,3,office,nakano,Tangiers Noir,Cane Mint,500,completed,
+2026-03-01,202603,3,office,baba_2nd,Tangiers Noir,Cane Mint,500,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Burley,Cane Mint (Burley),200,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Caramel Apple,200,completed,
+2026-03-01,202603,3,office,baba_2nd,Tangiers Noir,Cherry Limeade,200,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Chocolate Iced Cream,250,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Foreplay On The Peach,100,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Ginger Pear,250,completed,
+2026-02-26,202603,3,,office,Tangiers Noir,Kiwi,500,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Kiwi,500,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Lemon Tea,200,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Maraschino Cherry,100,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Raspberry Iced Tea,100,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Strawberry,100,completed,
+2026-03-02,202603,3,office,baba_main,Tangiers Noir,Yunnan Shaddock,100,completed,

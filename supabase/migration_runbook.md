@@ -32,6 +32,73 @@
   - ログCSVは `period_key (YYYYMM)` 列を優先し、未指定時は `recorded_at` と `month_num` から補完される
   - 同ファイル末尾の検証クエリでスプレッドシート集計セルと照合
 
+## 2.1) 単月 `transfer_logs` の差し替え（正規化CSVの再生成 → DB再投入）
+
+生シートを直したあと **特定月の移動だけ**入れ直すときの流れ（例: 2026年3月 = `period_key = 202603`）。
+
+### A. 正規化CSVの再生成
+
+プロジェクトルートで（パスに空白がある場合は引用符で囲む）:
+
+```powershell
+python data-migration/convert_transfer_raw_to_normalized.py `
+  --input "data-migration/csv/raw/棚卸しまとめ_2026年 - 3月.csv" `
+  --output "data-migration/csv/normalized/transfer_logs_2026-03.normalized.csv" `
+  --month-num 3 `
+  --base-year 2026
+```
+
+- 成功時、コンソールに `Events detected:` / `Converted rows:` / `Output:` が出る。
+- 既に `transfer_logs_2026-03.normalized.csv` を Excel 等で開いていると **上書き Permission denied** になることがある。その場合は別名で出力してから、エディタを閉じて差し替える（例: `_regenerated` → 本番ファイル名へリネーム）。
+
+### B. Supabase（本番）での差し替え手順
+
+**影響範囲:** `DELETE` は **`period_key = 202603` の移動行を全店舗分**削除する（3月シート由来の移動を月単位で張り直す前提）。
+
+1. **バックアップ（推奨）**  
+   SQL Editor で結果をエクスポートするか、例:
+   `select * from transfer_logs where period_key = 202603 order by id;`
+
+2. **本番の3月分のみ削除**
+
+```sql
+begin;
+delete from transfer_logs where period_key = 202603;
+commit;
+```
+
+3. **staging を空にする**
+
+```sql
+truncate table stg_transfer_logs;
+```
+
+4. **`transfer_logs_2026-03.normalized.csv` を `stg_transfer_logs` に取り込む**  
+   - Supabase Table Editor の **Import** で `stg_transfer_logs` を選び、CSVの列順が `import_normalized_csv.sql` の `stg_transfer_logs` 定義と一致することを確認する。
+
+5. **`import_transfer_logs_from_staging_only.sql` を実行する**（`import_normalized_csv.sql` の **4-2) transfer_logs** と同等）  
+   - リポジトリ: `supabase/import_transfer_logs_from_staging_only.sql` を SQL Editor に貼り付けて実行してもよい。  
+   - **手前の 3) マスタ upsert は実行しない**（既存 `brands` / `flavors` のまま）。
+
+6. **検証**
+
+```sql
+select period_key, count(*) from transfer_logs where period_key = 202603 group by period_key;
+
+-- 事務所 → 馬場2号店（件数の目安用）
+select count(*) from transfer_logs t
+join stores fs on fs.id = t.from_store_id
+join stores ds on ds.id = t.dest_store_id
+where t.period_key = 202603 and fs.store_key = 'office' and ds.store_key = 'baba_2nd';
+```
+
+7. アプリの **移動記録（3月）** と、必要なら **`fetch_inventory_result_details(202603, 4)` の `transferamount`** を再確認する。
+
+### C. 注意
+
+- `transfer_logs` は **`inventory_logs` と独立**なので、移動だけ差し替えても棚卸し行は触れない。
+- `resolved_transfer` の `join brands` / `join flavors` に失敗すると **その行は挿入されない**。取り込み後、正規化CSVに `ambiguous:` が残っていないか・ブランド名が DB の `brands.name` / `short_name` と解決できるかを確認する。
+
 ## 3) 検証チェックリスト
 - 件数一致
   - 月別・店舗別 `inventory_logs` 件数

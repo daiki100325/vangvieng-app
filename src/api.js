@@ -333,12 +333,18 @@ export async function getSheetData(storeKey, sheetName) {
   requireSupabase()
   const periodKey = normalizePeriodKey(sheetName)
   const storeId = await getStoreIdByKey(storeKey)
-  const { data, error } = await supabase.rpc('fetch_inventory_sheet_data', {
-    p_store_id: storeId,
-    p_period_key: periodKey
+  const [rpcResult, brandsResult] = await Promise.all([
+    supabase.rpc('fetch_inventory_sheet_data', { p_store_id: storeId, p_period_key: periodKey }),
+    supabase.from('brands').select('name,packages_configured,has_pkg_50,has_pkg_100,has_pkg_125,has_pkg_200,has_pkg_250,has_pkg_1kg')
+  ])
+  if (rpcResult.error) throw rpcResult.error
+  if (brandsResult.error) throw brandsResult.error
+  const brandMap = new Map((brandsResult.data || []).map(b => [b.name, b]))
+  const items = (rpcResult.data || []).map((row, idx) => {
+    const item = buildItemFromLog(row, idx)
+    item.brandData = brandMap.get(item.brand) || null
+    return item
   })
-  if (error) throw error
-  const items = (data || []).map((row, idx) => buildItemFromLog(row, idx))
   return { items, date: items[0]?.recorded_at || '' }
 }
 
@@ -851,6 +857,25 @@ export async function listTransferBrandsOrdered() {
     .sort((a, b) => (a.brand + a.flavorName).localeCompare(b.brand + b.flavorName, 'ja'))
 }
 
+export async function getBrandsWithPackageFlags() {
+  requireSupabase()
+  const { data, error } = await supabase
+    .from('brands')
+    .select('id,name,packages_configured,has_pkg_50,has_pkg_100,has_pkg_125,has_pkg_200,has_pkg_250,has_pkg_1kg')
+    .order('name', { ascending: true })
+  if (error) throw error
+  return data || []
+}
+
+export async function updateBrandPackageFlags(brandId, flags) {
+  requireSupabase()
+  const { error } = await supabase
+    .from('brands')
+    .update(flags)
+    .eq('id', brandId)
+  if (error) throw error
+}
+
 // ============================================================
 // 原価計算 API
 // ============================================================
@@ -1035,6 +1060,59 @@ export async function getDrinkOrders(storeKey, periodKey) {
   return data || []
 }
 
+// ------------------------------------------------------------
+// 単位原価・販売値マスタ API
+// ------------------------------------------------------------
+
+export async function getActiveCostPrice(periodKey) {
+  requireSupabase()
+  const pk = normalizePeriodKey(periodKey)
+  const { data, error } = await supabase
+    .from('cost_price_masters')
+    .select('*')
+    .lte('effective_from', pk)
+    .order('effective_from', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  // レコードが存在しない場合は cost_reports の DB DEFAULT と同じ値で返す
+  return data ?? {
+    price_flavor_per_g: 40,
+    price_charcoal_per_kg: 600,
+    price_hookah_first: 1900,
+    price_hookah_refill: 1800,
+    price_hookah_staff: 1800,
+    price_charge: 900
+  }
+}
+
+export async function getCostPriceMasters() {
+  requireSupabase()
+  const { data, error } = await supabase
+    .from('cost_price_masters')
+    .select('*')
+    .order('effective_from', { ascending: false })
+  if (error) throw error
+  return data || []
+}
+
+export async function addCostPriceMaster(row) {
+  requireSupabase()
+  const { error } = await supabase
+    .from('cost_price_masters')
+    .insert(row)
+  if (error) throw error
+}
+
+export async function deleteCostPriceMaster(id) {
+  requireSupabase()
+  const { error } = await supabase
+    .from('cost_price_masters')
+    .delete()
+    .eq('id', id)
+  if (error) throw error
+}
+
 export async function getCostReportHistory(storeKey) {
   requireSupabase()
   const storeId = await getStoreIdByKey(storeKey)
@@ -1082,9 +1160,11 @@ export async function getCostReportHistory(storeKey) {
     const charcoalServe = toNumeric(r.charcoal_nyanco_flat_serve) + toNumeric(r.charcoal_kingco_flat_serve)
 
     const A = totalServings > 0 ? flavorServe / totalServings : 0
-    const B = toNumeric(r.price_flavor_per_g) * A
+    const priceFlavorPerG = toNumeric(r.price_flavor_per_g) || 40
+    const priceCharcoalPerKg = toNumeric(r.price_charcoal_per_kg) || 600
+    const B = priceFlavorPerG * A
     const C = totalServings > 0 ? charcoalServe * 1000 / totalServings : 0
-    const D = toNumeric(r.price_charcoal_per_kg) * C / 1000
+    const D = priceCharcoalPerKg * C / 1000
     const E = totalVisitors > 0 ? drinkTotal / totalVisitors : 0
     const F = totalVisitors > 0 ? totalServings / totalVisitors : 0
 

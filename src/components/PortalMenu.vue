@@ -2,7 +2,7 @@
     <div class="flex flex-col items-center justify-center py-10">
         <h3 class="text-lg font-bold text-slate-600 mb-6 bg-slate-100 px-6 py-2 rounded-full">業務を選択してください</h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full max-w-7xl px-4">
             <!-- Inventory App Card -->
             <button @click="$emit('open-inventory')"
                 class="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-colors transition-transform transition-shadow duration-300 text-left flex flex-col h-full focus:outline-none focus:ring-4 focus:ring-brand-500/20 active:scale-95">

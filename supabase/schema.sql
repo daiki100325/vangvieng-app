@@ -7,7 +7,14 @@ create table if not exists stores (
 create table if not exists brands (
   id bigserial primary key,
   name text unique not null,
-  short_name text
+  short_name text,
+  has_pkg_50          boolean not null default false,
+  has_pkg_100         boolean not null default false,
+  has_pkg_125         boolean not null default false,
+  has_pkg_200         boolean not null default false,
+  has_pkg_250         boolean not null default false,
+  has_pkg_1kg         boolean not null default false,
+  packages_configured boolean not null default false
 );
 
 create table if not exists flavors (

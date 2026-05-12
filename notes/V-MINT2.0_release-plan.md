@@ -6,18 +6,18 @@ parent: [[V-MINT2.0/notes/_index]]
 # V-MINT2.0 — Release plan
 
 ## Summary
-- Phase 1〜6: **完了** — Supabase 接続確立 → UIパリティ → 5アプリ完全実装 → 受け入れ確認
-- Phase 7: **Cost App** — 原価計算機能実装（`cost_reports` / `flavor_brand_sales` / `drink_orders`）→ ブランドグループ集約対応 → 済
-- Phase 8（次フェーズ）: ダッシュボード「実質原価」サブモード（推移グラフ・サマリーテーブル）→ Cloudflare 本番切替
+- Phase 1〜6: **完了** — Supabase 接続確立 → UIパリティ → 基本アプリ実装 → 受け入れ確認
+- Phase 7: **完了** — Cost App（`cost_reports` / `flavor_brand_sales` / `drink_orders`）とブランドグループ集約対応
+- Phase 8: **完了** — ダッシュボード「実質原価」サブモード実装、Cloudflare 本番切替、既存URLで運用開始
 
 ## Context
-- 現行運用版は `V-MINT` のまま維持する必要がある
-- 先に環境分離と回帰検証を固定しないと業務影響リスクが高い
+- 現在は `V-MINT2.0` が本番運用中で、既存 URL で稼働している
+- 現フェーズは「移行」ではなく「運用安定化と継続改善」が中心
 
 ## Details
 - **ローカル優先の開発フロー（本番・Git 反映前）**
   - 接続: `.env.example` をコピーして **プロジェクト直下のファイル** `.env.local` を作成し（フォルダ `.env.local/` ではない）、Supabase の接続値を設定する
-  - 開発サーバー: `npm run dev` で動作確認（本番切替・Cloudflare は後フェーズ）
+  - 開発サーバー: `npm run dev` で動作確認し、修正内容をローカルで検証する
   - プッシュ前ゲート: `npm run build` が通ること、Transfer / Inventory / Request / Dashboard の手動スモークをローカルで済ませてから Git にプッシュする
 - 準備:
   - `.env` 設定と Supabase SQL 適用
@@ -70,12 +70,16 @@ parent: [[V-MINT2.0/notes/_index]]
   - `flavor_brand_sales` へ `merch_count_secondary` 追加（migration 20260507）
   - `CostApp.vue` 実装: シーシャ入力・ドリンク随時入力・原価計算プレビュー・保存
   - `src/api.js` に Cost App API 群追加（`getBrandsForCost` / `getCostReport` / `upsertCostReport` / `saveBrandSales` / `getBrandConsumptionForCost` / `addDrinkOrder` 等）
-- **Phase 8 残作業チェックリスト**
-  - [ ] ダッシュボード「実質原価」サブモード（推移グラフ・サマリーテーブル）
-  - [ ] `getCostReportHistory` を Dashboard に接続
-  - [ ] 受け入れチェックリスト完了（`V-MINT2.0_test-plan_cost_calculation.md`）
-  - [ ] `npm run build` 成功確認
-  - [ ] Cloudflare 切替判断・本番反映
+- **Phase 8 完了チェックリスト（実績）**
+  - [x] ダッシュボード「実質原価」サブモード（推移グラフ・サマリーテーブル）
+  - [x] `getCostReportHistory` を Dashboard に接続
+  - [x] 受け入れチェックリスト完了（`V-MINT2.0_test-plan_cost_calculation.md`）
+  - [x] `npm run build` 成功確認
+  - [x] Cloudflare 切替判断・本番反映
+- **運用フェーズの次アクション**
+  - [ ] 月次運用レビュー（在庫・移動・実質原価の整合）を定例化
+  - [ ] 現場向けマニュアルの更新差分を月次で反映
+  - [ ] 原価ダッシュボードの表示改善要望を優先度付けしてバックログ化
 - Source: [[V-MINT2.0/notes/V-MINT2.0_requirements]]
 
 ## Related

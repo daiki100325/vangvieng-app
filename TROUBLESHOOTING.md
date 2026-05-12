@@ -292,3 +292,28 @@
 - Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
 - Decision: [[V-MINT2.0/DECISIONS]]
 - Checklist: [[V-MINT2.0/notes/V-MINT2.0_dashboard-data-verification]]
+
+## Case: 原価計算の Azure Gold/Black 総消費だけダッシュボードの銘柄別合計と食い違う
+- Date: 2026-05-11
+- Severity: Medium
+- Owner: V-MINT2.0 ops
+
+### Symptoms
+- ダッシュボード「棚卸し結果」では店舗×月の銘柄別当月消費が妥当に見える
+- 原価計算 Step3 の「Azure Gold/Black」行の総消費量(g)だけ、Gold/Black 各銘柄のダッシュボード値を足した期待より小さい（例: 合計がちょうど数千 g 欠ける）
+
+### Cause
+- 原価計算の自動集計は `getBrandConsumptionForCost`（`src/api.js`）が **フレーバーごとの `prev + transfer - current` を `brands.cost_group_id ?? brands.id` に加算**し、画面は `getBrandsForCost` が返す **集約ブランド行（`is_cost_group`）と `cost_group_id` が NULL のみ**に `consumptionMap.get(brand_id)` で表示する
+- 一部フレーバーの `brands.cost_group_id` が未設定・別ブランド誤紐付け・重複ブランド行のどれかだと、消費が **集約キー `Azure Gold/Black` の id に乗らず**、画面上はどの行にも出ない（合計だけ欠ける）
+
+### Fix
+- Supabase で Azure系ブランドの `cost_group_id` を確認し、`Azure Gold Line` / `Azure Black Line` がすべて **同一の `Azure Gold/Black` 行 id** を指すよう修正する
+- 問題フレーバーは `flavors.brand_id` が意図しないブランド（別名の重複行など）を指していないか確認する
+
+### Prevention
+- マスタ追加・CSV 取込後に `SELECT id, name, cost_group_id FROM brands WHERE name ILIKE '%azure%'` を定例確認する
+- 原価計算を開く前に、ダッシュボードで Azure 系銘柄の行数と原価の1行が整合するかスポット比較する
+
+### Links
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
+- Architecture: [[V-MINT2.0/notes/V-MINT2.0_architecture]]

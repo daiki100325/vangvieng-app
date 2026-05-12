@@ -445,7 +445,7 @@
 </template>
 
 <script>
-import { getBrandsForCost, getBrandConsumptionForCost, getCostReport, upsertCostReport, saveBrandSales, addDrinkOrder, updateDrinkOrder, deleteDrinkOrder, getDrinkOrders, fetchLatestTransferPeriodKey } from '../../api.js'
+import { getBrandsForCost, getBrandConsumptionForCost, getCostReport, upsertCostReport, saveBrandSales, addDrinkOrder, updateDrinkOrder, deleteDrinkOrder, getDrinkOrders, fetchLatestTransferPeriodKey, getActiveCostPrice } from '../../api.js'
 import { buildYearOptions, buildMonthOptions, composePeriodKey, parsePeriodKey } from '../../utils/periods.js'
 
 // ブランド別デフォルト1パケあたりグラム数
@@ -500,7 +500,15 @@ export default {
                     kingcoFlatMerch: 0,
                     kinkcoCubeMerch: 0
                 },
-                brandSales: []
+                brandSales: [],
+                prices: {
+                    priceFlavorPerG: 40,
+                    priceCharcoalPerKg: 600,
+                    priceHookahFirst: 1900,
+                    priceHookahRefill: 1800,
+                    priceHookahStaff: 1800,
+                    priceCharge: 900
+                }
             },
             drinkOrders: [],
             newDrink: { orderDate: '', amount: null, description: '' },
@@ -600,11 +608,11 @@ export default {
         calcA() {
             return this.totalServings > 0 ? this.totalFlavorServe / this.totalServings : 0
         },
-        calcB() { return 40 * this.calcA },
+        calcB() { return this.form.prices.priceFlavorPerG * this.calcA },
         calcC() {
             return this.totalServings > 0 ? this.charcoalServeTotal * 1000 / this.totalServings : 0
         },
-        calcD() { return 600 * this.calcC / 1000 },
+        calcD() { return this.form.prices.priceCharcoalPerKg * this.calcC / 1000 },
         calcE() {
             return this.totalVisitors > 0 ? this.drinkTotal / this.totalVisitors : 0
         },
@@ -696,10 +704,19 @@ export default {
             this.$emit('update:loadingMessage', 'データを読み込み中...')
             this.errorMessage = ''
             try {
-                const [existing, brands, consumptionMap] = await Promise.all([
+                const parsed = parsePeriodKey(this.periodKey)
+                const prevPeriodKey = parsed
+                    ? composePeriodKey(
+                        parsed.month === 1 ? parsed.year - 1 : parsed.year,
+                        parsed.month === 1 ? 12 : parsed.month - 1
+                      )
+                    : null
+                const [existing, brands, consumptionMap, prevReport, activePrices] = await Promise.all([
                     getCostReport(this.selectedStoreKey, this.periodKey),
                     getBrandsForCost(),
-                    getBrandConsumptionForCost(this.selectedStoreKey, this.periodKey)
+                    getBrandConsumptionForCost(this.selectedStoreKey, this.periodKey),
+                    prevPeriodKey ? getCostReport(this.selectedStoreKey, prevPeriodKey).catch(() => null) : Promise.resolve(null),
+                    getActiveCostPrice(this.periodKey).catch(() => null)
                 ])
 
                 if (existing) {
@@ -718,6 +735,15 @@ export default {
                         kingcoFlatServe: r.charcoal_kingco_flat_serve,
                         kingcoFlatMerch: r.charcoal_kingco_flat_merch,
                         kinkcoCubeMerch: r.charcoal_kingco_cube_merch
+                    }
+                    // 保存済みスナップショット価格を復元
+                    this.form.prices = {
+                        priceFlavorPerG: Number(r.price_flavor_per_g) || 40,
+                        priceCharcoalPerKg: Number(r.price_charcoal_per_kg) || 600,
+                        priceHookahFirst: Number(r.price_hookah_first) || 1900,
+                        priceHookahRefill: Number(r.price_hookah_refill) || 1800,
+                        priceHookahStaff: Number(r.price_hookah_staff) || 1800,
+                        priceCharge: Number(r.price_charge) || 900
                     }
                     const salesMap = new Map(existing.brandSales.map((s) => [s.brand_id, s]))
                     this.form.brandSales = brands.map((b) => {
@@ -748,12 +774,29 @@ export default {
                     this.drinkOrders = drinks.map((d) => ({
                         id: d.id, orderDate: d.order_date, amount: d.amount, description: d.description
                     }))
-                    this.form.startDate = ''
+                    let autoStartDate = ''
+                    if (prevReport && prevReport.report && prevReport.report.end_date) {
+                        const prevEnd = new Date(prevReport.report.end_date)
+                        prevEnd.setDate(prevEnd.getDate() + 1)
+                        autoStartDate = prevEnd.toISOString().slice(0, 10)
+                    }
+                    this.form.startDate = autoStartDate
                     this.form.endDate = ''
                     this.form.hookahs = { first: 0, charge: 0, refill: 0, staff: 0, event: 0 }
                     this.form.charcoal = {
                         nyancoFlatServe: 0, nyancoFlatMerch: 0, nyancoCubeMerch: 0,
                         kingcoFlatServe: 0, kingcoFlatMerch: 0, kinkcoCubeMerch: 0
+                    }
+                    // 対象期間に適用される価格マスタをセット
+                    if (activePrices) {
+                        this.form.prices = {
+                            priceFlavorPerG: Number(activePrices.price_flavor_per_g) || 40,
+                            priceCharcoalPerKg: Number(activePrices.price_charcoal_per_kg) || 600,
+                            priceHookahFirst: Number(activePrices.price_hookah_first) || 1900,
+                            priceHookahRefill: Number(activePrices.price_hookah_refill) || 1800,
+                            priceHookahStaff: Number(activePrices.price_hookah_staff) || 1800,
+                            priceCharge: Number(activePrices.price_charge) || 900
+                        }
                     }
                 }
                 this.step = 1
@@ -870,7 +913,13 @@ export default {
                     charcoal_nyanco_cube_merch: c.nyancoCubeMerch || 0,
                     charcoal_kingco_flat_serve: c.kingcoFlatServe || 0,
                     charcoal_kingco_flat_merch: c.kingcoFlatMerch || 0,
-                    charcoal_kingco_cube_merch: c.kinkcoCubeMerch || 0
+                    charcoal_kingco_cube_merch: c.kinkcoCubeMerch || 0,
+                    price_flavor_per_g: this.form.prices.priceFlavorPerG,
+                    price_charcoal_per_kg: this.form.prices.priceCharcoalPerKg,
+                    price_hookah_first: this.form.prices.priceHookahFirst,
+                    price_hookah_refill: this.form.prices.priceHookahRefill,
+                    price_hookah_staff: this.form.prices.priceHookahStaff,
+                    price_charge: this.form.prices.priceCharge
                 })
                 await saveBrandSales(reportId, this.form.brandSales.filter((b) => b.totalConsumptionG !== 0 || b.merchCount > 0 || (b.merchCount250 || 0) > 0))
                 this.$emit('submitted')
