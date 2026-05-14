@@ -454,7 +454,13 @@ export async function getInventoryData(monthNum) {
   requireSupabase()
   const { data, error } = await supabase.rpc('fetch_request_inventory_data', { p_period_key: normalizePeriodKey(monthNum) })
   if (error) throw error
-  return data || []
+  return (data || []).map(row => ({
+    id: row.id,
+    brand: row.brand,
+    flavor: row.flavor,
+    stock: row.stock || {},
+    prevMonthConsumption: pick(row, 'prevMonthConsumption', 'prevmonthconsumption') || {}
+  }))
 }
 
 export async function getFlavorListForTransfer(monthNum) {
