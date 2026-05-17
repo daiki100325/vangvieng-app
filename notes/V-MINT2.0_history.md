@@ -9,7 +9,7 @@ parent: [[V-MINT2.0/notes/_index]]
 
 本文書は、水タバコ（シーシャ）複数店舗向け業務ポータルアプリ「V-MINT」の開発全史を記録する。無印（V-MINT 1.0）の開発背景・段階的なフェーズ移行・リリース後アップデートから、メジャーアップデートであるV-MINT 2.0のリリースまでを網羅する。
 
-- リポジトリ: `daiki100325/vangvieng-app`
+- リポジトリ: `daiki100325/V-MINT`
 - V-MINT 1.0 最終コミット: `08915be`
 - V-MINT 2.0 本番ブランチ: `v2`（Cloudflare Pages Production）
 

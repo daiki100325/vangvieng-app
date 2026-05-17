@@ -224,57 +224,43 @@
             <div v-if="priceMastersLoading" class="text-center py-12 text-slate-400 text-sm">読み込み中...</div>
             <div v-else class="pb-4 space-y-3">
 
-                <!-- 改定履歴一覧 -->
-                <div class="space-y-2">
-                    <div v-if="priceMasters.length === 0" class="text-center py-8 text-slate-400 text-sm">
-                        価格改定の記録がありません
+                <!-- 現在適用中 -->
+                <div v-if="priceMasters.length > 0"
+                    class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-sm font-bold text-slate-800">{{ priceRangeLabel(0) }}</span>
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5">現在適用中</span>
                     </div>
-                    <div v-for="(master, index) in priceMasters" :key="master.id"
-                        class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
-                        <div class="flex items-start justify-between gap-3 mb-3">
-                            <div>
-                                <span class="text-sm font-bold text-slate-800">{{ priceRangeLabel(index) }}</span>
-                                <span v-if="index === 0"
-                                    class="ml-2 text-xs font-bold text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5">現在適用中</span>
-                            </div>
-                            <button
-                                v-if="index < priceMasters.length - 1"
-                                @click="deletePriceMasterEntry(master, index)"
-                                :disabled="priceSaving"
-                                class="text-xs font-bold px-2.5 py-1.5 rounded-lg bg-slate-50 text-red-500 border border-red-200 hover:bg-red-50 transition-colors shrink-0 disabled:opacity-40">
-                                削除
-                            </button>
-                            <span v-else
-                                class="text-xs text-slate-400 shrink-0 py-1.5">削除不可</span>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">フレーバー原価</span>
+                            <span class="font-bold text-slate-700">{{ priceMasters[0].price_flavor_per_g }}円/g</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">フレーバー原価</span>
-                                <span class="font-bold text-slate-700">{{ master.price_flavor_per_g }}円/g</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">炭原価</span>
-                                <span class="font-bold text-slate-700">{{ master.price_charcoal_per_kg }}円/kg</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">1本目</span>
-                                <span class="font-bold text-slate-700">¥{{ Number(master.price_hookah_first).toLocaleString() }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">おかわり</span>
-                                <span class="font-bold text-slate-700">¥{{ Number(master.price_hookah_refill).toLocaleString() }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">スタッフ</span>
-                                <span class="font-bold text-slate-700">¥{{ Number(master.price_hookah_staff).toLocaleString() }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">チャージ</span>
-                                <span class="font-bold text-slate-700">¥{{ Number(master.price_charge).toLocaleString() }}</span>
-                            </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">炭原価</span>
+                            <span class="font-bold text-slate-700">{{ priceMasters[0].price_charcoal_per_kg }}円/kg</span>
                         </div>
-                        <div v-if="master.note" class="mt-2 text-xs text-slate-400 italic">{{ master.note }}</div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">1本目</span>
+                            <span class="font-bold text-slate-700">¥{{ Number(priceMasters[0].price_hookah_first).toLocaleString() }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">おかわり</span>
+                            <span class="font-bold text-slate-700">¥{{ Number(priceMasters[0].price_hookah_refill).toLocaleString() }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">スタッフ</span>
+                            <span class="font-bold text-slate-700">¥{{ Number(priceMasters[0].price_hookah_staff).toLocaleString() }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">チャージ</span>
+                            <span class="font-bold text-slate-700">¥{{ Number(priceMasters[0].price_charge).toLocaleString() }}</span>
+                        </div>
                     </div>
+                    <div v-if="priceMasters[0].note" class="mt-2 text-xs text-slate-400 italic">{{ priceMasters[0].note }}</div>
+                </div>
+                <div v-else class="text-center py-8 text-slate-400 text-sm">
+                    価格改定の記録がありません
                 </div>
 
                 <!-- 新規改定追加フォーム -->
@@ -350,6 +336,52 @@
                         class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold py-3 rounded-xl transition-colors disabled:opacity-50">
                         {{ priceSaving ? '追加中...' : '追加する' }}
                     </button>
+                </div>
+
+                <!-- 改定履歴（過去分） -->
+                <div v-if="priceMasters.length > 1" class="space-y-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 mt-2">改定履歴</p>
+                    <div v-for="(master, index) in priceMasters.slice(1)" :key="master.id"
+                        class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <span class="text-sm font-bold text-slate-800">{{ priceRangeLabel(index + 1) }}</span>
+                            <button
+                                v-if="index < priceMasters.slice(1).length - 1"
+                                @click="deletePriceMasterEntry(master, index + 1)"
+                                :disabled="priceSaving"
+                                class="text-xs font-bold px-2.5 py-1.5 rounded-lg bg-slate-50 text-red-500 border border-red-200 hover:bg-red-50 transition-colors shrink-0 disabled:opacity-40">
+                                削除
+                            </button>
+                            <span v-else class="text-xs text-slate-400 shrink-0 py-1.5">削除不可</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">フレーバー原価</span>
+                                <span class="font-bold text-slate-700">{{ master.price_flavor_per_g }}円/g</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">炭原価</span>
+                                <span class="font-bold text-slate-700">{{ master.price_charcoal_per_kg }}円/kg</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">1本目</span>
+                                <span class="font-bold text-slate-700">¥{{ Number(master.price_hookah_first).toLocaleString() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">おかわり</span>
+                                <span class="font-bold text-slate-700">¥{{ Number(master.price_hookah_refill).toLocaleString() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">スタッフ</span>
+                                <span class="font-bold text-slate-700">¥{{ Number(master.price_hookah_staff).toLocaleString() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">チャージ</span>
+                                <span class="font-bold text-slate-700">¥{{ Number(master.price_charge).toLocaleString() }}</span>
+                            </div>
+                        </div>
+                        <div v-if="master.note" class="mt-2 text-xs text-slate-400 italic">{{ master.note }}</div>
+                    </div>
                 </div>
 
             </div>

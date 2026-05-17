@@ -25,7 +25,7 @@ V-MINT2.0 の正式リリースにあたり、以下の2点を実施する。
 
 ### 前提
 
-- 現行 V-MINT は既存 Git リポジトリ（`daiki100325/vangvieng-app`）の `main` ブランチを Cloudflare Pages に接続してデプロイされている
+- 現行 V-MINT は既存 Git リポジトリ（`daiki100325/V-MINT`）の `main` ブランチを Cloudflare Pages に接続してデプロイされている
 - V-MINT2.0 のコードは同リポジトリに新規ブランチとして追加し、そのブランチを Cloudflare の接続先に切り替えることで同一 URL を維持する
 
 ### 手順
@@ -112,7 +112,7 @@ Cloudflare Pages の環境変数に Supabase の接続情報を追加する。
 
 ### 前提
 
-- GitHub リポジトリを使用している（`github.com/daiki100325/vangvieng-app`）
+- GitHub リポジトリを使用している（`github.com/daiki100325/V-MINT`）
 - 招待するシニマネの GitHub アカウントが存在する（アカウントが未作成の場合は事前に作成してもらう）
 
 ### 手順
@@ -131,15 +131,15 @@ Cloudflare Pages の環境変数に Supabase の接続情報を追加する。
 シニマネはメール内の **Accept invitation** リンクをクリックするか、以下の URL から承認する：
 
 ```
-https://github.com/daiki100325/vangvieng-app/invitations
+https://github.com/daiki100325/V-MINT/invitations
 ```
 
 #### Step 3: ローカル環境のセットアップ（シニマネ側の作業）
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/daiki100325/vangvieng-app.git
-cd vangvieng-app
+git clone https://github.com/daiki100325/V-MINT.git
+cd V-MINT
 
 # v2 ブランチに切り替え
 git checkout v2
