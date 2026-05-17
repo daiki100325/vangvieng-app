@@ -1,6 +1,11 @@
 # CHANGELOG_DEV
 
 ## 2026-05-17
+- What: 単位原価・販売値設定の「現在適用中」レコードを削除可能に変更（2件以上ある場合に削除ボタンを表示）
+- Why: 最新レコードは従来削除不可だったが、誤登録修正のため削除できるよう要望。削除後は次の最新レコードが自動的に適用される（effective_from DESC 順序のため）
+- Files: `src/components/apps/AdminApp.vue`
+
+## 2026-05-17
 - What: `AdminApp.vue` 単位原価・販売値設定セクションのレイアウト変更 — 上部: 現在適用中 / 中部: 新規改定追加フォーム / 下部: 過去の改定履歴
 - Why: 改定履歴がフォームより上に表示されているとスクロールが増えてUX劣化するため、V-PEACHの設定画面と同一順序に統一
 - Files: `src/components/apps/AdminApp.vue`

@@ -227,9 +227,18 @@
                 <!-- 現在適用中 -->
                 <div v-if="priceMasters.length > 0"
                     class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-sm font-bold text-slate-800">{{ priceRangeLabel(0) }}</span>
-                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5">現在適用中</span>
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-slate-800">{{ priceRangeLabel(0) }}</span>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5">現在適用中</span>
+                        </div>
+                        <button
+                            v-if="priceMasters.length > 1"
+                            @click="deletePriceMasterEntry(priceMasters[0], 0)"
+                            :disabled="priceSaving"
+                            class="text-xs font-bold px-2.5 py-1.5 rounded-lg bg-slate-50 text-red-500 border border-red-200 hover:bg-red-50 transition-colors shrink-0 disabled:opacity-40">
+                            削除
+                        </button>
                     </div>
                     <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                         <div class="flex justify-between">
