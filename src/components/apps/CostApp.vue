@@ -736,14 +736,16 @@ export default {
                         kingcoFlatMerch: r.charcoal_kingco_flat_merch,
                         kinkcoCubeMerch: r.charcoal_kingco_cube_merch
                     }
-                    // 保存済みスナップショット価格を復元
-                    this.form.prices = {
-                        priceFlavorPerG: Number(r.price_flavor_per_g) || 40,
-                        priceCharcoalPerKg: Number(r.price_charcoal_per_kg) || 600,
-                        priceHookahFirst: Number(r.price_hookah_first) || 1900,
-                        priceHookahRefill: Number(r.price_hookah_refill) || 1800,
-                        priceHookahStaff: Number(r.price_hookah_staff) || 1800,
-                        priceCharge: Number(r.price_charge) || 900
+                    // 価格は常に cost_price_masters から該当期間のものを参照（snapshot 廃止）
+                    if (activePrices) {
+                        this.form.prices = {
+                            priceFlavorPerG: Number(activePrices.price_flavor_per_g) || 40,
+                            priceCharcoalPerKg: Number(activePrices.price_charcoal_per_kg) || 600,
+                            priceHookahFirst: Number(activePrices.price_hookah_first) || 1900,
+                            priceHookahRefill: Number(activePrices.price_hookah_refill) || 1800,
+                            priceHookahStaff: Number(activePrices.price_hookah_staff) || 1800,
+                            priceCharge: Number(activePrices.price_charge) || 900
+                        }
                     }
                     const salesMap = new Map(existing.brandSales.map((s) => [s.brand_id, s]))
                     this.form.brandSales = brands.map((b) => {
@@ -913,13 +915,7 @@ export default {
                     charcoal_nyanco_cube_merch: c.nyancoCubeMerch || 0,
                     charcoal_kingco_flat_serve: c.kingcoFlatServe || 0,
                     charcoal_kingco_flat_merch: c.kingcoFlatMerch || 0,
-                    charcoal_kingco_cube_merch: c.kinkcoCubeMerch || 0,
-                    price_flavor_per_g: this.form.prices.priceFlavorPerG,
-                    price_charcoal_per_kg: this.form.prices.priceCharcoalPerKg,
-                    price_hookah_first: this.form.prices.priceHookahFirst,
-                    price_hookah_refill: this.form.prices.priceHookahRefill,
-                    price_hookah_staff: this.form.prices.priceHookahStaff,
-                    price_charge: this.form.prices.priceCharge
+                    charcoal_kingco_cube_merch: c.kinkcoCubeMerch || 0
                 })
                 await saveBrandSales(reportId, this.form.brandSales.filter((b) => b.totalConsumptionG !== 0 || b.merchCount > 0 || (b.merchCount250 || 0) > 0))
                 this.$emit('submitted')

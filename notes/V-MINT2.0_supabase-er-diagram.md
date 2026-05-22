@@ -23,9 +23,10 @@ parent:
 | `flavors` | マスタ | 初期 | フレーバーマスタ |
 | `inventory_logs` | トランザクション | 初期 | 棚卸しログ |
 | `transfer_logs` | トランザクション | 初期 | 移動記録ログ |
-| `cost_reports` | トランザクション | 原価計算機能追加 | 月次原価報告テーブル |
+| `cost_reports` | トランザクション | 原価計算機能追加 | 月次原価報告テーブル（価格は持たず `cost_price_masters` を参照） |
 | `drink_orders` | トランザクション | 原価計算機能追加 | ドリンク発注記録テーブル |
 | `flavor_brand_sales` | トランザクション | 原価計算機能追加 | ブランド別消費量・物販数テーブル |
+| `cost_price_masters` | マスタ | 単位原価管理機能追加 | 単位原価・販売値の唯一の真実源（価格改定マスタ） |
 
 ## Mermaid ER
 
@@ -66,8 +67,7 @@ flowchart TD
     period_key / start_date / end_date
     hookahs_{first,charge,refill,staff,event}
     charcoal_nyanco_* / kingco_*
-    price_flavor_per_g / price_charcoal_per_kg
-    price_hookah_{first,refill,staff} / price_charge
+    (価格カラムなし: cost_price_masters を参照)
     created_at / updated_at / UQ(store_id,period_key)`"]
 
     DRINK_ORDERS["`**DRINK_ORDERS**
@@ -81,6 +81,12 @@ flowchart TD
     merch_count / merch_count_secondary
     grams_per_pack / UQ(report_id,brand_id)`"]
 
+    COST_PRICE_MASTERS["`**COST_PRICE_MASTERS**
+    PK id / UK effective_from(YYYYMM)
+    price_flavor_per_g / price_charcoal_per_kg
+    price_hookah_{first,refill,staff} / price_charge
+    note / created_at`"]
+
     BRANDS -->|self 1:N cost_group| BRANDS
     BRANDS -->|1:N| FLAVORS
     FLAVORS -->|1:N| INVENTORY
@@ -91,6 +97,7 @@ flowchart TD
     STORES -->|1:N| DRINK_ORDERS
     COST_REPORTS -->|1:N CASCADE| FLAVOR_BRAND_SALES
     BRANDS -->|1:N| FLAVOR_BRAND_SALES
+    COST_PRICE_MASTERS -.->|effective_from<=period_key で参照| COST_REPORTS
 ```
 
 ## テーブル詳細 Notes
@@ -113,8 +120,13 @@ flowchart TD
 - `block_index` は移動記録のまとまりを UI 側で扱うための識別に使う（`GENERATED ALWAYS AS IDENTITY`）。
 
 ### cost_reports（月次原価報告）
-- 月次原価計算に必要な入力値（シーシャ販売数・炭消費量・定数）を `store_id + period_key` 単位で保存。
-- 価格定数（`price_*`）は価格改定に対応するため、入力時点の値をスナップショットとして保存する設計。
+- 月次原価計算に必要な入力値（シーシャ販売数・炭消費量）を `store_id + period_key` 単位で保存。
+- 価格定数は持たない。集計時に `cost_price_masters` を `effective_from <= period_key` で参照する（migration `20260523` で snapshot 廃止）。
+
+### cost_price_masters（単位原価・販売値マスタ）
+- 価格改定を `effective_from`（YYYYMM）単位で管理する単一情報源。
+- 原価計算・ダッシュボード集計時に `effective_from <= period_key` の最大レコードを動的に選択して適用。
+- マスタ編集は過去・未来全月の集計結果に即座に反映される。価格履歴の追跡は `effective_from` と `note` で行う。
 
 ### drink_orders（ドリンク発注記録）
 - 期中に随時入力するドリンク仕入れ額を記録。`period_key` で集計対象月を紐付ける。
@@ -156,6 +168,11 @@ flowchart TD
 | `20260416_inventory_logs_upsert.sql` | `updated_at` カラム追加・重複行削除・一意インデックス作成（upsert対応） |
 | `20260507_add_cost_brand_groups.sql` | `brands` に `is_cost_group` / `cost_group_id` を追加、原価集約ブランド行を挿入 |
 | `20260507_add_merch_count_secondary.sql` | `flavor_brand_sales` に `merch_count_secondary` を追加（Tangiers 250g対応） |
+| `20260512_add_brand_package_flags.sql` | `brands` にパッケージサイズフラグ（`has_pkg_*` / `packages_configured`）を追加 |
+| `20260513_add_cost_price_masters.sql` | `cost_price_masters` テーブル新設（価格改定を `effective_from` で管理）、初期レコード投入 |
+| `20260514_request_prev_month_consumption.sql` | 補充依頼モードで前月消費量を参照する RPC 更新 |
+| `20260517_enable_rls_option_a.sql` | 全テーブルで RLS 有効化（`anon` 全許可ポリシー） |
+| `20260523_drop_legacy_price_columns_from_cost_reports.sql` | `cost_reports` の価格6カラムを DROP（snapshot → マスタ参照型への刷新） |
 
 ## Related
 - [[V-MINT2.0/notes/V-MINT2.0_architecture]]

@@ -32,7 +32,7 @@ parent: [[V-MINT2.0/notes/_index]]
   - `inventory_logs` のパッケージ数量は物販 (`merch_*`) と在庫 (`stock_*`) を分離保持（`merch_other` は持たない）
   - 在庫算出は物販と在庫を合算して扱う
   - `brands` テーブルはパッケージサイズフラグ（`has_pkg_50/100/125/200/250/1kg`, `packages_configured`）を持ち、棚卸し入力画面の入力欄表示制御に使用
-  - `cost_price_masters` テーブルで単位原価・販売値の価格改定を `effective_from`（YYYYMM）単位で管理。原価計算時は該当月以前の最新レコードを自動適用
+  - `cost_price_masters` テーブルで単位原価・販売値の価格改定を `effective_from`（YYYYMM）単位で管理。原価計算時は該当月以前の最新レコードを自動適用。価格は `cost_reports` に snapshot されず、集計のたびにマスタを参照する（migration 20260523 で snapshot 廃止）
 - ダッシュボード要件:
   - ポータルの `在庫量確認` 導線は `ダッシュボードモード` に置き換える
   - ダッシュボードは `在庫量確認` / `棚卸し結果確認` / `実質原価` の3サブモードを持つ
@@ -69,13 +69,13 @@ parent: [[V-MINT2.0/notes/_index]]
   - 計算指標 A〜G: 1本あたりフレーバー使用量(g) / 原価(¥) / 炭使用量(g) / 炭原価(¥) / 1人あたりドリンク代(¥) / 1人あたりシーシャ本数 / 1人あたり実質原価(¥)
   - ブランドグループ集約: Azure Gold/Black Line は1ブランドに、Tangiers各種は1ブランドに集約して物販管理
   - `merch_count_secondary`: 250g袋など2種類目の物販個数を別途保持（グラム/パック計算で利用）
-  - 単位原価（フレーバー原価・炭原価）と販売値（1本目・おかわり・スタッフ・チャージ）は `cost_price_masters` から `effective_from <= period_key` の最新レコードを自動取得して計算に使用する
+  - 単位原価（フレーバー原価・炭原価）と販売値（1本目・おかわり・スタッフ・チャージ）は `cost_price_masters` から `effective_from <= period_key` の最新レコードを自動取得して計算に使用する。`cost_reports` は価格カラムを持たないため、マスタを編集すれば過去月の集計結果にも即座に反映される
   - 詳細要件: [[V-MINT2.0/notes/V-MINT2.0_reuquirements_cost_calculation]]
 - 管理者画面要件:
   - `フレーバー表示設定` サブモード: `flavors.is_active` を一括 toggle・保存
   - `新フレーバー追加` サブモード: 新規ブランド（略称 + 正式名称）と銘柄名を `brands` + `flavors` テーブルへ登録
   - `パッケージサイズ設定` サブモード: ブランドごとに `packages_configured` フラグと `has_pkg_*` フラグを設定・保存（棚卸し入力欄の出し分けに反映）
-  - `単位原価・販売値設定` サブモード: `cost_price_masters` の価格改定レコードを追加・削除。最古レコードは削除不可。改定内容はノートに記録可
+  - `単位原価・販売値設定` サブモード: `cost_price_masters` の価格改定レコードを追加・削除。レコードが1件のみの場合は削除不可（必ず1件は残す）。改定内容はノートに記録可。マスタ編集は集計時の価格参照に即座に反映されるため、別途レコード書き換えは不要
   - 管理者画面への入室には `AdminPinAuth.vue` による別途 PIN 認証が必要（`VITE_ADMIN_PIN_SHA256` で照合）
 - 本番運用要件:
   - 配信基盤は Cloudflare Pages を使用し、Production branch を `v2` とする

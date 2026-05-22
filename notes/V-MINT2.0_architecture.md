@@ -76,10 +76,10 @@ Vue 3 SPA（Vite + Tailwind CSS）と Supabase を組み合わせたフルスタ
 | `transfer_logs` | 店舗間移動記録。`amend_transfer_record` RPC で明細の更新・削除・追加を1トランザクション処理。 |
 | `brands` | ブランドマスタ。`is_cost_group`（原価集約フラグ）/ `cost_group_id`（集約先ブランドFK）を持つ。Azure Gold / Black Line・Tangiers 各種は各集約ブランドに紐付く。パッケージサイズ管理用に `has_pkg_50` / `has_pkg_100` / `has_pkg_125` / `has_pkg_200` / `has_pkg_250` / `has_pkg_1kg` / `packages_configured` を追加（migration 20260512）。 |
 | `flavors` | フレーバーマスタ。`is_active` で表示/非表示を制御。 |
-| `cost_reports` | 月次原価計算の本体（`store_id, period_key, start_date, end_date, hookahs_*, charcoal_*, price_*` 等）。 |
+| `cost_reports` | 月次原価計算の本体（`store_id, period_key, start_date, end_date, hookahs_*, charcoal_*` 等）。価格は保持せず、集計時に `cost_price_masters` を参照する（migration 20260523 で価格6カラム DROP）。 |
 | `flavor_brand_sales` | `cost_reports` に紐づくブランド別物販実績。`merch_count`（主サイズ）と `merch_count_secondary`（250g 袋などの2種目）を持つ。 |
 | `drink_orders` | 月内複数回のドリンク発注記録（`store_id, period_key, order_date, amount, description`）。 |
-| `cost_price_masters` | 単位原価・販売値の価格改定マスタ。`effective_from`（YYYYMM）以降に適用される `price_flavor_per_g` / `price_charcoal_per_kg` / `price_hookah_first` / `price_hookah_refill` / `price_hookah_staff` / `price_charge` を保持。原価計算時は `effective_from <= period_key` の最大レコードを自動選択（migration 20260513）。 |
+| `cost_price_masters` | 単位原価・販売値の **唯一の真実源**。`effective_from`（YYYYMM）以降に適用される `price_flavor_per_g` / `price_charcoal_per_kg` / `price_hookah_first` / `price_hookah_refill` / `price_hookah_staff` / `price_charge` を保持。原価計算時は `effective_from <= period_key` の最大レコードを自動選択。マスタ編集は過去月の集計結果に即座に反映される（migration 20260513 で導入、20260523 で snapshot 廃止により単一情報源化）。 |
 
 ### 業務月キー
 

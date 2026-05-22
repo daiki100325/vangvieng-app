@@ -243,7 +243,8 @@ V-MINT 1.0の4モードに加え、以下の2つが追加された。
 | `transfer_logs` | 店舗間移動記録。`amend_transfer_record` RPCで修正をトランザクション処理 |
 | `brands` | ブランドマスタ。`is_cost_group` / `cost_group_id` で原価集約グループを管理 |
 | `flavors` | フレーバーマスタ。`is_active` で表示/非表示を制御 |
-| `cost_reports` | 月次原価計算の本体 |
+| `cost_reports` | 月次原価計算の本体（販売数・炭消費量等を保持。価格は持たず `cost_price_masters` を参照） |
+| `cost_price_masters` | 単位原価・販売値の唯一の真実源。`effective_from` で価格改定を管理し、過去月にも遡及適用される |
 | `flavor_brand_sales` | ブランド別物販実績（原価計算に紐づく） |
 | `drink_orders` | 月内複数回のドリンク発注記録 |
 

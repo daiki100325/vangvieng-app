@@ -1,5 +1,16 @@
 # CHANGELOG_DEV
 
+## 2026-05-23
+- What: 単位原価をスナップショット型 → マスタ参照型へ刷新。`cost_reports` の価格6カラム（`price_flavor_per_g` / `price_charcoal_per_kg` / `price_hookah_{first,refill,staff}` / `price_charge`）を廃止し、集計時に `cost_price_masters` を `effective_from <= period_key` で解決
+- Why: マスタ編集だけで過去レコードへも遡及反映できるようにするため。保存時点スナップショットを残す設計は価格改定運用と相性が悪く、誤差・手作業 UPDATE の温床になっていた
+- Files: `src/api.js`, `src/components/apps/CostApp.vue`, `supabase/cost_calculation.sql`, `supabase/migrations/20260523_drop_legacy_price_columns_from_cost_reports.sql`
+- Related: [[V-MINT2.0/DECISIONS]] (ADR-20260523-01), [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+
+## 2026-05-17
+- What: 全テーブルで RLS を有効化（Option A: anon 全許可ポリシー）
+- Why: Supabase の「RLS has not been enabled」警告を解消。URL非公開・信頼ユーザー前提のため anon 全許可とし既存動作を維持
+- Files: `supabase/migrations/20260517_enable_rls_option_a.sql`
+
 ## 2026-05-17
 - What: 単位原価・販売値設定の「現在適用中」レコードを削除可能に変更（2件以上ある場合に削除ボタンを表示）
 - Why: 最新レコードは従来削除不可だったが、誤登録修正のため削除できるよう要望。削除後は次の最新レコードが自動的に適用される（effective_from DESC 順序のため）

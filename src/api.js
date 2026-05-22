@@ -1070,6 +1070,16 @@ export async function getDrinkOrders(storeKey, periodKey) {
 // 単位原価・販売値マスタ API
 // ------------------------------------------------------------
 
+// fallback 既定値（cost_price_masters が空の場合の安全策）
+const DEFAULT_COST_PRICE = Object.freeze({
+  price_flavor_per_g: 40,
+  price_charcoal_per_kg: 600,
+  price_hookah_first: 1900,
+  price_hookah_refill: 1800,
+  price_hookah_staff: 1800,
+  price_charge: 900
+})
+
 export async function getActiveCostPrice(periodKey) {
   requireSupabase()
   const pk = normalizePeriodKey(periodKey)
@@ -1081,15 +1091,17 @@ export async function getActiveCostPrice(periodKey) {
     .limit(1)
     .maybeSingle()
   if (error) throw error
-  // レコードが存在しない場合は cost_reports の DB DEFAULT と同じ値で返す
-  return data ?? {
-    price_flavor_per_g: 40,
-    price_charcoal_per_kg: 600,
-    price_hookah_first: 1900,
-    price_hookah_refill: 1800,
-    price_hookah_staff: 1800,
-    price_charge: 900
+  return data ?? { ...DEFAULT_COST_PRICE }
+}
+
+// 取得済み masters 配列（effective_from 昇順想定）から該当 period_key の価格を解決する
+function resolveCostPriceFromMasters(periodKey, mastersAsc) {
+  let applied = null
+  for (const m of mastersAsc) {
+    if (m.effective_from <= periodKey) applied = m
+    else break
   }
+  return applied ?? DEFAULT_COST_PRICE
 }
 
 export async function getCostPriceMasters() {
@@ -1143,6 +1155,14 @@ export async function getCostReportHistory(storeKey) {
     .eq('store_id', storeId)
   if (drinksError) throw drinksError
 
+  // 価格は cost_price_masters から period_key ごとに解決する（snapshot 廃止）
+  const { data: priceMasters, error: priceError } = await supabase
+    .from('cost_price_masters')
+    .select('*')
+    .order('effective_from', { ascending: true })
+  if (priceError) throw priceError
+  const mastersAsc = priceMasters || []
+
   const drinkTotalByPeriod = new Map()
   for (const d of allDrinks || []) {
     drinkTotalByPeriod.set(d.period_key, toNumeric(drinkTotalByPeriod.get(d.period_key)) + toNumeric(d.amount))
@@ -1166,8 +1186,9 @@ export async function getCostReportHistory(storeKey) {
     const charcoalServe = toNumeric(r.charcoal_nyanco_flat_serve) + toNumeric(r.charcoal_kingco_flat_serve)
 
     const A = totalServings > 0 ? flavorServe / totalServings : 0
-    const priceFlavorPerG = toNumeric(r.price_flavor_per_g) || 40
-    const priceCharcoalPerKg = toNumeric(r.price_charcoal_per_kg) || 600
+    const appliedPrice = resolveCostPriceFromMasters(r.period_key, mastersAsc)
+    const priceFlavorPerG = toNumeric(appliedPrice.price_flavor_per_g) || 40
+    const priceCharcoalPerKg = toNumeric(appliedPrice.price_charcoal_per_kg) || 600
     const B = priceFlavorPerG * A
     const C = totalServings > 0 ? charcoalServe * 1000 / totalServings : 0
     const D = priceCharcoalPerKg * C / 1000

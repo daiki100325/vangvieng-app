@@ -22,13 +22,7 @@ CREATE TABLE IF NOT EXISTS cost_reports (
   charcoal_kingco_flat_serve numeric NOT NULL DEFAULT 0,
   charcoal_kingco_flat_merch numeric NOT NULL DEFAULT 0,
   charcoal_kingco_cube_merch numeric NOT NULL DEFAULT 0,
-  -- [0] 定数（価格改定に対応するため保存）
-  price_flavor_per_g numeric NOT NULL DEFAULT 40,
-  price_charcoal_per_kg numeric NOT NULL DEFAULT 600,
-  price_hookah_first int NOT NULL DEFAULT 1900,
-  price_hookah_refill int NOT NULL DEFAULT 1800,
-  price_hookah_staff int NOT NULL DEFAULT 1800,
-  price_charge int NOT NULL DEFAULT 900,
+  -- 価格は cost_price_masters を effective_from で参照する（snapshot 廃止: migration 20260523）
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamp WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'Asia/Tokyo'),
   UNIQUE(store_id, period_key)

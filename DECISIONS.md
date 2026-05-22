@@ -22,6 +22,38 @@
 ### Links
 - Related note: [[V-MINT2.0/notes/<related-note>]]
 
+## ADR-20260523-01: 単位原価をマスタ参照型へ刷新（snapshot 廃止）
+- Status: Accepted
+- Date: 2026-05-23
+- Owners: V-MINT2.0 team
+
+### Context
+- `cost_reports` は各月レコードに `price_flavor_per_g` ほか6カラムを保存する snapshot 型だった。
+- `cost_price_masters` は導入済みだが、適用は「新規入力時のフォーム初期値」に留まり、既存レコードを開いて何もせず保存しても古い価格のまま再書き込みされる構造。
+- 価格改定（フレーバー原価など）を遡及適用したい運用要件が発生したが、現行構成では Supabase 上で `cost_reports` の price 列を SQL UPDATE する必要があり、設定画面の効果範囲が直感に反していた。
+
+### Decision
+- 価格は `cost_price_masters` を **集計・表示時に毎回参照**して解決する方式に統一する（`effective_from <= period_key` の最新行）。
+- `cost_reports` の価格6カラム（`price_flavor_per_g` / `price_charcoal_per_kg` / `price_hookah_{first,refill,staff}` / `price_charge`）を廃止し、DROP COLUMN を migration `20260523` で実施する。
+- CostApp 側の `form.prices` は集計プレビュー表示用に保持するが、`upsertCostReport` への書き込みからは除外。読み込み時も常に `getActiveCostPrice(periodKey)` から復元する。
+
+### Alternatives
+- Option A: マスタ参照型に統一（採用）
+- Option B: snapshot を維持しつつ、設定画面で「遡及適用」ボタンを明示的に提供
+- Option C: snapshot 自動 sync（マスタ編集時に `cost_reports` を一括 UPDATE）
+
+### Consequences
+- Positive:
+  - マスタを編集すれば過去・未来全月へ即座に反映され、運用が直感的に。
+  - cost_reports スキーマがスリム化、価格に関する単一情報源（`cost_price_masters`）が確立。
+- Negative:
+  - 「保存時点で何円だったか」の監査トレイルが失われる。価格履歴自体は `cost_price_masters.effective_from` ＋ `note` で代替可能。
+  - DROP COLUMN は不可逆。デプロイ手順としては「コード変更を先に本番反映 → 動作確認 → DROP COLUMN 実行」の順を厳守。
+
+### Links
+- Related note: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+- Migration: `supabase/migrations/20260523_drop_legacy_price_columns_from_cost_reports.sql`
+
 ## ADR-20260414-01: API互換アダプタでSupabase移行
 - Status: Deprecated
 - Date: 2026-04-14
