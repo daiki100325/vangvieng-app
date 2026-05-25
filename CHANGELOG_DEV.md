@@ -1,5 +1,11 @@
 # CHANGELOG_DEV
 
+## 2026-05-25
+- What: 棚卸し入力モードの最終確認画面で消費量チェックがマイナス誤警告を出す不具合を修正。`checkNegativeConsumption` 内で当月移動量を `prevPeriodKey`（前月）で取得していたものを `periodKey`（当月）に修正
+- Why: 当月に大量の移動（仕入れ等）があった場合、本来正の消費量が `100 + 0 - 250 = -150g` のようにマイナス計算され、ユーザーに誤警告を表示していた。ダッシュボードの消費量計算（`api.js:985-990`）は正しく `pk` を使用していたため、入力モードのロジックを揃えた
+- Files: `src/api.js`
+- Related: [[V-MINT2.0/TROUBLESHOOTING]]
+
 ## 2026-05-23
 - What: 単位原価をスナップショット型 → マスタ参照型へ刷新。`cost_reports` の価格6カラム（`price_flavor_per_g` / `price_charcoal_per_kg` / `price_hookah_{first,refill,staff}` / `price_charge`）を廃止し、集計時に `cost_price_masters` を `effective_from <= period_key` で解決
 - Why: マスタ編集だけで過去レコードへも遡及反映できるようにするため。保存時点スナップショットを残す設計は価格改定運用と相性が悪く、誤差・手作業 UPDATE の温床になっていた

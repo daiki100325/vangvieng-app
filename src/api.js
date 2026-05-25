@@ -386,9 +386,11 @@ export async function checkNegativeConsumption(payload) {
   const prevPeriodKey = getPreviousPeriodKey(periodKey)
   const storeId = await getStoreIdByKey(payload.storeKey)
 
-  const [prevInventoryByFlavor, prevTransferByFlavor] = await Promise.all([
+  // 消費量 = 前月末在庫 + 当月の移動量 - 当月末在庫
+  // 当月移動量は periodKey（入力中の月）で取得する（prevPeriodKey ではない）
+  const [prevInventoryByFlavor, currentTransferByFlavor] = await Promise.all([
     prevPeriodKey ? fetchLatestInventoryByFlavor(storeId, prevPeriodKey) : Promise.resolve(new Map()),
-    prevPeriodKey ? fetchCompletedTransferDeltaByFlavor(storeId, prevPeriodKey) : Promise.resolve(new Map())
+    fetchCompletedTransferDeltaByFlavor(storeId, periodKey)
   ])
 
   const negativeConsumptionItems = []
@@ -398,9 +400,9 @@ export async function checkNegativeConsumption(payload) {
     const flavorId = item.flavorId || item.id || item.rowIndex
     const flavorName = buildFlavorDisplayName(item)
     const prevStock = toNumeric(prevInventoryByFlavor.get(flavorId))
-    const prevTransfer = toNumeric(prevTransferByFlavor.get(flavorId))
+    const currentTransfer = toNumeric(currentTransferByFlavor.get(flavorId))
     const currentStock = calculateInventoryGrams(item)
-    const consumption = prevStock + prevTransfer - currentStock
+    const consumption = prevStock + currentTransfer - currentStock
     const formattedAmount = formatWarningAmount(consumption)
 
     if (payload.storeKey === 'office') {

@@ -21,6 +21,33 @@
 - Dev log: [[V-MINT2.0/CHANGELOG_DEV]]
 - Decision: [[V-MINT2.0/DECISIONS]]
 
+## Case: 棚卸し入力モードの最終確認画面で消費量マイナス誤警告
+- Date: 2026-05-25
+- Severity: Medium
+- Owner: V-MINT2.0
+
+### Symptoms
+- 棚卸し入力モードの最終確認画面で「前月消費量がマイナスになるフレーバーがあります」と表示される
+- しかし対応するフレーバーは本来マイナスにならないはず（移動量を考慮すれば正の消費量）
+- ダッシュボードモードの消費量表示は正しい値が出ている
+
+### Cause
+- `src/api.js` の `checkNegativeConsumption` 内で「当月移動量」を取得する際、誤って `prevPeriodKey`（前月のキー）を渡していた
+- 正しくは `periodKey`（入力中の月＝当月）を渡す必要がある
+- 当月に大量の移動（仕入れ等）があった場合、その分が抜け落ちて `prev + 0 - current` で誤マイナスを返していた
+
+### Fix
+- `fetchCompletedTransferDeltaByFlavor(storeId, prevPeriodKey)` → `fetchCompletedTransferDeltaByFlavor(storeId, periodKey)` に修正
+- 変数名も `prevTransferByFlavor` → `currentTransferByFlavor` に変更し、当月であることを明示
+
+### Prevention
+- ダッシュボードと入力モードで同じ計算式（消費量 = 前月末在庫 + 当月移動量 - 当月末在庫）を使う際は、共通ヘルパー関数化を検討
+- 期間キー（periodKey / prevPeriodKey）を扱う変数は「いつの値か」を変数名にも反映する
+
+### Links
+- Dev log: [[V-MINT2.0/CHANGELOG_DEV]] (2026-05-25)
+- Reference: `src/api.js` `checkNegativeConsumption` (line 382-) vs ダッシュボード消費量計算 (line 985-990)
+
 ## Case: 未実施月の棚卸しで商品カードが0件になる
 - Date: 2026-04-16
 - Severity: High
