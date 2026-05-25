@@ -224,11 +224,11 @@
                 </div>
                 <div class="bg-slate-50 rounded-xl p-3 space-y-1 text-sm">
                     <div class="flex justify-between">
-                        <span class="text-slate-500">シーシャ提供本数 [2-1]</span>
+                        <span class="text-slate-500">シーシャ提供本数 <span class="text-xs text-slate-400">(①＋③＋④＋⑤)</span></span>
                         <span class="font-bold text-slate-800">{{ totalServings }} 本</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-slate-500">来店人数 [2-2]</span>
+                        <span class="text-slate-500">滞在時間にかかる来店人数 <span class="text-xs text-slate-400">(②＋③＋④＋⑤)</span></span>
                         <span class="font-bold text-slate-800">{{ totalVisitors }} 人</span>
                     </div>
                 </div>
@@ -324,11 +324,11 @@
                 </div>
                 <div class="bg-slate-50 rounded-xl p-3 space-y-1 text-sm">
                     <div class="flex justify-between">
-                        <span class="text-slate-500">提供の炭消費量 [4-1]</span>
+                        <span class="text-slate-500">提供の炭消費量</span>
                         <span class="font-bold text-slate-800">{{ charcoalServeTotal }} kg</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-slate-500">物販の炭販売量 [4-2]</span>
+                        <span class="text-slate-500">物販の炭販売量</span>
                         <span class="font-bold text-slate-600">{{ charcoalMerchTotal }} kg</span>
                     </div>
                 </div>
@@ -543,11 +543,11 @@ export default {
         },
         hookahFields() {
             return [
-                { key: 'first', label: 'シーシャ1本目', unit: '本' },
-                { key: 'charge', label: 'チャージ', unit: '個' },
-                { key: 'refill', label: 'おかわりシーシャ', unit: '本' },
-                { key: 'staff', label: 'スタッフシーシャ', unit: '本' },
-                { key: 'event', label: 'イベント等', unit: '本' }
+                { key: 'first', label: '① シーシャ1本目', unit: '本' },
+                { key: 'charge', label: '② チャージ', unit: '個' },
+                { key: 'refill', label: '③ おかわりシーシャ', unit: '本' },
+                { key: 'staff', label: '④ スタッフシーシャ', unit: '本' },
+                { key: 'event', label: '⑤ イベント等', unit: '本' }
             ]
         },
         charcoalBrands() {
