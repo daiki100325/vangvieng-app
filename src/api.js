@@ -452,6 +452,22 @@ export async function fetchLatestInventoryPeriodKey() {
   return pk != null ? normalizePeriodKey(pk) : null
 }
 
+/** cost_reports に存在する指定店舗の最大 period_key */
+export async function fetchLatestCostReportPeriodKeyByStore(storeKey) {
+  requireSupabase()
+  const storeId = await getStoreIdByKey(storeKey)
+  const { data, error } = await supabase
+    .from('cost_reports')
+    .select('period_key')
+    .eq('store_id', storeId)
+    .order('period_key', { ascending: false })
+    .limit(1)
+  if (error) throw error
+  const row = Array.isArray(data) ? data[0] : data
+  const pk = row?.period_key
+  return pk != null ? normalizePeriodKey(pk) : null
+}
+
 export async function getInventoryData(monthNum) {
   requireSupabase()
   const { data, error } = await supabase.rpc('fetch_request_inventory_data', { p_period_key: normalizePeriodKey(monthNum) })

@@ -40,7 +40,10 @@ Vue 3 SPA（Vite + Tailwind CSS）と Supabase を組み合わせたフルスタ
   - `overview`（在庫量）: 拠点別在庫 + 総在庫 + 前月消費量
   - `results`（棚卸し結果）: 拠点別の棚卸し結果詳細
   - `cost`（実質原価）: 月次原価指標の推移確認
-- **`CostApp.vue`** — Step 0（店舗・対象月・サブモード選択）→ Step 1（シーシャ: ブランド別物販個数・フック本数・炭消費量入力 / ドリンク: 発注日・金額・備考の随時追加）→ 計算結果プレビュー・保存。
+- **`CostApp.vue`** — Step 0（店舗 → 対象月（自動セット）→ サブモード選択）→ Step 1（シーシャ: ブランド別物販個数・フック本数・炭消費量入力 / ドリンク: 発注日・金額・備考の随時追加）→ 計算結果プレビュー・保存。
+  - 対象月は店舗選択後に `fetchLatestCostReportPeriodKeyByStore(storeKey)` で当該店舗の最新 `cost_reports.period_key` を取得し、その翌月をデフォルトとしてセット。レコードなしの初回は `fetchLatestInventoryPeriodKey()` の同月、それもなければ現在月をフォールバック。自動セット中は年月セレクトをロックして「対象月を自動セットしています...」を表示
+  - ドリンクモードの発注追加・編集時は `checkDrinkDateConflict()` で前月の `cost_reports.start_date`〜`end_date` と発注日を照合し、範囲内なら保存をブロック（誤月登録防止）
+  - シーシャ販売数の各項目には ①〜⑤ を付番し、シーシャ提供本数（①+③+④+⑤）・来客数（②+③+④）の算式を UI に表示
 - **`AdminApp.vue`** — 4 サブモードを持つ管理者画面。入室時は `AdminPinAuth.vue` による管理者 PIN 認証を要求する。
   - `flavor-visibility`: フレーバーの表示/非表示を一括 toggle・保存（`brands` + `flavors` テーブル）
   - `add-flavor`: 新規ブランド / 銘柄を `brands` + `flavors` テーブルへ登録
@@ -115,7 +118,7 @@ Vue 3 SPA（Vite + Tailwind CSS）と Supabase を組み合わせたフルスタ
 
 Supabase クライアントを直接ラップする関数群。GAS 由来の関数名（`getSheetData` 等）は UI 互換のため維持している。
 
-**Cost App 関連:** `getBrandsForCost`, `getCostReport`, `upsertCostReport`, `saveBrandSales`, `getBrandConsumptionForCost`, `addDrinkOrder`, `updateDrinkOrder`, `deleteDrinkOrder`, `getDrinkOrders`, `getCostReportHistory`
+**Cost App 関連:** `getBrandsForCost`, `getCostReport`, `upsertCostReport`, `saveBrandSales`, `getBrandConsumptionForCost`, `addDrinkOrder`, `updateDrinkOrder`, `deleteDrinkOrder`, `getDrinkOrders`, `getCostReportHistory`, `fetchLatestCostReportPeriodKeyByStore`, `fetchLatestInventoryPeriodKey`
 
 **Admin App 関連:** `getAllFlavorsWithBrand`, `batchUpdateFlavorIsActive`, `addFlavorForArrival`, `listTransferBrandsOrdered`, `getBrandsWithPackageFlags`, `updateBrandPackageFlags`, `getCostPriceMasters`, `addCostPriceMaster`, `deleteCostPriceMaster`, `getActiveCostPrice`
 

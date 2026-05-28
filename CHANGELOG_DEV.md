@@ -1,5 +1,18 @@
 # CHANGELOG_DEV
 
+## 2026-05-28
+- What: 原価計算モードの対象月デフォルトを「店舗選択後に、その店舗の cost_reports 最新 period_key の翌月」に変更。cost_reports がない初回は inventory_logs 最新月を使用。店舗切替時は年月をリセットして再設定。自動セット中は年月セレクトをロックし「対象月を自動セットしています...」を表示
+- Why: 店舗ごとにシーシャ原価計算の進捗が異なるため、全店舗一律のデフォルトでは対象月の選択ミスが発生していた。自動セット前にユーザーが誤操作するリスクも排除
+- Files: `src/api.js`（`fetchLatestCostReportPeriodKeyByStore` 追加）, `src/components/apps/CostApp.vue`
+
+- What: ドリンク発注記録の追加・編集時に、前月のシーシャ集計期間（start_date〜end_date）と発注日を照合してアラートを表示する機能を追加
+- Why: 5月のシーシャ原価計算完了後に6月モードで5月分のドリンクを誤登録するケースへの対策
+- Files: `src/components/apps/CostApp.vue`（`checkDrinkDateConflict`, `loadDrinkOrders` 更新）
+
+- What: `notes/` 配下の文書を現行仕様に同期。要件・アーキテクチャ・ユーザーマニュアル・履歴・index・リリース計画・schema review Q&A の各文書に、原価計算モードの店舗別月デフォルト・自動セットロック UI・ドリンク発注の前月期間チェック・シーシャ販売数 ①〜⑤ 付番・パッケージサイズ設定の実装ステータス等を反映
+- Why: 2026-05-12 以降の機能追加・運用改善（パッケージサイズ設定 / 単位原価マスタ / RLS / 原価計算 UX 改善）が文書に未反映だったため
+- Files: `notes/_index.md`, `notes/V-MINT2.0_architecture.md`, `notes/V-MINT2.0_requirements.md`, `notes/V-MINT2.0_release-plan.md`, `notes/V-MINT2.0_history.md`, `notes/V-MINT2.0_user-manual.md`, `notes/schema-review-QA_20260509.md`
+
 ## 2026-05-25
 - What: 原価計算モードの集計指標ラベルを整理。シーシャ販売数の各項目に①〜⑤を付番、シーシャ提供本数を①+③+④+⑤・滞在時間にかかる来店人数を②+③+④とし算式をUIに表示。炭消費量の[4-1][4-2]番号も削除
 - Why: スプレッドシート時代の管理番号が残っていて意味をなさなくなっていたため整理

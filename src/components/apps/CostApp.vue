@@ -21,18 +21,23 @@
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">対象月</label>
                     <div class="grid grid-cols-2 gap-3">
                         <select v-model="selectedYear"
-                            class="appearance-none w-full bg-slate-50 border border-slate-200 text-base font-bold rounded-xl p-4 text-center focus:ring-2 focus:ring-purple-500"
+                            :disabled="isSettingPeriod"
+                            class="appearance-none w-full bg-slate-50 border border-slate-200 text-base font-bold rounded-xl p-4 text-center focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             :class="selectedYear ? 'text-slate-800' : 'text-slate-400'">
                             <option value="" disabled>年を選択</option>
                             <option v-for="y in years" :key="y.value" :value="y.value">{{ y.label }}</option>
                         </select>
                         <select v-model="selectedMonth"
-                            class="appearance-none w-full bg-slate-50 border border-slate-200 text-base font-bold rounded-xl p-4 text-center focus:ring-2 focus:ring-purple-500"
+                            :disabled="isSettingPeriod"
+                            class="appearance-none w-full bg-slate-50 border border-slate-200 text-base font-bold rounded-xl p-4 text-center focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             :class="selectedMonth ? 'text-slate-800' : 'text-slate-400'">
                             <option value="" disabled>月を選択</option>
                             <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
                         </select>
                     </div>
+                    <p v-if="isSettingPeriod" class="text-xs text-purple-500 font-medium text-center animate-pulse">
+                        対象月を自動セットしています...
+                    </p>
                 </div>
 
                 <!-- サブモード選択 -->
@@ -445,8 +450,8 @@
 </template>
 
 <script>
-import { getBrandsForCost, getBrandConsumptionForCost, getCostReport, upsertCostReport, saveBrandSales, addDrinkOrder, updateDrinkOrder, deleteDrinkOrder, getDrinkOrders, fetchLatestTransferPeriodKey, getActiveCostPrice } from '../../api.js'
-import { buildYearOptions, buildMonthOptions, composePeriodKey, parsePeriodKey } from '../../utils/periods.js'
+import { getBrandsForCost, getBrandConsumptionForCost, getCostReport, upsertCostReport, saveBrandSales, addDrinkOrder, updateDrinkOrder, deleteDrinkOrder, getDrinkOrders, fetchLatestInventoryPeriodKey, fetchLatestCostReportPeriodKeyByStore, getActiveCostPrice } from '../../api.js'
+import { buildYearOptions, buildMonthOptions, composePeriodKey, parsePeriodKey, getNextPeriodKey, getCurrentPeriodKey } from '../../utils/periods.js'
 
 // ブランド別デフォルト1パケあたりグラム数
 const DEFAULT_GRAMS_PER_PACK = {
@@ -518,7 +523,9 @@ export default {
             isSavingDrink: false,
             isSubmitting: false,
             errorMessage: '',
-            existingReportId: null
+            existingReportId: null,
+            prevShishaReport: null,
+            isSettingPeriod: false
         }
     },
     computed: {
@@ -635,9 +642,6 @@ export default {
             return true
         }
     },
-    created() {
-        this.initializeLatestPeriod()
-    },
     watch: {
         costSubMode(newVal) {
             if (newVal === 'drink' && this.selectedStoreKey && this.periodKey) {
@@ -646,12 +650,12 @@ export default {
                 this.drinkOrders = []
             }
         },
-        selectedStoreKey() {
-            if (this.costSubMode === 'drink' && this.selectedStoreKey && this.periodKey) {
-                this.loadDrinkOrders()
-            } else if (this.step === 0) {
-                this.drinkOrders = []
-            }
+        selectedStoreKey(newKey) {
+            this.selectedYear = ''
+            this.selectedMonth = ''
+            this.drinkOrders = []
+            this.prevShishaReport = null
+            if (newKey) this.applyDefaultPeriodForStore(newKey)
         },
         periodKey() {
             if (this.costSubMode === 'drink' && this.selectedStoreKey && this.periodKey) {
@@ -662,18 +666,31 @@ export default {
         }
     },
     methods: {
-        async initializeLatestPeriod() {
+        async applyDefaultPeriodForStore(storeKey) {
+            this.isSettingPeriod = true
             try {
-                const latestPeriodKey = await fetchLatestTransferPeriodKey()
-                if (latestPeriodKey) {
-                    const parsed = parsePeriodKey(latestPeriodKey)
-                    if (parsed) {
-                        this.selectedYear = String(parsed.year)
-                        this.selectedMonth = String(parsed.month)
-                    }
+                const latestCost = await fetchLatestCostReportPeriodKeyByStore(storeKey)
+                let target
+                if (latestCost) {
+                    target = getNextPeriodKey(latestCost)
+                } else {
+                    const latestInv = await fetchLatestInventoryPeriodKey()
+                    target = latestInv ?? getCurrentPeriodKey()
+                }
+                const parsed = parsePeriodKey(target)
+                if (parsed) {
+                    this.selectedYear = String(parsed.year)
+                    this.selectedMonth = String(parsed.month)
                 }
             } catch (e) {
-                console.error('最新対象月の読み込みに失敗しました:', e)
+                console.error('対象月の自動設定に失敗しました:', e)
+                const parsed = parsePeriodKey(getCurrentPeriodKey())
+                if (parsed) {
+                    this.selectedYear = String(parsed.year)
+                    this.selectedMonth = String(parsed.month)
+                }
+            } finally {
+                this.isSettingPeriod = false
             }
         },
         serveConsumption(b) {
@@ -687,10 +704,23 @@ export default {
             this.isDrinkLoading = true
             this.errorMessage = ''
             try {
-                const drinks = await getDrinkOrders(this.selectedStoreKey, this.periodKey)
+                const parsed = parsePeriodKey(this.periodKey)
+                const prevPeriodKey = parsed
+                    ? composePeriodKey(
+                        parsed.month === 1 ? parsed.year - 1 : parsed.year,
+                        parsed.month === 1 ? 12 : parsed.month - 1
+                      )
+                    : null
+                const [drinks, prevReport] = await Promise.all([
+                    getDrinkOrders(this.selectedStoreKey, this.periodKey),
+                    prevPeriodKey
+                        ? getCostReport(this.selectedStoreKey, prevPeriodKey).catch(() => null)
+                        : Promise.resolve(null)
+                ])
                 this.drinkOrders = drinks.map((d) => ({
                     id: d.id, orderDate: d.order_date, amount: d.amount, description: d.description
                 }))
+                this.prevShishaReport = prevReport?.report ?? null
             } catch (e) {
                 this.errorMessage = e.message || 'ドリンク一覧の読み込みに失敗しました。'
                 this.drinkOrders = []
@@ -826,8 +856,31 @@ export default {
             this.step = 0
             this.$emit('update:stepActive', false)
         },
+        checkDrinkDateConflict(orderDate) {
+            if (this.costSubMode !== 'drink') return null
+            if (!this.prevShishaReport?.start_date || !this.prevShishaReport?.end_date) return null
+            if (!orderDate) return null
+            const d = new Date(orderDate)
+            const start = new Date(this.prevShishaReport.start_date)
+            const end = new Date(this.prevShishaReport.end_date)
+            if (d >= start && d <= end) {
+                const prevParsed = parsePeriodKey(this.prevShishaReport.period_key)
+                const periodLabel = prevParsed
+                    ? `${prevParsed.year}年${String(prevParsed.month).padStart(2, '0')}月`
+                    : '前月'
+                const startStr = this.prevShishaReport.start_date.slice(5).replace('-', '/')
+                const endStr = this.prevShishaReport.end_date.slice(5).replace('-', '/')
+                return `発注日（${orderDate.slice(5).replace('-', '/')}）は${periodLabel}のシーシャ集計期間（${startStr}〜${endStr}）内です。${periodLabel}のドリンク記録としてつけてください。`
+            }
+            return null
+        },
         async addDrinkEntry() {
             if (!this.newDrink.orderDate || !this.newDrink.amount) return
+            const conflict = this.checkDrinkDateConflict(this.newDrink.orderDate)
+            if (conflict) {
+                this.errorMessage = conflict
+                return
+            }
             this.isAddingDrink = true
             this.errorMessage = ''
             try {
@@ -860,6 +913,11 @@ export default {
         },
         async saveEditDrink(drink) {
             if (!this.editingDrink.orderDate || !this.editingDrink.amount) return
+            const conflict = this.checkDrinkDateConflict(this.editingDrink.orderDate)
+            if (conflict) {
+                this.errorMessage = conflict
+                return
+            }
             this.isSavingDrink = true
             this.errorMessage = ''
             try {

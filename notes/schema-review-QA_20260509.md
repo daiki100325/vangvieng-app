@@ -67,6 +67,8 @@ ALTER TABLE brands
 
 **推奨**: 近い将来 Admin 画面でブランドマスタを管理する可能性があるなら **今のうちに `brands` にカラム追加しておく**のが合理的。FLAVORS 単位の差異（同ブランド内でサイズが異なるフレーバーが存在するか）を確認した上で最終判断。現状は**ブランド単位で統一**されているため BRANDS が適切。
 
+> **実装後追記（2026-05-12）**: 上記方針に基づき `brands` に追加したが、`text[]` 配列ではなく **サイズごとの boolean フラグ**（`has_pkg_50` / `has_pkg_100` / `has_pkg_125` / `has_pkg_200` / `has_pkg_250` / `has_pkg_1kg`）+ 設定完了マーカー（`packages_configured`）として実装した。理由は、UI 側で個別フラグを直接バインドできて Admin 画面の実装が単純になるため。migration: `20260512_add_brand_package_flags.sql`
+
 ---
 
 ## FLAVORS テーブル
@@ -219,11 +221,23 @@ menus          (id, name, store_id, published_at, …)
 
 ## まとめ：優先度の高いスキーマ変更案
 
-| 優先度 | 変更内容 | 影響範囲 |
-|---|---|---|
-| 高 | `brands` に `supported_pkg_sizes text[]` を追加 | Admin 画面・棚卸し入力画面のフィルタロジック |
-| 中 | `inventory_logs` に `tupper_extra numeric` を追加（3本目タッパー） | 棚卸し入力画面 |
-| 中 | `flavors` に `is_on_menu boolean`, `menu_image_url text` を追加 | メニュー表示機能（新規） |
-| 低 | `month_num` 廃止（`period_key` へ完全移行） | 既存クエリの影響調査が必要 |
+| 優先度 | 変更内容 | 影響範囲 | 実装ステータス（2026-05時点） |
+|---|---|---|---|
+| 高 | `brands` に `supported_pkg_sizes text[]` を追加 | Admin 画面・棚卸し入力画面のフィルタロジック | ✅ **実装済（仕様変更）** — `text[]` ではなく、サイズごとの boolean フラグ `has_pkg_50/100/125/200/250/1kg` + `packages_configured` として実装（migration `20260512_add_brand_package_flags.sql`）。Admin の `パッケージサイズ設定` サブモードから編集可能 |
+| 中 | `inventory_logs` に `tupper_extra numeric` を追加（3本目タッパー） | 棚卸し入力画面 | ⬜ 未着手（業務要件未発生のため保留） |
+| 中 | `flavors` に `is_on_menu boolean`, `menu_image_url text` を追加 | メニュー表示機能（新規） | ⬜ 未着手 |
+| 低 | `month_num` 廃止（`period_key` へ完全移行） | 既存クエリの影響調査が必要 | ⬜ 未着手（互換維持中） |
 
-Source: [[V-MINT2.0/notes/V-MINT2.0_architecture]]
+## 2026-05 以降の関連スキーマ変更
+
+本 Q&A 後に追加された主なスキーマ変更:
+
+| 日付 | 変更 | マイグレーション |
+|---|---|---|
+| 2026-05-12 | `brands` にパッケージサイズフラグ列追加（上記 #1 の実装） | `20260512_add_brand_package_flags.sql` |
+| 2026-05-13 | `cost_price_masters` テーブル新設（単位原価マスタ） | `20260513_add_cost_price_masters.sql` |
+| 2026-05-14 | 補充依頼の前月消費量参照 RPC 更新 | `20260514_request_prev_month_consumption.sql` |
+| 2026-05-17 | 全テーブルで RLS 有効化（anon 全許可） | `20260517_enable_rls_option_a.sql` |
+| 2026-05-23 | `cost_reports` の価格6カラムを DROP（マスタ参照型へ刷新） | `20260523_drop_legacy_price_columns_from_cost_reports.sql` |
+
+Source: [[V-MINT2.0/notes/V-MINT2.0_architecture]], [[V-MINT2.0/notes/V-MINT2.0_supabase-er-diagram]]
