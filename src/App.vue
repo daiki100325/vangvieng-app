@@ -2,7 +2,7 @@
     <div id="app" class="min-h-[100dvh] flex flex-col">
 
         <!-- PIN認証オーバーレイ -->
-        <PinAuth v-if="!authenticated" @authenticated="authenticated = true" />
+        <PinAuth v-if="!authenticated" @authenticated="onAuthenticated" />
 
         <!-- 管理者PIN認証オーバーレイ -->
         <AdminPinAuth v-if="showAdminAuth" @authenticated="onAdminAuthenticated" @cancel="showAdminAuth = false" />
@@ -236,7 +236,10 @@ export default {
   },
   data() {
     return {
-      authenticated: false,
+      authenticated: (() => {
+        const ts = localStorage.getItem('vmint_auth_ts')
+        return !!ts && Date.now() - Number(ts) < 8 * 60 * 60 * 1000
+      })(),
       showAdminAuth: false,
       currentStep: 0,
       appMode: null,
@@ -339,11 +342,24 @@ export default {
   },
   mounted() {
     window.addEventListener('popstate', this.handlePopState)
+    window.addEventListener('pagehide', this.onPageHide)
   },
   beforeUnmount() {
     window.removeEventListener('popstate', this.handlePopState)
+    window.removeEventListener('pagehide', this.onPageHide)
   },
   methods: {
+    // ─── PIN認証 ──────────────────────────────────────────────────────────
+    onAuthenticated() {
+      this.authenticated = true
+      localStorage.setItem('vmint_auth_ts', String(Date.now()))
+    },
+    onPageHide(e) {
+      // bfcache（スリープ復帰など）でない場合＝明示的なタブ閉じ・離脱
+      if (!e.persisted) {
+        localStorage.removeItem('vmint_auth_ts')
+      }
+    },
     // ─── Global confirm dialog ────────────────────────────────────────────
     appConfirm(message, okLabel = 'OK', okClass = 'text-emerald-600 hover:bg-emerald-50') {
       return new Promise((resolve) => {
